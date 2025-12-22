@@ -62,6 +62,9 @@ ChannelMap::initialize_from_csv(const std::string& file_path) {
   }
 
   while (std::getline(file, line)) {
+    if(line.back() == '\r'){ // for Windwos-style line ending
+      line.pop_back();
+    }
     auto tokens = split_line(line);
     if (tokens.size() != m_header.size()) {
       error << "column size = " << tokens.size()
