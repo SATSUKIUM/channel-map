@@ -50,7 +50,7 @@ private:
 #ifdef DEBUG
 LogStream debug(LogLevel::kDEBUG);
 #else
-std::ostream debug("/dev/null");
+std::ofstream debug("/dev/null");
 #endif
 LogStream info(LogLevel::kINFO);
 LogStream warning(LogLevel::kWARNING);
