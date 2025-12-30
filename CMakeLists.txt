@@ -30,8 +30,10 @@ file(GLOB HEADERS "include/*.hpp")
 
 ### main library
 add_library(channel-map SHARED ${SOURCES})
-target_include_directories(channel-map PUBLIC include)
-target_include_directories(channel-map PRIVATE)
+target_include_directories(channel-map PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+) ### ビルド時はソースディレクトリ、インストール後はインストール先のincludeを参照
 
 ### filesystem
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
