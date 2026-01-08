@@ -41,7 +41,7 @@ target_include_directories(channel-map PRIVATE)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(FILESYSTEM_LIB stdc++fs)
 endif()
-target_link_libraries(ChannelMap PUBLIC stdc++fs)
+target_link_libraries(channel-map PUBLIC stdc++fs)
 
 ### script
 set(SCRIPT_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/script/chmap-config)
