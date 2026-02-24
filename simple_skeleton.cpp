@@ -27,7 +27,7 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#define general_chmap 0
+#define general_chmap 1
 #define OF_BENCHMARK 1
 #define CHECK_DUPLICATE_FE_ID 0
 #define PRINT_ALL_ITEMS_FE 0
@@ -81,12 +81,17 @@ int main(int argc, char* argv[]) {
     #if general_chmap
     chmap::ChannelMap& channel_map = chmap::ChannelMap::get_instance();
     channel_map.initialize(input_file_path);
+    std::cout << "\n[simple_skeleton.cpp] channel-map initialized\n";
     chmap::ChannelTuple test_det1("utof", 0, 0, "right", 0);
     chmap::ChannelTuple test_det2("t0", 0, 0, "top", 0);
     chmap::ChannelTuple test_det3("bdc", "X", 1, 1, 0);
     const auto& fe1 = channel_map.get("fe", test_det1);
+    std::cout << "\n[in simple_skeleton.cpp] channel-map search completed\n";
     const auto& fe2 = channel_map.get("fe", test_det2);
+    std::cout << "\n[in simple_skeleton.cpp] channel-map search completed\n";
     const auto& fe3 = channel_map.get("fe", test_det3);
+    std::cout << "\n[in simple_skeleton.cpp] channel-map search completed\n";
+
     std::cout << "\n[in simple_skeleton.cpp] General ChannelMap results:" << std::endl;
     std::cout << "  for det: " << test_det1 << ", fe: " << fe1 << std::endl;
     std::cout << "  for det: " << test_det2 << ", fe: " << fe2 << std::endl;
@@ -210,8 +215,8 @@ int main(int argc, char* argv[]) {
 
     #if general_chmap
     constexpr int n_trials = ntrials;
-    auto t0 = std::chrono::high_resolution_clock::now();
-    auto t1 =  std::chrono::high_resolution_clock::now();
+    t0 = std::chrono::high_resolution_clock::now();
+    t1 =  std::chrono::high_resolution_clock::now();
     auto t2 =  std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
