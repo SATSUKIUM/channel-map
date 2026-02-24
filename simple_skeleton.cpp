@@ -1,23 +1,29 @@
 #include "channel_map_simple.hpp"
 #include "channel_map_simple_item.hpp"
 
+// below for the original channel-map
 #include "channel_map.hpp"
 #include "debug_print.hpp"
 #include "channel_tuple.hpp"
 #include "element.hpp"
 
+// handle string, and so on.
 #include <string>
 #include <iostream>
 #include <iomanip>
 
+// file, and so on.
 #include <cstdlib>
 #include <variant>
 
+// stopwatch
 #include <chrono>
 
+// file out
 #include <filesystem>
 #include <fstream>
 
+// static analysis
 #include <TFile.h>
 #include <TTree.h>
 
