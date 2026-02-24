@@ -8,6 +8,7 @@ namespace chmap {
         uint32_t id;
         // id = (ip3rd << 24) | (ip4th << 16) | channel で初期化。channelは最大FFFF
         ChannelMapSimpleItem_FE(uint8_t ip3rd, uint8_t ip4th, uint16_t ch) : id((uint32_t(ip3rd) << 24) | (uint32_t(ip4th) << 16) | uint32_t(ch) ) {}
+        void decode();
     };
     struct ChannelMapSimpleItem_DET {
         uint32_t name;// detector name in 4 char
@@ -15,7 +16,7 @@ namespace chmap {
         uint8_t segment;// segment number in 8bit int (0-255)
         uint32_t channel;// channel name in 4 char
         public: 
-        void printContent();
+        void decode();
     };
     struct ChannelMapSimpleItem {
         ChannelMapSimpleItem_FE fe;
