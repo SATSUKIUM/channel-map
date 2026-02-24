@@ -32,6 +32,8 @@ int main(int argc, char* argv[]) {
         std::cout << "element : " << e << std::endl;
       }
 
+      std::cout << "det = " << std::get<std::string>(det[0]) << ", " << std::get<chmap::number_t>(det[1]) << ", " << std::get<chmap::number_t>(det[2]) << ", " << std::get<std::string>(det[3]) << ", " << std::get<chmap::number_t>(det[4]) << std::endl;
+
 
       /*
         std::get<T> returns the value if the specified type T
