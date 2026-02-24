@@ -38,11 +38,15 @@
 mapdata.csvのファイルパスを与えるとchannel-map-simpleの動作テストをする
 */
 int main(int argc, char* argv[]) {
+    auto t0 = std::chrono::high_resolution_clock::now();
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto t2 = std::chrono::high_resolution_clock::now();
+
     std::string input_file_path = argv[1];
     chmap::ChannelMapSimple& channel_map_simple = chmap::ChannelMapSimple::get_instance();
-    auto t0 = std::chrono::high_resolution_clock::now();
+    t0 = std::chrono::high_resolution_clock::now();
     channel_map_simple.initialize(input_file_path);
-    auto t1 = std::chrono::high_resolution_clock::now();
+    t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in simple_skeleton.cpp] ChannelMapSimple initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
 
     #if DUMMY
@@ -172,6 +176,16 @@ int main(int argc, char* argv[]) {
         {0xFF, 0xFF, 0xFFFF, "non-existing_channel"}
     };
 
+    #if 1
+    {
+        std::cout << std::string(80, '=') << std::endl;
+        chmap::ChannelMapSimpleItem_DET* detitem = channel_map_simple.getDETItem(test_ip3rd_T1right, test_ip4th_T1right, test_ch_T1right);
+        channel_map_simple.printDETinfo(*detitem);
+        std::cout << std::string(80, '=') << std::endl;
+        
+    }
+    #endif
+
     for(const auto& item : test_items) {
         uint8_t ip3rd = std::get<0>(item);
         uint8_t ip4th = std::get<1>(item);
@@ -183,19 +197,19 @@ int main(int argc, char* argv[]) {
         chmap::ChannelMapSimpleItem_DET* det_item = channel_map_simple.getDETItem(ip3rd, ip4th, ch);
         if(det_item != nullptr) {
             channel_map_simple.printDETinfo( *det_item );
-            auto t0 = std::chrono::high_resolution_clock::now();
+            t0 = std::chrono::high_resolution_clock::now();
             for(int i=0; i<ntrials; i++) {
                 chmap::ChannelMapSimpleItem_DET* det_item_inner = channel_map_simple.getDETItem(ip3rd, ip4th, ch);
-                // det_name = det_item_inner->name;
-                // det_plane = det_item_inner->plane;
-                // det_segment = det_item_inner->segment;
-                // det_channel = det_item_inner->channel;
+                det_name = det_item_inner->name;
+                det_plane = det_item_inner->plane;
+                det_segment = det_item_inner->segment;
+                det_channel = det_item_inner->channel;
             }
-            auto t1 =  std::chrono::high_resolution_clock::now();
+            t1 =  std::chrono::high_resolution_clock::now();
             for(int i=0; i<ntrials; i++) {
                 chmap::ChannelMapSimpleItem_DET* det_item_inner;
             }
-            auto t2 =  std::chrono::high_resolution_clock::now();
+            t2 =  std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
             std::cout << "\tDET name: " << std::hex << std::setw(8) << std::setfill('0') << det_name << std::dec
                       << ", plane: " << std::hex << std::setw(8) << std::setfill('0') << det_plane << std::dec
@@ -217,22 +231,19 @@ int main(int argc, char* argv[]) {
     constexpr int n_trials = ntrials;
     t0 = std::chrono::high_resolution_clock::now();
     t1 =  std::chrono::high_resolution_clock::now();
-    auto t2 =  std::chrono::high_resolution_clock::now();
+    t2 =  std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
 
-    std::string detector_id, detector_plane, detector_segment, detector_channel;
+    std::string detector_id, detector_channel;
+    chmap::number_t detector_plane, detector_segment;
     t0 = std::chrono::high_resolution_clock::now();
     for(int i=0; i<n_trials; i++) {
         chmap::ChannelTuple det = channel_map.get("detector", fe1);
-        // detector_id = std::get<std::string>(det[0]);
-        // detector_plane = std::get<std::string>(det[1]);
-        // detector_segment = std::get<std::string>(det[2]);
-        // detector_channel = std::get<std::string>(det[3]);
-        // detector_id = static_cast<uint64_t>(std::get<chmap::number_t>(det[0]));
-        // detector_plane = static_cast<uint64_t>(std::get<chmap::number_t>(det[1]));
-        // detector_segment = static_cast<uint64_t>(std::get<chmap::number_t>(det[2]));
-        // detector_channel = static_cast<uint64_t>(std::get<chmap::number_t>(det[3]));
+        detector_id = std::get<std::string>(det[0]);
+        detector_plane = std::get<chmap::number_t>(det[1]);
+        detector_segment = std::get<chmap::number_t>(det[2]);
+        detector_channel = std::get<std::string>(det[3]);
     }
     t1 =  std::chrono::high_resolution_clock::now();
     for(int i=0; i<n_trials; i++) {
