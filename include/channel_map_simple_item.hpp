@@ -14,6 +14,8 @@ namespace chmap {
         uint16_t plane;// plane name in 2 char
         uint8_t segment;// segment number in 8bit int (0-255)
         uint32_t channel;// channel name in 4 char
+        public: 
+        void printContent();
     };
     struct ChannelMapSimpleItem {
         ChannelMapSimpleItem_FE fe;
