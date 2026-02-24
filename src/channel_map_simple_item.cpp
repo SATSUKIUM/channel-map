@@ -31,7 +31,7 @@ namespace chmap {
     } // void ChannelMapSimpleItem_DET::decode()
 
     void ChannelMapSimpleItem_FE::decode(){
-        std::cout << "\tFE id: 0x" << std::hex << std::setw(8) << sdf::setfill('0') << id << std::dec << std::endl;
+        std::cout << "\tFE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << id << std::dec << std::endl;
         std::cout
             << "\t\tFront-End IP address: 192.168."
             << std::setw(3) << std::setfill('0') << ((id >> 24) & 0xFF)
