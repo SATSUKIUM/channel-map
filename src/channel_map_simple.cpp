@@ -504,30 +504,11 @@ namespace chmap {
     }// void ChannelMapSimple::checkDuplicateFEIDs_summary
 
     void ChannelMapSimple::printFEid(ChannelMapSimpleItem_FE fe_item) {
-        std::cout << "\tFE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << fe_item.id << std::dec << std::endl;
-        std::cout << "\t\tip 3rd octet: " << std::setw(2) << std::setfill('0') << ((fe_item.id >> 24) & 0xFF) << std::endl;
-        std::cout << "\t\tip 4th octet: " << std::setw(2) << std::setfill('0') << ((fe_item.id >> 16) & 0xFF) << std::endl;
-        std::cout << "\t\tchannel: " << std::setw(4) << std::setfill('0') << (fe_item.id & 0xFFFF) << std::endl;
+        fe_item.decode();
     }// void ChannelMapSimple::printFEid
 
     void ChannelMapSimple::printDETinfo(ChannelMapSimpleItem_DET det_item) {
-        std::cout << "\tDET name: 0x" << std::setw(8) << std::setfill('0') << det_item.name;
-        std::cout << " (char: " << static_cast<char>((det_item.name >> 24) & 0xFF)
-                  << static_cast<char>((det_item.name >> 16) & 0xFF)
-                  << static_cast<char>((det_item.name >> 8) & 0xFF)
-                  << static_cast<char>(det_item.name & 0xFF)
-                  << ")," << std::endl;
-        std::cout << "\tplane: 0x" << std::setw(4) << std::setfill('0') << det_item.plane;
-        std::cout << " (char: " << static_cast<char>((det_item.plane >> 8) & 0xFF)
-                  << static_cast<char>(det_item.plane & 0xFF)
-                  << ")," << std::endl;
-        std::cout << "\tsegment: " << static_cast<uint8_t>(det_item.segment) << "," << std::endl;
-        std::cout << "\tchannel: 0x" << std::setw(8) << std::setfill('0');
-        std::cout << det_item.channel << " (char: " << static_cast<char>((det_item.channel >> 24) & 0xFF)
-                  << static_cast<char>((det_item.channel >> 16) & 0xFF)
-                  << static_cast<char>((det_item.channel >> 8) & 0xFF)
-                  << static_cast<char>(det_item.channel & 0xFF)
-                  << ")" << std::endl;
+        det_item.decode();
     }// void ChannelMapSimple::printDETinfo
 
     void ChannelMapSimple::makeDummyEntry(uint32_t maxFillFactor) {
