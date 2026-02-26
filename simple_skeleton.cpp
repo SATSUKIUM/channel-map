@@ -24,8 +24,8 @@
 #include <fstream>
 
 // static analysis
-#include <TFile.h>
-#include <TTree.h>
+// #include <TFile.h>
+// #include <TTree.h>
 
 #define general_chmap 1
 #define OF_BENCHMARK 1
@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
         chmap::ChannelMapSimpleItem_DET* detitem = channel_map_simple.getDETItem(test_ip3rd_T1right, test_ip4th_T1right, test_ch_T1right);
         channel_map_simple.printDETinfo(*detitem);
         std::cout << std::string(80, '=') << std::endl;
-        
+
     }
     #endif
 
