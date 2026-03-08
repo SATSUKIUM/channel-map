@@ -7,7 +7,7 @@ namespace chmap {
         // print member variables
         std::cout << "\tDET name: 0x" << std::setw(8) << std::setfill('0') << name;
         std::cout
-            << " (in char: " << name
+            << " (in char: "
             << static_cast<char>((name >> 24) & 0xFF)
             << static_cast<char>((name >> 16) & 0xFF)
             << static_cast<char>((name >> 8) & 0xFF)
@@ -15,7 +15,7 @@ namespace chmap {
             << ")," << std::endl;
         std::cout << "\tplane: 0x" << std::setw(4) << std::setfill('0') << plane;
         std::cout
-            << " (in char: " << static_cast<uint16_t>(plane)
+            << " (in char: "
             << static_cast<char>((plane >> 8) & 0xFF)
             << static_cast<char>(plane & 0xFF)
             << ")," << std::endl;
