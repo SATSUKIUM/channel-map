@@ -19,7 +19,7 @@ namespace chmap {
             << static_cast<char>((plane >> 8) & 0xFF)
             << static_cast<char>(plane & 0xFF)
             << ")," << std::endl;
-        std::cout << "\tsegment: " << segment << std::endl;
+        std::cout << "\tsegment: " << static_cast<int>(segment) << std::endl;
         std::cout << "\tchannel: 0x" << std::hex << std::setw(8) << std::setfill('0');
         std::cout << channel
             << " (in char: "
