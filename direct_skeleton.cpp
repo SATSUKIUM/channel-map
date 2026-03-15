@@ -27,6 +27,8 @@
 // #include <TFile.h>
 // #include <TTree.h>
 
+#include <unistd.h>
+
 #define general_chmap 0
 #define OF_BENCHMARK 0
 #define CHECK_DUPLICATE_FE_ID 0
@@ -49,8 +51,8 @@ int main(int argc, char* argv[]) {
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in simple_skeleton.cpp] ChannelMapDirect initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
     
-    int i;
-    std::cin >> i;
+
+    sleep(100); 
 
     // t0 = std::chrono::high_resolution_clock::now();
     // channel_map_direct.printAllItemsDET();
