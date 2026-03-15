@@ -51,9 +51,9 @@ int main(int argc, char* argv[]) {
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in simple_skeleton.cpp] ChannelMapDirect initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
     
-    std::cout << "\n[in direct_skeleton.cpp] Sleeping for 1000 second before testing getDETItem..." << std::endl;
-    sleep(1000); 
-    std::cout << "\n[in direct_skeleton.cpp] Awake now. Starting getDETItem tests..." << std::endl;
+    // std::cout << "\n[in direct_skeleton.cpp] Sleeping for 1000 second before testing getDETItem..." << std::endl;
+    // sleep(1000); 
+    // std::cout << "\n[in direct_skeleton.cpp] Awake now. Starting getDETItem tests..." << std::endl;
 
     // t0 = std::chrono::high_resolution_clock::now();
     // channel_map_direct.printAllItemsDET();
