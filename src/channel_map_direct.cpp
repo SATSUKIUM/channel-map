@@ -186,6 +186,7 @@ namespace chmap {
         det_items.clear();
 
         std::cout << "[ChannelMapDirect::initialize] direct map initialize finished" << std::endl;
+        return fillRatio;
 
         #if DEBUG_PRINT
         std::cout << "initialized ChannelMapDirect with " << fItemsFE.size() << " items." << std::endl;

@@ -2,10 +2,10 @@
 #include "channel_map_simple_item.hpp"
 
 // below for the original channel-map
-#include "channel_map.hpp"
-#include "debug_print.hpp"
-#include "channel_tuple.hpp"
-#include "element.hpp"
+// #include "channel_map.hpp"
+// #include "debug_print.hpp"
+// #include "channel_tuple.hpp"
+// #include "element.hpp"
 
 // handle string, and so on.
 #include <string>
