@@ -48,6 +48,9 @@ int main(int argc, char* argv[]) {
     channel_map_direct.initialize(input_file_path);
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in simple_skeleton.cpp] ChannelMapDirect initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
+    
+    int i;
+    std::cin >> i;
 
     // t0 = std::chrono::high_resolution_clock::now();
     // channel_map_direct.printAllItemsDET();
