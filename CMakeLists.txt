@@ -90,6 +90,12 @@ target_link_libraries(speedtest PRIVATE channel-map ${FILESYSTEM_LIB})
 add_executable(simple-skeleton-program simple_skeleton.cpp)
 target_compile_features(simple-skeleton-program PRIVATE cxx_std_17)
 target_link_libraries(simple-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB} ROOT::Core ROOT::Hist ROOT::Tree)
+
+### direct skeleton
+add_executable(direct-skeleton-program direct_skeleton.cpp)
+target_compile_features(direct-skeleton-program PRIVATE cxx_std_17)
+target_link_libraries(direct-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
+
 # target_link_libraries(simple-skeleton-program ${ROOT_LIBRARIES})
 # target_link_directories(simple-skeleton-program PRIVATE ${ROOT_LIBRARY_DIRS})
 # target_include_directories(simple-skeleton-program PRIVATE ${ROOT_INCLUDE_DIRS})
@@ -100,6 +106,7 @@ install(TARGETS skeleton-program DESTINATION bin)
 install(TARGETS fat-skeleton-program DESTINATION bin)
 install(TARGETS speedtest DESTINATION bin)
 install(TARGETS simple-skeleton-program DESTINATION bin)
+install(TARGETS direct-skeleton-program DESTINATION bin)
 install(TARGETS channel-map EXPORT ChannelMapTargets DESTINATION lib)
 install(FILES ${HEADERS} DESTINATION include)
 install(FILES ${SCRIPT_SOURCE} DESTINATION bin
