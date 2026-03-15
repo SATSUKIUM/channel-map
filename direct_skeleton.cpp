@@ -49,6 +49,10 @@ int main(int argc, char* argv[]) {
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in simple_skeleton.cpp] ChannelMapDirect initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
 
+    // t0 = std::chrono::high_resolution_clock::now();
+    // channel_map_direct.printAllItemsDET();
+    // t1 = std::chrono::high_resolution_clock::now();
+    // std::cout << "\n[in simple_skeleton.cpp] printAllItemsDET completed in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
     #if OF_BENCHMARK // file out, number of channels, time for search
     std::ofstream of_benchmark("benchmark_results.txt", std::ios::app);
     std::cout << "\n[in simple_skeleton.cpp] Benchmark of " << channel_map_simple.getNumberOfChannels() << " channels started." << std::endl;
