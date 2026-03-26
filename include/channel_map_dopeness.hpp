@@ -1,7 +1,6 @@
 #ifndef CHANNEL_MAP_DOPENESS_HPP_
 #define CHANNEL_MAP_DOPENESS_HPP_
 
-#include <optional> // for optional return of getDopeKey_FE
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -31,7 +30,7 @@ namespace chmap {
             std::vector<ChannelMapSimpleItem_FE> fItemsFE; // 実在するfe item
             std::vector<ChannelMapSimpleItem_DET> fItemsDET; // 実在するdet item
 
-            ChannelMapSimpleItem_DET getDETItem(uint8_t ip3rd, uint8_t ip4th, uint8_t ch);
+            ChannelMapSimpleItem_DET getDETItem(uint32_t doped_index);
             void printAllItemsFE();
             void printAllItemsDET();
             void checkDuplicateFEIDs();
@@ -39,7 +38,7 @@ namespace chmap {
             void printFEid(ChannelMapSimpleItem_FE fe_item);
             void printDETinfo(ChannelMapSimpleItem_DET det_item);
             int getNumberOfChannels() const { return fItems.size(); }
-            std::optional<uint32_t> getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch);
+            bool getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment
@@ -49,6 +48,7 @@ namespace chmap {
             ip3rd, ip4th, chのそれぞれのとりうる値の範囲で張られるdope-vectorの準備
             */
             uint8_t min_ip3rd, min_ip4th, min_ch;
+            uint8_t max_ip3rd, max_ip4th, max_ch;
             uint8_t sizeSpace_ip3rd, sizeSpace_ip4th, sizeSpace_ch;
             uint32_t sizeSpace_key = 0; // sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch
             uint32_t minId; // for out of range handling
