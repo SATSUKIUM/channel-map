@@ -450,8 +450,13 @@ namespace chmap {
     void ChannelMapDirect::printAllItemsDET() {
         std::cout << "DET items count: " << fItemsDET.size() << std::endl;
         std::cout << "All DET Items:" << std::endl;
-        for(auto& item : fItemsDET) {
-            item.decode();
+        for(auto& item : fItemsFE) {
+            ChannelMapSimpleItem_DET* det_item = getDETItem((item.id >> 24) & 0xFF, (item.id >> 16) & 0xFF, item.id & 0xFFFF);
+            if(det_item) {
+                det_item->decode();
+            } else {
+                std::cout << "\tNo corresponding DET item found for this FE item." << std::endl;
+            }
         }
     }// void ChannelMapDirect::printAllItemsDET
 
