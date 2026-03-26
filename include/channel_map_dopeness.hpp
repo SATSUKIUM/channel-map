@@ -1,6 +1,8 @@
 #ifndef CHANNEL_MAP_DOPENESS_HPP_
 #define CHANNEL_MAP_DOPENESS_HPP_
 
+#include <optional> // for optional return of getDopeKey_FE
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <filesystem>
@@ -27,6 +29,7 @@ namespace chmap {
             std::unordered_map<std::string, uint16_t> mapdata_string_simplify_map16;
             std::vector<ChannelMapSimpleItem_DET> fItemsDET_direct; // fe.idをインデックスとするvector
             std::vector<ChannelMapSimpleItem_FE> fItemsFE; // 実在するfe item
+            std::vector<ChannelMapSimpleItem_DET> fItemsDET; // 実在するdet item
 
             ChannelMapSimpleItem_DET getDETItem(uint8_t ip3rd, uint8_t ip4th, uint8_t ch);
             void printAllItemsFE();
@@ -36,6 +39,7 @@ namespace chmap {
             void printFEid(ChannelMapSimpleItem_FE fe_item);
             void printDETinfo(ChannelMapSimpleItem_DET det_item);
             int getNumberOfChannels() const { return fItems.size(); }
+            std::optional<uint32_t> getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch);
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment
@@ -47,6 +51,8 @@ namespace chmap {
             uint8_t min_ip3rd, min_ip4th, min_ch;
             uint8_t sizeSpace_ip3rd, sizeSpace_ip4th, sizeSpace_ch;
             uint32_t sizeSpace_key = 0; // sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch
+            uint32_t minId; // for out of range handling
+            uint32_t maxId; // for out of range handling
 
             // for reading csv and initialization
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
@@ -60,9 +66,7 @@ namespace chmap {
             uint16_t parse_to16(const std::string& token);
             uint8_t parse_to8(const std::string& token);
 
-            std::size_t getFERank(uint8_t ip3rd, uint8_t ip4th, uint8_t ch);
-
-            std::vector<ChannelMapSimpleItem_DET> fItemsDET; // dope vectorの実体
+            std::vector<ChannelMapSimpleItem_DET> fItemsDET_dope; // dope vectorの実体
 
             ChannelMapDopeness() = default; // private default constructor
 
