@@ -79,19 +79,19 @@ int main(int argc, char* argv[]) {
     // test t1 right channel
     uint8_t test_ip3rd_T1right = 0x02;
     uint8_t test_ip4th_T1right = 0xAA;
-    uint16_t test_ch_T1right = 12;
+    uint8_t test_ch_T1right = 12;
     // test utof left channel
     uint8_t test_ip3rd_utof_left = 0x02;
     uint8_t test_ip4th_utof_left = 0xA9;
-    uint16_t test_ch_utof_left = 8;
+    uint8_t test_ch_utof_left = 8;
     // test bdc 1 V plane channel 4
     uint8_t test_ip3rd_bdc1 = 0x02;
     uint8_t test_ip4th_bdc1 = 0xA1;
-    uint16_t test_ch_bdc1 = 32;
+    uint8_t test_ch_bdc1 = 32;
     // test kldc 2 U' plane channel 16
     uint8_t test_ip3rd_kldc2 = 0x02;
     uint8_t test_ip4th_kldc2 = 0xB2;
-    uint16_t test_ch_kldc2 = 96;
+    uint8_t test_ch_kldc2 = 96;
 
 
     uint32_t det_name;
@@ -99,12 +99,12 @@ int main(int argc, char* argv[]) {
     uint8_t det_segment;
     uint32_t det_channel;
 
-    std::vector<std::tuple<uint8_t, uint8_t, uint16_t, std::string>> test_items = {
+    std::vector<std::tuple<uint8_t, uint8_t, uint8_t, std::string>> test_items = {
         {test_ip3rd_T1right, test_ip4th_T1right, test_ch_T1right, "T1_right_channel"},
         {test_ip3rd_utof_left, test_ip4th_utof_left, test_ch_utof_left, "utof_left_channel"},
         {test_ip3rd_bdc1, test_ip4th_bdc1, test_ch_bdc1, "bdc_1_V_plane_channel_4"},
         {test_ip3rd_kldc2, test_ip4th_kldc2, test_ch_kldc2, "kldc_2_U'_plane_channel_16"},
-        {0xFF, 0xFF, 0xFFFF, "non-existing_channel"}
+        {0xFF, 0xFF, 0xFF, "non-existing_channel"}
     };
 
     #if 1

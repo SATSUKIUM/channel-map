@@ -426,7 +426,7 @@ namespace chmap {
     }// uint8_t ChannelMapDirect::parse_to8
 
     size_t ChannelMapDirect::getFERank(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) {
-        uint32_t id = (uint32_t(ip3rd) << 24) | (uint32_t(ip4th) << 16) | uint32_t(ch);
+        uint32_t id = (uint32_t(ip3rd) << 16) | (uint32_t(ip4th) << 8) | uint32_t(ch);
         return (id >= minId && id < minId + sizeId) ? (id - minId) : std::string::npos; // idが範囲内ならインデックスを返し、そうでなければstd::string::nposを返す
     }// size_t ChannelMapDirect::getFERank
 
