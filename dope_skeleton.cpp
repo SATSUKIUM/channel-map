@@ -49,11 +49,11 @@ int main(int argc, char* argv[]) {
     t0 = std::chrono::high_resolution_clock::now();
     channel_map_dopeness.initialize(input_file_path);
     t1 = std::chrono::high_resolution_clock::now();
-    std::cout << "\n[in simple_skeleton.cpp] ChannelMapDopeness initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
+    std::cout << "\n[in dope_skeleton.cpp] ChannelMapDopeness initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
 
     #if OF_BENCHMARK // file out, number of channels, time for search
     std::ofstream of_benchmark("benchmark_results.txt", std::ios::app);
-    std::cout << "\n[in simple_skeleton.cpp] Benchmark of " << channel_map_dopeness.getNumberOfChannels() << " channels started." << std::endl;
+    std::cout << "\n[in dope_skeleton.cpp] Benchmark of " << channel_map_dopeness.getNumberOfChannels() << " channels started." << std::endl;
     #endif
 
 
@@ -108,9 +108,9 @@ int main(int argc, char* argv[]) {
         uint8_t ip4th = std::get<1>(item);
         uint16_t ch = std::get<2>(item);
         const std::string& description = std::get<3>(item);
-        std::cout << "\n[in simple_skeleton.cpp] Testing getDETItem for FE id of " << description << ":" << std::endl;
+        std::cout << "\n[in dope_skeleton.cpp] Testing getDETItem for FE id of " << description << ":" << std::endl;
         channel_map_dopeness.printFEid(chmap::ChannelMapSimpleItem_FE(ip3rd, ip4th, ch));
-        std::cout << "\t\tCorresponding DET info:" << std::endl;
+        std::cout << "\t\t(↓Corresponding DET info)" << std::endl;
         uint32_t doped_index;
         if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)) {
             std::cout << "\tFE id is out of range in getDopeKey_FE()." << std::endl;
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
                     << ", segment: " << static_cast<uint8_t>(det_segment)
                     << ", channel: " << std::hex << std::setw(8) << std::setfill('0') << det_channel << std::dec
                     << std::endl;
-        std::cout << "\n[in simple_skeleton.cpp] Performed " << ntrials << " trials of getDETItem from " << channel_map_dopeness.getNumberOfChannels() << " channels in " << elapsed_subtract_overhead_loop.count() << " microseconds." << " Overhead: " << std::chrono::duration<double , std::micro>(t2 - t1).count() << " microseconds." << std::endl;
+        std::cout << "\n[in dope_skeleton.cpp] Performed " << ntrials << " trials of getDETItem from " << channel_map_dopeness.getNumberOfChannels() << " channels in " << elapsed_subtract_overhead_loop.count() << " microseconds." << " Overhead: " << std::chrono::duration<double , std::micro>(t2 - t1).count() << " microseconds." << std::endl;
         std::cout << "\tAverage time per getDETItem call: " << (elapsed_subtract_overhead_loop.count() / ntrials) << " microseconds." << std::endl;
 
         #if OF_BENCHMARK // file out
@@ -172,19 +172,19 @@ int main(int argc, char* argv[]) {
     t2 =  std::chrono::high_resolution_clock::now();
 
     elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
-    std::cout << "\n[in simple_skeleton.cpp] Performed " << n_trials << " trials of get detector (using general ChannelMap) in " << elapsed_subtract_overhead_loop.count() << " microseconds." << std::endl;
+    std::cout << "\n[in dope_skeleton.cpp] Performed " << n_trials << " trials of get detector (using general ChannelMap) in " << elapsed_subtract_overhead_loop.count() << " microseconds." << std::endl;
     std::cout << "\tAverage time per get detector call: " << (elapsed_subtract_overhead_loop.count() / n_trials) << " microseconds." << std::endl;
     #endif
 
     #if 0
-    std::cout << "\n[in simple_skeleton.cpp] generating root file including all channel fe id" << std::endl;
+    std::cout << "\n[in dope_skeleton.cpp] generating root file including all channel fe id" << std::endl;
     TFile* output_root_file = new TFile("all_items_after_dummy.root", "RECREATE");
-    TTree* tree = new TTree("channel_map_simple_tree", "Tree containing all channel map simple items after dummy entry addition");
+    TTree* tree = new TTree("channel_map_dope_tree", "Tree containing all channel map dope items after dummy entry addition");
     uint32_t feid;
     tree->Branch("feid", &feid, "feid/i");
-    uint32_t nentry = channel_map_simple.getNumberOfChannels();
+    uint32_t nentry = channel_map_dopeness.getNumberOfChannels();
     uint32_t entry_count = 0;
-    for(const auto& item : channel_map_simple.fItemsFE) {
+    for(const auto& item : channel_map_dopeness.fItemsFE) {
         feid = item.id;
         tree->Fill();
         entry_count++;
