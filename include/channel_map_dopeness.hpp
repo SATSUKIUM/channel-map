@@ -49,7 +49,7 @@ namespace chmap {
             */
             uint8_t min_ip3rd, min_ip4th, min_ch;
             uint8_t max_ip3rd, max_ip4th, max_ch;
-            uint32_t sizeSpace_ip3rd, sizeSpace_ip4th, sizeSpace_ch; // 8bitではオーバーフローしちゃったので、大は小をウンヌン
+            uint16_t sizeSpace_ip3rd, sizeSpace_ip4th, sizeSpace_ch; // 8bitではオーバーフローしちゃったので、大は小をウンヌン
             uint32_t sizeSpace_key = 0; // sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch
             uint32_t minId; // for out of range handling
             uint32_t maxId; // for out of range handling
