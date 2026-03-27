@@ -176,10 +176,10 @@ namespace chmap {
         // どこからどこまで空間を作るかスキャン
         min_ip3rd = 0xFF; // used in getDopeKey_FE()
         min_ip4th = 0xFF; // used in getDopeKey_FE()
-        min_ch = 0xFF; // used in getDopeKey_FE()
-        max_ip3rd = 0; // used in getDopeKey_FE()
-        max_ip4th = 0; // used in getDopeKey_FE()
-        max_ch = 0; // used in getDopeKey_FE()
+        min_ch = 0xFF;    // used in getDopeKey_FE()
+        max_ip3rd = 0;    // used in getDopeKey_FE()
+        max_ip4th = 0;    // used in getDopeKey_FE()
+        max_ch = 0;       // used in getDopeKey_FE()
         uint8_t buf;
         for(const auto& item : fItems){
             auto fe = item.fe;
@@ -193,6 +193,15 @@ namespace chmap {
             if(buf < min_ch) min_ch = buf;
             if(buf > max_ch) max_ch = buf;
         }
+        #if 1
+        std::cout << "min_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << std::dec << std::endl;
+        std::cout << "max_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << std::dec << std::endl;
+        std::cout << "min_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << std::dec << std::endl;
+        std::cout << "max_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << std::dec << std::endl;
+        std::cout << "min_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << std::dec << std::endl;
+        std::cout << "max_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << std::dec << std::endl;
+        std::cout << "calculated FE key space: " << (max_ip3rd - min_ip3rd + 1) << " * " << (max_ip4th - min_ip4th + 1) << " * " << (max_ch - min_ch + 1) << std::endl;
+        #endif
         sizeSpace_ip3rd = max_ip3rd - min_ip3rd + 1;
         sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
         sizeSpace_ch = max_ch - min_ch + 1;
@@ -203,9 +212,9 @@ namespace chmap {
 
 
         std::cout << "\tFE key space size: " << sizeSpace_key << std::endl;
-        std::cout << "\t\tsizeSpace_ip3rd: 0x" << std::setw(2) << std::hex << sizeSpace_ip3rd << " (" << std::setw(2) << std::setfill('0') << min_ip3rd << " ~ " << std::setw(2) << std::setfill('0') << max_ip3rd << ")" << std::endl;
-        std::cout << "\t\tsizeSpace_ip4th: 0x" << std::setw(2) << std::hex << sizeSpace_ip4th << " (" << std::setw(2) << std::setfill('0') << min_ip4th << " ~ " << std::setw(2) << std::setfill('0') << max_ip4th << ")" << std::endl;
-        std::cout << "\t\tsizeSpace_ch: 0x" << std::setw(2) << std::hex << sizeSpace_ch << " (" << std::setw(2) << std::setfill('0') << min_ch << " ~ " << std::setw(2) << std::setfill('0') << max_ch << ")" << std::endl;
+        std::cout << "\t\tsizeSpace_ip3rd: 0x" << std::setw(2) << std::hex << sizeSpace_ip3rd << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << ")" << std::endl;
+        std::cout << "\t\tsizeSpace_ip4th: 0x" << std::setw(2) << std::hex << sizeSpace_ip4th << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << ")" << std::endl;
+        std::cout << "\t\tsizeSpace_ch: 0x" << std::setw(2) << std::hex << sizeSpace_ch << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << ")" << std::endl;
 
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_key;
         std::cout << "\tFE ID range coverage: " << fill_ratio * 100.0 << " %" << std::endl;
