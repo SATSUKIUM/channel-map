@@ -408,7 +408,7 @@ namespace chmap {
         }
     }// uint8_t ChannelMapSimple::parse_to8
 
-    size_t ChannelMapSimple::getFERank(uint8_t ip3rd, uint8_t ip4th, uint16_t ch) {
+    size_t ChannelMapSimple::getFERank(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) {
         uint32_t id = (uint32_t(ip3rd) << 24) | (uint32_t(ip4th) << 16) | uint32_t(ch);
         // binary search in fItemsFE, 
         #if DEBUG_PRINT_GETFERANK
@@ -426,7 +426,7 @@ namespace chmap {
         }
     }// size_t ChannelMapSimple::getFERank
 
-    ChannelMapSimpleItem_DET* ChannelMapSimple::getDETItem(uint8_t ip3rd, uint8_t ip4th, uint16_t ch) {
+    ChannelMapSimpleItem_DET* ChannelMapSimple::getDETItem(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) {
         auto rank = getFERank(ip3rd, ip4th, ch);
         if(rank != std::string::npos) {
             return &fItemsDET[rank];
