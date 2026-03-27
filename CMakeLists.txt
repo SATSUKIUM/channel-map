@@ -96,6 +96,11 @@ add_executable(direct-skeleton-program direct_skeleton.cpp)
 target_compile_features(direct-skeleton-program PRIVATE cxx_std_17)
 target_link_libraries(direct-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
 
+### dope skeleton
+add_executable(dope-skeleton-program dope_skeleton.cpp)
+target_compile_features(dope-skeleton-program PRIVATE cxx_std_17)
+target_link_libraries(dope-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
+
 # target_link_libraries(simple-skeleton-program ${ROOT_LIBRARIES})
 # target_link_directories(simple-skeleton-program PRIVATE ${ROOT_LIBRARY_DIRS})
 # target_include_directories(simple-skeleton-program PRIVATE ${ROOT_INCLUDE_DIRS})
@@ -107,6 +112,7 @@ install(TARGETS fat-skeleton-program DESTINATION bin)
 install(TARGETS speedtest DESTINATION bin)
 install(TARGETS simple-skeleton-program DESTINATION bin)
 install(TARGETS direct-skeleton-program DESTINATION bin)
+install(TARGETS dope-skeleton-program DESTINATION bin)
 install(TARGETS channel-map EXPORT ChannelMapTargets DESTINATION lib)
 install(FILES ${HEADERS} DESTINATION include)
 install(FILES ${SCRIPT_SOURCE} DESTINATION bin
