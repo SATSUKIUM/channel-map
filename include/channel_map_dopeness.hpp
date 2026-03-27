@@ -60,7 +60,7 @@ namespace chmap {
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens);
             void simplify_detector_names();
             uint32_t four_char_to_uint32(char a, char b, char c, char d);
-            uint16_t four_char_to_uint16(char a, char b);
+            uint16_t two_char_to_uint16(char a, char b);
             bool isTokenNumeric(const std::string& token);
             uint32_t parse_to32(const std::string& token);
             uint16_t parse_to16(const std::string& token);

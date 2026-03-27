@@ -36,6 +36,13 @@ namespace chmap {
     }// ChannelMapDopeness::~ChannelMapDopeness()
     
     double ChannelMapDopeness::initialize(const std::string& file_path) {
+        /*
+        1. simplify_detector_names()で長いstringを4文字charにmapする
+        2. csvを読んで、FE, DETの情報をそれぞれ持つChannelMapSimpleItemをstd::vector<ChannelMapSimpleItem> fItemsに入れる
+        3. fItemsをFEのidの昇順でソートする(不要かも...)
+        4. fItemsをスキャンして、dope vectorのサイズを決める
+
+        */
         double fill_ratio;
 
         simplify_detector_names(); // prepare detname_simplify_map
@@ -163,37 +170,38 @@ namespace chmap {
             };
         }
         */
-        
+
+        std::cout << "[ChannelMapDopeness::initialize] dope vector initialize start" << std::endl;
+        std::cout << "\tnumber of items: " << fItems.size() << std::endl;
         // どこからどこまで空間を作るかスキャン
-        min_ip3rd = 0xFF;
-        min_ip4th = 0xFF;
-        min_ch = 0xFF;
-        max_ip3rd = 0;
-        max_ip4th = 0;
-        max_ch = 0;
-        uint8_t buf_segment;
+        min_ip3rd = 0xFF; // used in getDopeKey_FE()
+        min_ip4th = 0xFF; // used in getDopeKey_FE()
+        min_ch = 0xFF; // used in getDopeKey_FE()
+        max_ip3rd = 0; // used in getDopeKey_FE()
+        max_ip4th = 0; // used in getDopeKey_FE()
+        max_ch = 0; // used in getDopeKey_FE()
+        uint8_t buf;
         for(const auto& item : fItems){
             auto fe = item.fe;
-            buf_segment = (fe.id>>16) & 0xFF; // ip3rd
-            if(buf_segment < min_ip3rd) min_ip3rd = buf_segment;
-            if(buf_segment > max_ip3rd) max_ip3rd = buf_segment;
-            buf_segment = (fe.id>>8) & 0xFF; // ip4th
-            if(buf_segment < min_ip4th) min_ip4th = buf_segment;
-            if(buf_segment > max_ip4th) max_ip4th = buf_segment;
-            buf_segment = fe.id & 0xFF; // ch
-            if(buf_segment < min_ch) min_ch = buf_segment;
-            if(buf_segment > max_ch) max_ch = buf_segment;
+            buf = (fe.id>>16) & 0xFF; // ip3rd
+            if(buf < min_ip3rd) min_ip3rd = buf;
+            if(buf > max_ip3rd) max_ip3rd = buf;
+            buf = (fe.id>>8) & 0xFF; // ip4th
+            if(buf < min_ip4th) min_ip4th = buf;
+            if(buf > max_ip4th) max_ip4th = buf;
+            buf = fe.id & 0xFF; // ch
+            if(buf < min_ch) min_ch = buf;
+            if(buf > max_ch) max_ch = buf;
         }
         sizeSpace_ip3rd = max_ip3rd - min_ip3rd + 1;
         sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
         sizeSpace_ch = max_ch - min_ch + 1;
         sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch;
-        getDopeKey_FE(min_ip3rd, min_ip4th, min_ch, minId);
-        getDopeKey_FE(max_ip3rd, max_ip4th, max_ch, maxId);
+        getDopeKey_FE(min_ip3rd, min_ip4th, min_ch, minId); // minIdを参照で渡している。関数内で代入がある。
+        getDopeKey_FE(max_ip3rd, max_ip4th, max_ch, maxId); // maxIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
 
-        std::cout << "[ChannelMapDopeness::initialize] dope vector initialize start" << std::endl;
-        std::cout << "\tnumber of items: " << fItems.size() << std::endl;
+
         std::cout << "\tFE key space size: " << sizeSpace_key << std::endl;
         std::cout << "\t\tsizeSpace_ip3rd: 0x" << std::setw(2) << std::hex << sizeSpace_ip3rd << " (" << std::setw(2) << std::setfill('0') << min_ip3rd << " ~ " << std::setw(2) << std::setfill('0') << max_ip3rd << ")" << std::endl;
         std::cout << "\t\tsizeSpace_ip4th: 0x" << std::setw(2) << std::hex << sizeSpace_ip4th << " (" << std::setw(2) << std::setfill('0') << min_ip4th << " ~ " << std::setw(2) << std::setfill('0') << max_ip4th << ")" << std::endl;
@@ -260,7 +268,7 @@ namespace chmap {
         int len_tokens = tokens.size();
         uint64_t fe_ip_full;
         uint16_t fe_ip_3rd_4th;
-        uint16_t fe_channel;
+        uint8_t fe_channel;
         uint32_t det_name;
         uint16_t det_plane;
         uint8_t det_segment;
@@ -295,9 +303,9 @@ namespace chmap {
                 } else if(fe_count == 1) {
                     #if DEBUG_PRINT
                     std::cout << "parsing token(fe_count == 1): " << tokens[i] << " (string)" << std::endl;
-                    std::cout << "This token is interpreted as FE channel in uint16_t format " << std::stoul(tokens[i], nullptr, 0) << std::endl;
+                    std::cout << "This token is interpreted as FE channel in uint8_t format " << std::stoul(tokens[i], nullptr, 0) << std::endl;
                     #endif
-                    fe_channel = parse_to16(tokens[i]);
+                    fe_channel = parse_to8(tokens[i]);
                 }
                 fe_count++;
             } else if(type == "detector") {
@@ -414,7 +422,7 @@ namespace chmap {
         };
         // make simplified map
         for(const auto& plane_pair : detplanes){
-            uint16_t simplified = four_char_to_uint16(
+            uint16_t simplified = two_char_to_uint16(
                 plane_pair.second[0],
                 plane_pair.second[1]
             );
@@ -427,10 +435,10 @@ namespace chmap {
         return (uint32_t(uint8_t(a)) << 24) | (uint32_t(uint8_t(b)) << 16) | (uint32_t(uint8_t(c)) << 8) | uint32_t(uint8_t(d));
     }// uint32_t ChannelMapDopeness::four_char_to_uint32
 
-    uint16_t ChannelMapDopeness::four_char_to_uint16(char a, char b) {
+    uint16_t ChannelMapDopeness::two_char_to_uint16(char a, char b) {
         // 2つのcharをuint16_tに変換するルールを規定
         return (uint16_t(uint8_t(a)) << 8) | uint16_t(uint8_t(b));
-    }// uint16_t ChannelMapDopeness::four_char_to_uint16
+    }// uint16_t ChannelMapDopeness::two_char_to_uint16
 
     bool ChannelMapDopeness::isTokenNumeric(const std::string& token) {
         // return true if token is numeric
