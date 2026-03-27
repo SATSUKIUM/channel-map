@@ -120,8 +120,17 @@ int main(int argc, char* argv[]) {
 
         t0 = std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
-            channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index);
+            #if 1
+            if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
+                std::cout << "\tFE id is out of range in getDopeKey_FE() in the loop. This should not happen since it was checked before the loop." << std::endl;
+                break;
+            }
             chmap::ChannelMapSimpleItem_DET det_item_inner = channel_map_dopeness.getDETItem(doped_index);
+            #endif
+            #if 0
+            doped_index = channel_map_dopeness.unchecked_getDopeKey_FE(ip3rd, ip4th, ch);
+            chmap::ChannelMapSimpleItem_DET det_item_inner = channel_map_dopeness.getDETItem(doped_index);
+            #endif
             det_name = det_item_inner.name;
             det_plane = det_item_inner.plane;
             det_segment = det_item_inner.segment;
