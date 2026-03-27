@@ -263,6 +263,10 @@ namespace chmap {
         return true;
     } // std::optional<uint32_t> ChannelMapDopeness::getDopeKey_FE
 
+    uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
+        return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
+    } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
+
     std::vector<std::string> ChannelMapDopeness::split_line(const std::string& line, char delimiter) {
         std::vector<std::string> tokens;
         std::string token;
