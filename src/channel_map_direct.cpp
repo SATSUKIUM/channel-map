@@ -425,12 +425,12 @@ namespace chmap {
         }
     }// uint8_t ChannelMapDirect::parse_to8
 
-    size_t ChannelMapDirect::getFERank(uint8_t ip3rd, uint8_t ip4th, uint16_t ch) {
+    size_t ChannelMapDirect::getFERank(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) {
         uint32_t id = (uint32_t(ip3rd) << 24) | (uint32_t(ip4th) << 16) | uint32_t(ch);
         return (id >= minId && id < minId + sizeId) ? (id - minId) : std::string::npos; // idが範囲内ならインデックスを返し、そうでなければstd::string::nposを返す
     }// size_t ChannelMapDirect::getFERank
 
-    ChannelMapSimpleItem_DET* ChannelMapDirect::getDETItem(uint8_t ip3rd, uint8_t ip4th, uint16_t ch) {
+    ChannelMapSimpleItem_DET* ChannelMapDirect::getDETItem(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) {
         auto rank = getFERank(ip3rd, ip4th, ch);
         if(rank != std::string::npos) {
             return &fItemsDET_direct[rank]; // 範囲外アクセスのハンドルはgetFERankで済んでいる(ように思ってコードを書いた)
@@ -451,7 +451,7 @@ namespace chmap {
         std::cout << "DET items count: " << fItemsDET.size() << std::endl;
         std::cout << "All DET Items:" << std::endl;
         for(auto& item : fItemsFE) {
-            ChannelMapSimpleItem_DET* det_item = getDETItem((item.id >> 24) & 0xFF, (item.id >> 16) & 0xFF, item.id & 0xFFFF);
+            ChannelMapSimpleItem_DET* det_item = getDETItem((item.id >> 16) & 0xFF, (item.id >> 8) & 0xFF, item.id & 0xFF);
             if(det_item) {
                 det_item->decode();
             } else {
