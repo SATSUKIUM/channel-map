@@ -22,15 +22,19 @@ namespace chmap {
             /*
             FEのキーをdope-vectorのインデックスとすることで、バリューへは直接アクセスできるようにする
             */
-            double initialize(const std::string& file_path); // キーの充填率を返す
+            /*
+            DET->FEの「逆引き」を実装してみる
+            */
+            double initialize(const std::string& file_path, bool createInvMap = false); // 返り値はFEキーの充填率
+            double initialize_InvMap(const std::string& file_path); // 返り値はDETキーの充填率
             std::vector<ChannelMapSimpleItem> fItems;
             std::unordered_map<std::string, uint32_t> mapdata_string_simplify_map32;
             std::unordered_map<std::string, uint16_t> mapdata_string_simplify_map16;
-            std::vector<ChannelMapSimpleItem_DET> fItemsDET_direct; // fe.idをインデックスとするvector
             std::vector<ChannelMapSimpleItem_FE> fItemsFE; // 実在するfe item
             std::vector<ChannelMapSimpleItem_DET> fItemsDET; // 実在するdet item
 
             ChannelMapSimpleItem_DET getDETItem(uint32_t doped_index);
+            ChannelMapSimpleItem_FE getFEIItem(uint32_t doped_index);
             void printAllItemsFE();
             void printAllItemsDET();
             void checkDuplicateFEIDs();
@@ -40,6 +44,8 @@ namespace chmap {
             int getNumberOfChannels() const { return fItems.size(); }
             bool getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
             uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
+            bool getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
+            uint32_t unchecked_getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment
@@ -51,9 +57,21 @@ namespace chmap {
             uint8_t min_ip3rd, min_ip4th, min_ch;
             uint8_t max_ip3rd, max_ip4th, max_ch;
             uint16_t sizeSpace_ip3rd, sizeSpace_ip4th, sizeSpace_ch; // 8bitではオーバーフローしちゃったので、大は小をウンヌン
-            uint32_t sizeSpace_key = 0; // sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch
-            uint32_t minId; // for out of range handling
-            uint32_t maxId; // for out of range handling
+            uint32_t sizeSpace_FEKey = 0; // sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch
+            uint32_t minFEId; // for out of range handling
+            uint32_t maxFEId; // for out of range handling
+
+            /*
+            DET key: 88bit = 32bit(name) + 16bit(plane) + 8bit(segment) + 32bit(channel)
+            1byteごとに取りうる値を保持する
+            */
+            uint8_t min_name[4], min_plane[2], min_segment, min_channel[4];
+            uint8_t max_name[4], max_plane[2], max_segment, max_channel[4];
+            uint64_t sizeSpace_name, sizeSpace_plane, sizeSpace_segment, sizeSpace_channel;
+            uint64_t sizeSpace_DETKey; // sizeSpace_name * sizeSpace_plane * sizeSpace_segment * sizeSpace_channel
+            uint32_t minDETId; // for out of range handling
+            uint32_t maxDETId; // for out of range handling
+
 
             // for reading csv and initialization
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
@@ -68,6 +86,7 @@ namespace chmap {
             uint8_t parse_to8(const std::string& token);
 
             std::vector<ChannelMapSimpleItem_DET> fItemsDET_dope; // dope vectorの実体
+            std::vector<ChannelMapSimpleItem_FE> fItemsFE_dope; // dope vectorの実体
 
             ChannelMapDopeness() = default; // private default constructor
 
