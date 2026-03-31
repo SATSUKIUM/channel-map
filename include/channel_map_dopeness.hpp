@@ -26,7 +26,7 @@ namespace chmap {
             DET->FEの「逆引き」を実装してみる
             */
             double initialize(const std::string& file_path, bool createInvMap = false); // 返り値はFEキーの充填率
-            double initialize_InvMap(const std::string& file_path); // 返り値はDETキーの充填率
+            double initialize_InvMap(); // 返り値はDETキーの充填率
             std::vector<ChannelMapSimpleItem> fItems;
             std::unordered_map<std::string, uint32_t> mapdata_string_simplify_map32;
             std::unordered_map<std::string, uint16_t> mapdata_string_simplify_map16;
@@ -65,19 +65,26 @@ namespace chmap {
             DET key: 88bit = 32bit(name) + 16bit(plane) + 8bit(segment) + 32bit(channel)
             1byteごとに取りうる値を保持する
             */
-            uint8_t min_name[4], min_plane[2], min_segment, min_channel[4];
+            uint8_t min_name[4], min_plane[2], min_segment, min_channel[4]; // name == UTOFのとき、name[0] = 'U', name[1] = 'T', name[2] = 'O', name[3] = 'F'とする
             uint8_t max_name[4], max_plane[2], max_segment, max_channel[4];
-            uint64_t sizeSpace_name, sizeSpace_plane, sizeSpace_segment, sizeSpace_channel;
-            uint64_t sizeSpace_DETKey; // sizeSpace_name * sizeSpace_plane * sizeSpace_segment * sizeSpace_channel
+            uint16_t sizeSpace_name[4], sizeSpace_plane[2], sizeSpace_segment, sizeSpace_channel[4];
+
+            // 記述を簡便にするために連続して配列に入れる
+            uint16_t sizeSpace_part[11]; // sizeSpace_part[i] = sizeSpace_name[0] * ... * sizeSpace_name[i] (i=0,1,2,3) or sizeSpace_plane[0] * ... * sizeSpace_plane[i-4] (i=4,5) or sizeSpace_segment (i=6) or sizeSpace_channel[0] * ... * sizeSpace_channel[i-7] (i=7,8,9,10)
+            uint16_t min_DET_part[11]; // for out of range handling
+            uint16_t max_DET_part[11]; // for out of range handling
+            
+            uint32_t sizeSpace_DETKey; // sizeSpace_name * sizeSpace_plane * sizeSpace_segment * sizeSpace_channel
             uint32_t minDETId; // for out of range handling
             uint32_t maxDETId; // for out of range handling
 
 
             // for reading csv and initialization
+            void readCSV(const std::string& file_path);
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens);
-            void simplify_detector_names();
+            void defineDictionary();
             uint32_t four_char_to_uint32(char a, char b, char c, char d);
             uint16_t two_char_to_uint16(char a, char b);
             bool isTokenNumeric(const std::string& token);
@@ -85,8 +92,8 @@ namespace chmap {
             uint16_t parse_to16(const std::string& token);
             uint8_t parse_to8(const std::string& token);
 
-            std::vector<ChannelMapSimpleItem_DET> fItemsDET_dope; // dope vectorの実体
-            std::vector<ChannelMapSimpleItem_FE> fItemsFE_dope; // dope vectorの実体
+            std::vector<ChannelMapSimpleItem_DET> fItemsFEtoDET_dope; // dope vectorの実体
+            std::vector<ChannelMapSimpleItem_FE> fItemsDETtoFE_dope; // dope vectorの実体
 
             ChannelMapDopeness() = default; // private default constructor
 
