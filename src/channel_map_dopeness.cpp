@@ -26,6 +26,14 @@ if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
 }else{
     // usual process}
 */
+/*
+関連ソースコード
+    - src/channel_map_simple_item.cpp : decode()の実装
+    - src/channel_map_simple_rules.cpp : 辞書などのルールの定義
+    - src/channel_map_readCSV.cpp : CSVの読み込みとfItemsの初期化
+    - include/channel_map_simple_item.hpp
+    - include/channel_map_dopeness.hpp
+*/
 namespace chmap {    
     ChannelMapDopeness& ChannelMapDopeness::get_instance() {
         static ChannelMapDopeness instance;
@@ -107,8 +115,8 @@ namespace chmap {
         sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
         sizeSpace_ch = max_ch - min_ch + 1;
         sizeSpace_FEKey = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch;
-        getDopeKey_FE(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
-        getDopeKey_FE(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
+        getDopeKey_FEtoDET(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
+        getDopeKey_FEtoDET(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
 
 
@@ -122,7 +130,7 @@ namespace chmap {
         std::vector<ChannelMapSimpleItem_DET> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
         for(const auto& item : fItems){
             uint32_t doped_index;
-            if(!getDopeKey_FE( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index )) {
+            if(!getDopeKey_FEtoDET( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index )) {
                 std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
                 item.fe.decode();
                 continue;
@@ -247,7 +255,7 @@ namespace chmap {
 
     }
     // ↓このコードの本質
-    bool ChannelMapDopeness::getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
+    bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
         if(ip3rd < min_ip3rd || ip3rd > max_ip3rd || ip4th < min_ip4th || ip4th > max_ip4th || ch < min_ch || ch > max_ch) {
             return false;
         }
@@ -259,7 +267,8 @@ namespace chmap {
         return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
     } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
 
-    bool ChannelMapDopeness::getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
+    // ↓このコードの本質
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
         uint8_t buf;
         // check if the input values are within the defined space
         for(int i=0; i<4; ++i){
@@ -312,7 +321,11 @@ namespace chmap {
 
     ChannelMapSimpleItem_DET ChannelMapDopeness::getDETItem(uint32_t doped_index){
         return fItemsFEtoDET_dope[doped_index];
-    }// ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
+    } // ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
+
+    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+        return fItemsDETtoFE_dope[doped_index];
+    } // ChannelMapSimpleItem_FE* ChannelMapDopeness::getFEIItem
 
     void ChannelMapDopeness::printAllItemsFE() {
         std::cout << "FE items count: " << fItemsFE.size() << std::endl;
@@ -327,7 +340,7 @@ namespace chmap {
         std::cout << "All DET Items:" << std::endl;
         for(auto& item : fItemsFE) {
             uint32_t doped_index;
-            if(!getDopeKey_FE( (item.ip3rd) & 0xFF, (item.ip4th) & 0xFF, item.ch & 0xFF, doped_index)) {
+            if(!getDopeKey_FEtoDET( (item.ip3rd) & 0xFF, (item.ip4th) & 0xFF, item.ch & 0xFF, doped_index)) {
                 std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
                 item.decode();
                 continue;

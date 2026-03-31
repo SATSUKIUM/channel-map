@@ -42,9 +42,9 @@ namespace chmap {
             void printFEid(ChannelMapSimpleItem_FE fe_item);
             void printDETinfo(ChannelMapSimpleItem_DET det_item);
             int getNumberOfChannels() const { return fItems.size(); }
-            bool getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
+            bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
             uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
-            bool getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
+            bool getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
             uint32_t unchecked_getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
