@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
         chmap::ChannelMapSimpleItem_DET det_item = channel_map_dopeness.getDETItem(doped_index);
-        std::cout << "query: " << ip3rd << ", " << ip4th << ", " << ch << std::endl;
+        std::cout << "query: " << static_cast<uint32_t>(ip3rd) << ", " << static_cast<uint32_t>(ip4th) << ", " << static_cast<uint32_t>(ch) << std::endl;
 
         uint32_t det_name = det_item.name;
         uint16_t det_plane = det_item.plane;
