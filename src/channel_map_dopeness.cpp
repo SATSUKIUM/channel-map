@@ -257,6 +257,21 @@ namespace chmap {
 
         sizeSpace_DETKey = sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] * sizeSpace_plane[0] * sizeSpace_plane[1] * sizeSpace_segment * sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3];
         std::cout << "\tcalculated DET key space: " << sizeSpace_DETKey << std::endl;
+        std::cout << "\tDET ID coverage: " << (static_cast<double>(fItems.size()) / sizeSpace_DETKey) * 100.0 << " %" << std::endl;
+
+        std::vector<ChannelMapSimpleItem_FE> dettofe_dopevector(sizeSpace_DETKey); // DETのname, plane, segment, channelをインデックスとするdope-vectorを用意
+        for(const auto& item : fItems){
+            uint32_t doped_index;
+            if(!getDopeKey_DETtoFE(item.det.name, item.det.plane, item.det.segment, item.det.channel, doped_index)) {
+                std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
+                item.det.decode();
+                continue;
+            }
+            
+            dettofe_dopevector[doped_index] = item.fe;
+        }
+        fItemsDETtoFE_dope = dettofe_dopevector;
+
         return static_cast<double>(fItems.size()) / sizeSpace_DETKey;
     }
     // ↓このコードの本質
