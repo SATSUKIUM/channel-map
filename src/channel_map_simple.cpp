@@ -156,7 +156,7 @@ namespace chmap {
         #endif
         // sort fItems by fe.id
         std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe.id < right.fe.id; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
+            return left.fe < right.fe; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
         });
         #if DEBUG_PRINT
         std::cout << "finished sorting fItems" << std::endl;
@@ -416,10 +416,10 @@ namespace chmap {
         #endif
         auto it = std::lower_bound(fItemsFE.begin(), fItemsFE.end(), id,
             [](const ChannelMapSimpleItem_FE& item, uint32_t value) {
-                return item.id < value;
+                return item.getRawID() < value;
             }
         );
-        if(it != fItemsFE.end() && it->id == id) {
+        if(it != fItemsFE.end() && it->getRawID() == id) {
             return std::distance(fItemsFE.begin(), it);
         } else {
             return std::string::npos; // not found
@@ -439,7 +439,7 @@ namespace chmap {
         std::cout << "FE items count: " << fItemsFE.size() << std::endl;
         std::cout << "All FE Items:" << std::endl;
         for(const auto& item : fItemsFE) {
-            std::cout << "  FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.id << std::dec << std::endl;
+            std::cout << "  FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.getRawID() << std::dec << std::endl;
         }
     }// void ChannelMapSimple::printAllItemsFE
     void ChannelMapSimple::printAllItemsDET() {
@@ -459,7 +459,7 @@ namespace chmap {
         for(const auto& item : fItemsFE) {
             auto range = std::equal_range(fItemsFE.begin(), fItemsFE.end(), item,
                 [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right) {
-                    return left.id < right.id;
+                    return left < right;
                 } // 狭義弱順序の不等号はfItemsFEをソートする順番に合わせる必要がある。
             );
             size_t count = std::distance(range.first, range.second);
@@ -483,7 +483,7 @@ namespace chmap {
         int duplicate_totalCount = 0;
         for(const auto& item : fItemsFE_copy){
             auto range = std::equal_range(fItemsFE_copy.begin(), fItemsFE_copy.end(), item, [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right){
-                return left.id < right.id;
+                return left < right;
             });
             size_t count = std::distance(range.first, range.second);
             if(count > 1){
@@ -510,314 +510,6 @@ namespace chmap {
     void ChannelMapSimple::printDETinfo(ChannelMapSimpleItem_DET det_item) {
         det_item.decode();
     }// void ChannelMapSimple::printDETinfo
-
-    void ChannelMapSimple::makeDummyEntry(uint32_t maxFillFactor) {
-        std::vector<ChannelMapSimpleItem_FE> new_fe_items;
-        std::vector<ChannelMapSimpleItem_DET> new_det_items;
-
-        ChannelMapSimpleItem_DET dummy_det;
-        ChannelMapSimpleItem_FE dummy_fe(0, 0, 0);
-            // below ChannelMapSimpleItem_DET examlple
-            // struct ChannelMapSimpleItem_DET {
-            //     uint32_t name;// detector name in 4 char
-            //     uint16_t plane;// plane name in 2 char
-            //     uint8_t segment;// segment number in 8bit int (0-255)
-            //     uint32_t channel;// channel name in 4 char
-            // };
-        dummy_det.name = parse_to32("nil");
-        dummy_det.plane = parse_to16("nil");
-        dummy_det.segment = 0;
-        dummy_det.channel = parse_to32("nil");
-
-        for(auto it = fItems.begin(); it != fItems.end(); ++it){
-            if(it == fItems.begin()){
-                uint32_t gap = it->fe.id - 0;
-                if(gap < maxFillFactor){
-                    if(gap == 0){
-                        new_fe_items.push_back(it->fe);
-                        new_det_items.push_back(it->det);
-                        #if DEBUG_PRINT_DUMMY_MAKER
-                        printFEid(it->fe);
-                        printDETinfo(it->det);
-                        #endif
-                        continue; // no gap, no dummy entry needed
-                    } // endif(gap == 0)
-                    else{
-                        for(int i=0; i<gap; ++i){
-                            if(i == 0){ // for the original entry
-                                new_fe_items.push_back(it->fe);
-                                new_det_items.push_back(it->det);
-                                #if DEBUG_PRINT_DUMMY_MAKER
-                                printFEid(it->fe);
-                                printDETinfo(it->det);
-                                #endif
-                            }
-                            else{
-                                dummy_fe.id = 0 + i;
-                                new_fe_items.push_back(dummy_fe);
-                                new_det_items.push_back(dummy_det);
-                                #if DEBUG_PRINT_DUMMY_MAKER
-                                printFEid(dummy_fe);
-                                printDETinfo(dummy_det);
-                                #endif
-                            }
-                        } // done(int i=0; i<gap; ++i)
-                    } // endif(gap > 0)
-                } // endif(gap < maxFillFactor)
-                else{
-                    // insert dummy entry
-                    for(int i=0; i<maxFillFactor - 1; ++i){
-                        if(i == 0){ // for the original entry
-                            new_fe_items.push_back(it->fe);
-                            new_det_items.push_back(it->det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(it->fe);
-                            printDETinfo(it->det);
-                            #endif
-                        }
-                        else{
-                            dummy_fe.id = 0 + gap/maxFillFactor * i;
-                            new_fe_items.push_back(dummy_fe);
-                            new_det_items.push_back(dummy_det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(dummy_fe);
-                            printDETinfo(dummy_det);
-                            #endif
-                        }
-                    } // done(int i=0; i<maxFillFactor - 1; ++i)
-                } // endif(gap >= maxFillFactor)
-            } // endif(it == fItems.begin())
-            else if(it != fItems.end() - 1){
-                auto original_left = it;
-                auto original_right = it + 1;
-                uint32_t gap = (original_right->fe.id) - (original_left->fe.id);
-                if(gap < maxFillFactor){
-                    if(gap == 0){
-                        new_fe_items.push_back(original_left->fe);
-                        new_det_items.push_back(original_left->det);
-                        #if DEBUG_PRINT_DUMMY_MAKER
-                        printFEid(original_left->fe);
-                        printDETinfo(original_left->det);
-                        #endif
-                        continue; // no gap, no dummy entry needed
-                    } // endif(gap == 0)
-                    else{
-                        for(int i=0; i<gap; ++i){
-                            if(i == 0){ // for the original left entry
-                                new_fe_items.push_back(original_left->fe);
-                                new_det_items.push_back(original_left->det);
-                                #if DEBUG_PRINT_DUMMY_MAKER
-                                printFEid(original_left->fe);
-                                printDETinfo(original_left->det);
-                                #endif
-                            }
-                            else{
-                                dummy_fe.id = original_left->fe.id + i;
-                                new_fe_items.push_back(dummy_fe);
-                                new_det_items.push_back(dummy_det);
-                                #if DEBUG_PRINT_DUMMY_MAKER
-                                printFEid(dummy_fe);
-                                printDETinfo(dummy_det);
-                                #endif
-                            }
-                        }
-                    } // endif(gap > 0)
-                } // endif(gap < maxFillFactor)
-                else{
-                    // insert dummy entry
-                    uint32_t gapId = original_right->fe.id - original_left->fe.id;
-                    for(int i=0; i<maxFillFactor - 1; ++i){
-                        if(i == 0){ // for the original left entry
-                            new_fe_items.push_back(original_left->fe);
-                            new_det_items.push_back(original_left->det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(original_left->fe);
-                            printDETinfo(original_left->det);
-                            #endif
-                        }
-                        else{
-                            dummy_fe.id = original_left->fe.id + gapId/maxFillFactor * i;
-                            new_fe_items.push_back(dummy_fe);
-                            new_det_items.push_back(dummy_det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(dummy_fe);
-                            printDETinfo(dummy_det);
-                            #endif
-                        }
-                    } // done(int i=0; i<maxFillFactor - 1; ++i)
-                } // endif(gap >= maxFillFactor)
-            } // endif(it != fItems.end() - 1)
-            else{
-                uint32_t gap = sizeof(uint32_t) - (it->fe.id + 1);
-                if(gap < maxFillFactor){
-                    for(int i=0; i<gap; ++i){
-                        if(i == 0){ // for the original entry
-                            new_fe_items.push_back(it->fe);
-                            new_det_items.push_back(it->det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(it->fe);
-                            printDETinfo(it->det);
-                            #endif
-                        }
-                        else{
-                            dummy_fe.id = it->fe.id + 1 + i;
-                            new_fe_items.push_back(dummy_fe);
-                            new_det_items.push_back(dummy_det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(dummy_fe);
-                            printDETinfo(dummy_det);
-                            #endif
-                        }
-                    } // done(int i=0; i<gap; ++i)
-                } // endif(gap < maxFillFactor)
-                else{
-                    // insert dummy entry
-                    uint32_t gapId = sizeof(uint32_t) - (it->fe.id + 1);
-                    for(int i=0; i<maxFillFactor - 1; ++i){
-                        if(i == 0){ // for the original entry
-                            new_fe_items.push_back(it->fe);
-                            new_det_items.push_back(it->det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(it->fe);
-                            printDETinfo(it->det);
-                            #endif
-                        }
-                        else{
-                            dummy_fe.id = it->fe.id + 1 + gapId/maxFillFactor * i;
-                            new_fe_items.push_back(dummy_fe);
-                            new_det_items.push_back(dummy_det);
-                            #if DEBUG_PRINT_DUMMY_MAKER
-                            printFEid(dummy_fe);
-                            printDETinfo(dummy_det);
-                            #endif
-                        }
-                    } // done(int i=0; i<maxFillFactor - 1; ++i)
-                } // endif(gap >= maxFillFactor)
-            } // endif(it == fItems.begin()), else if(it != fItems.end() - 1), else
-        } // for(auto it = fItems.begin(); it != fItems.end(); ++it)
-
-        std::vector<ChannelMapSimpleItem> new_fItems;
-        auto fe_it = new_fe_items.begin();
-        auto det_it = new_det_items.begin();
-        for(; fe_it != new_fe_items.end() && det_it != new_det_items.end(); ++fe_it, ++det_it){
-            ChannelMapSimpleItem item = { *fe_it, *det_it };
-            new_fItems.push_back(item);
-        }
-        fItems = new_fItems;
-        // sort
-        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe.id < right.fe.id; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
-        });
-        fItemsFE.clear();
-        fItemsDET.clear();
-        for(const auto& item : fItems){
-            fItemsFE.push_back(item.fe);
-            fItemsDET.push_back(item.det);
-        }
-    }// void ChannelMapSimple::makeDummyEntry
-
-    void ChannelMapSimple::makeDummyEntry2(double FillRatio) {
-        uint32_t originalNumItems = fItems.size();
-        uint32_t countDummyEntries = 0;
-        std::vector<ChannelMapSimpleItem_FE> new_fe_items;
-        std::vector<ChannelMapSimpleItem_DET> new_det_items;
-
-        ChannelMapSimpleItem_DET dummy_det;
-        ChannelMapSimpleItem_FE dummy_fe(0, 0, 0);
-            // below ChannelMapSimpleItem_DET examlple
-            // struct ChannelMapSimpleItem_DET {
-            //     uint32_t name;// detector name in 4 char
-            //     uint16_t plane;// plane name in 2 char
-            //     uint8_t segment;// segment number in 8bit int (0-255)
-            //     uint32_t channel;// channel name in 4 char
-            // };
-        dummy_det.name = parse_to32("nil");
-        dummy_det.plane = parse_to16("nil");
-        dummy_det.segment = 0;
-        dummy_det.channel = parse_to32("nil");
-
-        uint32_t maxFillFactor; // gap*FillRatioで可変
-        uint32_t leftId, rightId, gapId;
-        for(auto it = fItems.begin(); it != fItems.end(); ++it){
-            if(it == fItems.begin()){
-                leftId = 0;
-                rightId = it->fe.id;
-                gapId = it->fe.id - 0;
-            } // endif(it == fItems.begin())
-            else if(it != fItems.end() - 1){
-                auto original_left = it;
-                auto original_right = it + 1;
-                leftId = original_left->fe.id;
-                rightId = original_right->fe.id;
-                gapId = rightId - leftId;
-            } // endif(it == fItems.begin()), else if(it != fItems.end() - 1)
-            else{ // last entry
-                leftId = it->fe.id;
-                rightId = UINT32_MAX;
-                gapId = UINT32_MAX - leftId;
-            } // endif(it == fItems.end() - 1)
-
-            new_fe_items.push_back(it->fe);
-            new_det_items.push_back(it->det);
-            #if 0
-            std::cout << "original entry added" << std::endl;
-            std::cout << "\tproceeding gap: " << gapId << " between FE id " << std::hex << leftId << std::dec << " and FE id " << std::hex << rightId << std::dec << std::endl;
-            std::cout << "\t" << (gapId-1)*FillRatio << " dummy entries will be added in this gap if maxFillFactor is not exceeded." << std::endl;
-            #endif
-            countDummyEntries++;
-
-            if(gapId <= 1){
-                continue; // no gap, no dummy entry needed
-            } // endif(gap <= 1)
-            else{
-                // insert dummy entry
-                maxFillFactor = (gapId - 1) * FillRatio;
-                if(maxFillFactor < 1){
-                    continue; // no dummy entry needed
-                }
-                for(int i=0; i < maxFillFactor - 1; ++i){
-                    if(i == 0){ // for the original entry
-                        continue; // already added above
-                    }
-                    else{
-                        dummy_fe.id = leftId + gapId/maxFillFactor * i;
-                        new_fe_items.push_back(dummy_fe);
-                        new_det_items.push_back(dummy_det);
-                        countDummyEntries++;
-                        #if DEBUG_PRINT_DUMMY_MAKER
-                        printFEid(dummy_fe);
-                        printDETinfo(dummy_det);
-                        #endif
-                    }
-                } // done(int i=0; i<maxFillFactor - 1; ++i)
-            } // endif(gap > 1)
-            if(countDummyEntries % 10000 == 0) {
-                std::cout << "\tProgress: " << (countDummyEntries * 100) / (originalNumItems + countDummyEntries) << "% (" << countDummyEntries << " dummy entries added)" << std::endl;
-            }
-        } // for(auto it = fItems.begin(); it != fItems.end(); ++it)
-
-        std::vector<ChannelMapSimpleItem> new_fItems;
-        auto fe_it = new_fe_items.begin();
-        auto det_it = new_det_items.begin();
-        for(; fe_it != new_fe_items.end() && det_it != new_det_items.end(); ++fe_it, ++det_it){
-            ChannelMapSimpleItem item = { *fe_it, *det_it };
-            new_fItems.push_back(item);
-        }
-        new_fe_items.clear();
-        new_det_items.clear();
-        fItems = new_fItems;
-        new_fItems.clear();
-        // sort
-        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe.id < right.fe.id; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
-        });
-        fItemsFE.clear();
-        fItemsDET.clear();
-        for(const auto& item : fItems){
-            fItemsFE.push_back(item.fe);
-            fItemsDET.push_back(item.det);
-        }
-    }// void ChannelMapSimple::makeDummyEntry2
 
     uint32_t ChannelMapSimple::fileoutAllItems(const std::string& filename) {
         std::ofstream outfile(filename);
