@@ -535,7 +535,7 @@ namespace chmap {
         #endif
         #if 1 // char format output
         for(const auto& item : fItems) {
-            outfile << "FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.id << std::dec;
+            outfile << "FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.getRawID() << std::dec;
             outfile << "  DET name: " << std::dec
                     << " (char: " << static_cast<char>((item.det.name >> 24) & 0xFF)
                     << static_cast<char>((item.det.name >> 16) & 0xFF)
