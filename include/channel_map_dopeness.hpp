@@ -74,9 +74,9 @@ namespace chmap {
             uint16_t min_DET_part[11]; // for out of range handling
             uint16_t max_DET_part[11]; // for out of range handling
             
-            uint32_t sizeSpace_DETKey; // sizeSpace_name * sizeSpace_plane * sizeSpace_segment * sizeSpace_channel
-            uint32_t minDETId; // for out of range handling
-            uint32_t maxDETId; // for out of range handling
+            uint64_t sizeSpace_DETKey; // sizeSpace_name * sizeSpace_plane * sizeSpace_segment * sizeSpace_channel
+            uint64_t minDETId; // for out of range handling
+            uint64_t maxDETId; // for out of range handling
 
 
             // for reading csv and initialization
