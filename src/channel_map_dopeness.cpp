@@ -267,7 +267,9 @@ namespace chmap {
                 item.det.decode();
                 continue;
             }
-            
+            #if 1
+            std::cout << "try: " << doped_index << std::endl;
+            #endif
             dettofe_dopevector[doped_index] = item.fe;
         }
         fItemsDETtoFE_dope = dettofe_dopevector;
