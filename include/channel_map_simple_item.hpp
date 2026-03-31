@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <cstdint>
+
+// for std::tie
+#include <tuple>
 namespace chmap {
     struct ChannelMapSimpleItem_FE {
         // zero initialized default constructor
