@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     std::string input_file_path = argv[1];
     chmap::ChannelMapDopeness& channel_map_dopeness = chmap::ChannelMapDopeness::get_instance();
     t0 = std::chrono::high_resolution_clock::now();
-    channel_map_dopeness.initialize(input_file_path, false); // initialize()の第2引数は、逆引きマップを作るかどうか
+    channel_map_dopeness.initialize(input_file_path, true); // initialize()の第2引数は、逆引きマップを作るかどうか
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in dope_skeleton.cpp] ChannelMapDopeness initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
 
@@ -105,6 +105,20 @@ int main(int argc, char* argv[]) {
             continue;
         }
         chmap::ChannelMapSimpleItem_DET det_item = channel_map_dopeness.getDETItem(doped_index);
+        std::cout << "query: " << ip3rd << ", " << ip4th << ", " << ch << std::endl;
+
+        uint32_t det_name = det_item.name;
+        uint16_t det_plane = det_item.plane;
+        uint8_t det_segment = det_item.segment;
+        uint32_t det_channel = det_item.channel;
+        uint32_t doped_index_inv;
+        if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name, det_plane, det_segment, det_channel, doped_index_inv)) {
+            std::cout << "\tDET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
+            continue;
+        }
+        chmap::ChannelMapSimpleItem_FE fe_item_inv = channel_map_dopeness.getFEIItem(doped_index_inv);
+        fe_item_inv.decode();
+
 
         t0 = std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
