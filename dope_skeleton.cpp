@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         uint16_t det_plane = det_item.plane;
         uint8_t det_segment = det_item.segment;
         uint32_t det_channel = det_item.channel;
-        uint32_t doped_index_inv;
+        uint64_t doped_index_inv;
         if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name, det_plane, det_segment, det_channel, doped_index_inv)) {
             std::cout << "\tDET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
             continue;

@@ -34,7 +34,7 @@ namespace chmap {
             std::vector<ChannelMapSimpleItem_DET> fItemsDET; // 実在するdet item
 
             ChannelMapSimpleItem_DET getDETItem(uint32_t doped_index);
-            ChannelMapSimpleItem_FE getFEIItem(uint32_t doped_index);
+            ChannelMapSimpleItem_FE getFEIItem(uint64_t doped_index);
             void printAllItemsFE();
             void printAllItemsDET();
             void checkDuplicateFEIDs();
@@ -44,8 +44,8 @@ namespace chmap {
             int getNumberOfChannels() const { return fItems.size(); }
             bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
             uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
-            bool getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
-            uint32_t unchecked_getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
+            bool getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint64_t& retKey) const;
+            uint64_t unchecked_getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment

@@ -261,7 +261,7 @@ namespace chmap {
 
         std::vector<ChannelMapSimpleItem_FE> dettofe_dopevector(sizeSpace_DETKey); // DETのname, plane, segment, channelをインデックスとするdope-vectorを用意
         for(const auto& item : fItems){
-            uint32_t doped_index;
+            uint64_t doped_index;
             if(!getDopeKey_DETtoFE(item.det.name, item.det.plane, item.det.segment, item.det.channel, doped_index)) {
                 std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
                 item.det.decode();
@@ -290,7 +290,7 @@ namespace chmap {
     } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
 
     // ↓このコードの本質
-    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint64_t& retKey) const {
         uint8_t buf;
         // check if the input values are within the defined space
         for(int i=0; i<4; ++i){
@@ -330,7 +330,7 @@ namespace chmap {
         }
 
         retKey = 0;
-        uint32_t cofactor;
+        uint64_t cofactor;
         for(int i=0; i<11; ++i){
             for(int j=0; j<11-i - 1; ++j){
                 cofactor += sizeSpace_part[i+1 + j];
@@ -345,7 +345,7 @@ namespace chmap {
         return fItemsFEtoDET_dope[doped_index];
     } // ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
 
-    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint64_t doped_index){
         return fItemsDETtoFE_dope[doped_index];
     } // ChannelMapSimpleItem_FE* ChannelMapDopeness::getFEIItem
 
