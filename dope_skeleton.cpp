@@ -1,12 +1,6 @@
 #include "channel_map_dopeness.hpp"
 #include "channel_map_simple_item.hpp"
 
-// below for the original channel-map
-// #include "channel_map.hpp"
-// #include "debug_print.hpp"
-// #include "channel_tuple.hpp"
-// #include "element.hpp"
-
 // handle string, and so on.
 #include <string>
 #include <iostream>
@@ -47,14 +41,9 @@ int main(int argc, char* argv[]) {
     std::string input_file_path = argv[1];
     chmap::ChannelMapDopeness& channel_map_dopeness = chmap::ChannelMapDopeness::get_instance();
     t0 = std::chrono::high_resolution_clock::now();
-    channel_map_dopeness.initialize(input_file_path);
+    channel_map_dopeness.initialize(input_file_path, false); // initialize()の第2引数は、逆引きマップを作るかどうか
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in dope_skeleton.cpp] ChannelMapDopeness initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
-
-    #if OF_BENCHMARK // file out, number of channels, time for search
-    std::ofstream of_benchmark("benchmark_results.txt", std::ios::app);
-    std::cout << "\n[in dope_skeleton.cpp] Benchmark of " << channel_map_dopeness.getNumberOfChannels() << " channels started." << std::endl;
-    #endif
 
 
     // test t1 right channel
@@ -74,7 +63,6 @@ int main(int argc, char* argv[]) {
     uint8_t test_ip4th_kldc2 = 0xB2;
     uint8_t test_ch_kldc2 = 96;
 
-
     uint32_t det_name;
     uint16_t det_plane;
     uint8_t det_segment;
@@ -92,8 +80,8 @@ int main(int argc, char* argv[]) {
     {
         std::cout << std::string(80, '=') << std::endl;
         uint32_t doped_index;
-        if(!channel_map_dopeness.getDopeKey_FE(test_ip3rd_T1right, test_ip4th_T1right, test_ch_T1right, doped_index)) {
-            std::cout << "FE id for T1 right channel is out of range in getDopeKey_FE()." << std::endl;
+        if(!channel_map_dopeness.getDopeKey_FEtoDET(test_ip3rd_T1right, test_ip4th_T1right, test_ch_T1right, doped_index)) {
+            std::cout << "FE id for T1 right channel is out of range in getDopeKey_FEtoDET()." << std::endl;
             return 1;
         }
         chmap::ChannelMapSimpleItem_DET detitem = channel_map_dopeness.getDETItem(doped_index);
@@ -112,8 +100,8 @@ int main(int argc, char* argv[]) {
         channel_map_dopeness.printFEid(chmap::ChannelMapSimpleItem_FE(ip3rd, ip4th, ch));
         std::cout << "\t\t(↓Corresponding DET info)" << std::endl;
         uint32_t doped_index;
-        if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)) {
-            std::cout << "\tFE id is out of range in getDopeKey_FE()." << std::endl;
+        if(!channel_map_dopeness.getDopeKey_FEtoDET(ip3rd, ip4th, ch, doped_index)) {
+            std::cout << "\tFE id is out of range in getDopeKey_FEtoDET()." << std::endl;
             continue;
         }
         chmap::ChannelMapSimpleItem_DET det_item = channel_map_dopeness.getDETItem(doped_index);
@@ -121,8 +109,8 @@ int main(int argc, char* argv[]) {
         t0 = std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
             #if 1
-            if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
-                std::cout << "\tFE id is out of range in getDopeKey_FE() in the loop. This should not happen since it was checked before the loop." << std::endl;
+            if(!channel_map_dopeness.getDopeKey_FEtoDET(ip3rd, ip4th, ch, doped_index)){
+                std::cout << "\tFE id is out of range in getDopeKey_FEtoDET() in the loop. This should not happen since it was checked before the loop." << std::endl;
                 break;
             }
             chmap::ChannelMapSimpleItem_DET det_item_inner = channel_map_dopeness.getDETItem(doped_index);
@@ -156,53 +144,5 @@ int main(int argc, char* argv[]) {
 
     }
 
-    #if general_chmap
-    constexpr int n_trials = ntrials;
-    t0 = std::chrono::high_resolution_clock::now();
-    t1 =  std::chrono::high_resolution_clock::now();
-    t2 =  std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
-
-    std::string detector_id, detector_channel;
-    chmap::number_t detector_plane, detector_segment;
-    t0 = std::chrono::high_resolution_clock::now();
-    for(int i=0; i<n_trials; i++) {
-        chmap::ChannelTuple det = channel_map.get("detector", fe1);
-        detector_id = std::get<std::string>(det[0]);
-        detector_plane = std::get<chmap::number_t>(det[1]);
-        detector_segment = std::get<chmap::number_t>(det[2]);
-        detector_channel = std::get<std::string>(det[3]);
-    }
-    t1 =  std::chrono::high_resolution_clock::now();
-    for(int i=0; i<n_trials; i++) {
-        chmap::ChannelTuple det;
-    }
-    t2 =  std::chrono::high_resolution_clock::now();
-
-    elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
-    std::cout << "\n[in dope_skeleton.cpp] Performed " << n_trials << " trials of get detector (using general ChannelMap) in " << elapsed_subtract_overhead_loop.count() << " microseconds." << std::endl;
-    std::cout << "\tAverage time per get detector call: " << (elapsed_subtract_overhead_loop.count() / n_trials) << " microseconds." << std::endl;
-    #endif
-
-    #if 0
-    std::cout << "\n[in dope_skeleton.cpp] generating root file including all channel fe id" << std::endl;
-    TFile* output_root_file = new TFile("all_items_after_dummy.root", "RECREATE");
-    TTree* tree = new TTree("channel_map_dope_tree", "Tree containing all channel map dope items after dummy entry addition");
-    uint32_t feid;
-    tree->Branch("feid", &feid, "feid/i");
-    uint32_t nentry = channel_map_dopeness.getNumberOfChannels();
-    uint32_t entry_count = 0;
-    for(const auto& item : channel_map_dopeness.fItemsFE) {
-        feid = item.id;
-        tree->Fill();
-        entry_count++;
-        if(entry_count % 10000 == 0) {
-            std::cout << "\tProgress: " << (entry_count * 100) / nentry << "% (" << entry_count << " entries filled)" << std::endl;
-        }
-    }
-    tree->Write();
-    output_root_file->Close();
-    #endif
     return 0;
 }
