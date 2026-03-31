@@ -257,7 +257,7 @@ namespace chmap {
 
         sizeSpace_DETKey = sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] * sizeSpace_plane[0] * sizeSpace_plane[1] * sizeSpace_segment * sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3];
         std::cout << "\tcalculated DET key space: " << sizeSpace_DETKey << std::endl;
-
+        return static_cast<double>(fItems.size()) / sizeSpace_DETKey;
     }
     // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
