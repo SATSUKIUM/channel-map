@@ -125,8 +125,8 @@ namespace chmap {
             ChannelMapSimpleItem item = makeSimpleItem(tokens);
             #if DEBUG_PRINT
             std::cout << "  made ChannelMapSimpleItem: " << std::endl;
-            std::cout << "    FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.id << std::dec << std::endl;
-            std::cout << "    DET name: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.det.name << std::dec
+            std::cout << "    FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.getRawID() << std::dec << std::endl;
+            std::cout << "    DET name: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.det.getRawID() << std::dec
                       << ", plane: 0x" << std::hex << std::setw(4) << std::setfill('0') << item.det.plane << std::dec
                       << ", segment: " << static_cast<uint32_t>(item.det.segment)
                       << ", channel: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.det.channel << std::dec
@@ -144,7 +144,7 @@ namespace chmap {
         #endif
         // sort fItems by fe.id
         std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe.id < right.fe.id; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
+            return left.fe < right.fe; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
         });
         #if DEBUG_PRINT
         std::cout << "finished sorting fItems" << std::endl;
@@ -153,21 +153,21 @@ namespace chmap {
         /*
         below: channel-map-simpleからの変更
         */
-        minId = fItems[0].fe.id;
-        sizeId = fItems.back().fe.id - fItems[0].fe.id + 1;
+        minId = fItems[0].fe.getRawID(); // fe.idの最小値を取得
+        sizeId = fItems.back().fe.getRawID() - fItems[0].fe.getRawID() + 1;
 
         std::cout << "[ChannelMapDirect::initialize] direct map initialize start" << std::endl;
         std::cout << "\tnumber of items: " << fItems.size() << std::endl;
         std::cout << "\tminId: " << std::hex << minId << std::dec << std::endl;
-        std::cout << "\tmaxId: " << std::hex << fItems.back().fe.id << std::dec << std::endl;
+        std::cout << "\tmaxId: " << std::hex << fItems.back().fe.getRawID() << std::dec << std::endl;
         std::cout << "\tsizeId: " << sizeId << " (*11 byte memory will be used)" << std::endl;
         double fillRatio = static_cast<double>(fItems.size()) / sizeId;
         std::cout << "\tFE ID range coverage: " << fillRatio * 100.0 << " %" << std::endl;
         std::vector<ChannelMapSimpleItem_DET> direct_det_items(sizeId); // fe.idをインデックスとするvectorを用意
         for(const auto& item : fItems){
-            uint32_t index = item.fe.id - minId;
+            uint32_t index = item.fe.getRawID() - minId;
             if(index >= sizeId) {
-                std::cerr << "fe.id out of range: " << item.fe.id << std::endl;
+                std::cerr << "fe.id out of range: " << item.fe.getRawID() << std::endl;
                 continue;
             }
             direct_det_items[index] = item.det; // fe.idをインデックスとしてdet情報を格納
@@ -451,7 +451,7 @@ namespace chmap {
         std::cout << "DET items count: " << fItemsDET.size() << std::endl;
         std::cout << "All DET Items:" << std::endl;
         for(auto& item : fItemsFE) {
-            ChannelMapSimpleItem_DET* det_item = getDETItem((item.id >> 16) & 0xFF, (item.id >> 8) & 0xFF, item.id & 0xFF);
+            ChannelMapSimpleItem_DET* det_item = getDETItem(item.ip3rd, item.ip4th, item.ch);
             if(det_item) {
                 det_item->decode();
             } else {
@@ -465,7 +465,7 @@ namespace chmap {
         for(const auto& item : fItemsFE) {
             auto range = std::equal_range(fItemsFE.begin(), fItemsFE.end(), item,
                 [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right) {
-                    return left.id < right.id;
+                    return left < right;
                 } // 狭義弱順序の不等号はfItemsFEをソートする順番に合わせる必要がある。
             );
             size_t count = std::distance(range.first, range.second);
@@ -489,7 +489,7 @@ namespace chmap {
         int duplicate_totalCount = 0;
         for(const auto& item : fItemsFE_copy){
             auto range = std::equal_range(fItemsFE_copy.begin(), fItemsFE_copy.end(), item, [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right){
-                return left.id < right.id;
+                return left < right;
             });
             size_t count = std::distance(range.first, range.second);
             if(count > 1){

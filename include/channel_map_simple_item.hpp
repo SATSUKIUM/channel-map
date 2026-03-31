@@ -16,6 +16,9 @@ namespace chmap {
         bool operator<(const ChannelMapSimpleItem_FE& right) const {
             return std::tie(this->ip3rd, this->ip4th, this->ch) < std::tie(right.ip3rd, right.ip4th, right.ch);
         }
+        uint32_t getRawID() const {
+            return (static_cast<uint32_t>(ip3rd) << 16) | (static_cast<uint32_t>(ip4th) << 8) | static_cast<uint32_t>(ch);
+        }
     };
     struct ChannelMapSimpleItem_DET {
         // zero initialized default constructor
@@ -30,6 +33,9 @@ namespace chmap {
         // define operator< for sorting and comparison
         bool operator<(const ChannelMapSimpleItem_DET& right) const {
             return std::tie(this->name, this->plane, this->segment, this->channel) < std::tie(right.name, right.plane, right.segment, right.channel);
+        }
+        uint32_t getRawID() const {
+            return (name << 24) | (plane << 8) | (segment << 0) | channel; // segmentは8bitなので、channelと重ならないように0ビットシフト
         }
     };
     struct ChannelMapSimpleItem {
