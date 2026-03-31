@@ -32,7 +32,7 @@
 #define OF_BENCHMARK 1
 #define CHECK_DUPLICATE_FE_ID 0
 #define PRINT_ALL_ITEMS_FE 0
-#define DUMMY 1
+#define DUMMY 0
 #define ntrials 1000000
 
 /*
