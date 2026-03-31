@@ -331,9 +331,16 @@ namespace chmap {
 
         retKey = 0;
         uint64_t cofactor;
+        // for(int i=0; i<11; ++i){
+        //     for(int j=0; j<11-i - 1; ++j){
+        //         cofactor += sizeSpace_part[i+1 + j];
+        //     }
+        //     retKey += (ret_part[i] - min_DET_part[i]) * cofactor;
+        // }
         for(int i=0; i<11; ++i){
-            for(int j=0; j<11-i - 1; ++j){
-                cofactor += sizeSpace_part[i+1 + j];
+            cofactor = 1;
+            for(int j=0; j<i; ++j){
+                cofactor *= sizeSpace_part[j];
             }
             retKey += (ret_part[i] - min_DET_part[i]) * cofactor;
         }
