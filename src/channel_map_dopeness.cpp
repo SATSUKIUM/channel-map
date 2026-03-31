@@ -35,9 +35,9 @@ namespace chmap {
         // destructor
     }// ChannelMapDopeness::~ChannelMapDopeness()
     
-    double ChannelMapDopeness::initialize(const std::string& file_path) {
+    double ChannelMapDopeness::initialize(const std::string& file_path, bool createInvMap) {
         /*
-        1. simplify_detector_names()で長いstringを4文字charにmapする
+        1. defineDictionary()で長いstringを4文字charにmapする
         2. csvを読んで、FE, DETの情報をそれぞれ持つChannelMapSimpleItemをstd::vector<ChannelMapSimpleItem> fItemsに入れる
         3. fItemsをFEのidの昇順でソートする(不要かも...)
         4. fItemsをスキャンして、dope vectorのサイズを決める
@@ -45,7 +45,7 @@ namespace chmap {
         */
         double fill_ratio;
 
-        simplify_detector_names(); // prepare detname_simplify_map
+        defineDictionary(); // prepare detname_simplify_map
         #if DEBUG_PRINT
         std::cout << "str simplify map32:" << std::endl;
         for(const auto& pair : mapdata_string_simplify_map32){
@@ -57,6 +57,110 @@ namespace chmap {
         }
         #endif
 
+        // fItems, fItemsFE, fItemsDETの初期化
+        readCSV(file_path); // fill fItems
+
+        #if DEBUG_PRINT
+        std::cout << "start sorting fItems by fe.id" << std::endl;
+        #endif
+        // sort fItems by fe.id
+        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
+            return left.fe < right.fe; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
+        });
+        #if DEBUG_PRINT
+        std::cout << "finished sorting fItems" << std::endl;
+        #endif
+
+
+        std::cout << "[ChannelMapDopeness::initialize] dope vector initialize start" << std::endl;
+        std::cout << "\tnumber of items: " << fItems.size() << std::endl;
+        // どこからどこまで空間を作るかスキャン
+        min_ip3rd = 0xFF; // used in getDopeKey_FE()
+        min_ip4th = 0xFF; // used in getDopeKey_FE()
+        min_ch = 0xFF;    // used in getDopeKey_FE()
+        max_ip3rd = 0;    // used in getDopeKey_FE()
+        max_ip4th = 0;    // used in getDopeKey_FE()
+        max_ch = 0;       // used in getDopeKey_FE()
+        uint8_t buf;
+        for(const auto& item : fItems){
+            auto fe = item.fe;
+            buf = (fe.ip3rd) & 0xFF; // ip3rd
+            if(buf < min_ip3rd) min_ip3rd = buf;
+            if(buf > max_ip3rd) max_ip3rd = buf;
+            buf = (fe.ip4th) & 0xFF; // ip4th
+            if(buf < min_ip4th) min_ip4th = buf;
+            if(buf > max_ip4th) max_ip4th = buf;
+            buf = fe.ch & 0xFF; // ch
+            if(buf < min_ch) min_ch = buf;
+            if(buf > max_ch) max_ch = buf;
+        }
+        #if 1
+        std::cout << "min_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << std::dec << std::endl;
+        std::cout << "max_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << std::dec << std::endl;
+        std::cout << "min_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << std::dec << std::endl;
+        std::cout << "max_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << std::dec << std::endl;
+        std::cout << "min_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << std::dec << std::endl;
+        std::cout << "max_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << std::dec << std::endl;
+        std::cout << "calculated FE key space: " << (max_ip3rd - min_ip3rd + 1) << " * " << (max_ip4th - min_ip4th + 1) << " * " << (max_ch - min_ch + 1) << std::endl;
+        #endif
+        sizeSpace_ip3rd = max_ip3rd - min_ip3rd + 1;
+        sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
+        sizeSpace_ch = max_ch - min_ch + 1;
+        sizeSpace_FEKey = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch;
+        getDopeKey_FE(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
+        getDopeKey_FE(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
+        // スキャン終わり
+
+
+        std::cout << "\tFE key space size: " << sizeSpace_FEKey << std::endl;
+        std::cout << "\t\tsizeSpace_ip3rd: 0x" << std::setw(2) << std::hex << sizeSpace_ip3rd << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << ")" << std::endl;
+        std::cout << "\t\tsizeSpace_ip4th: 0x" << std::setw(2) << std::hex << sizeSpace_ip4th << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << ")" << std::endl;
+        std::cout << "\t\tsizeSpace_ch: 0x" << std::setw(2) << std::hex << sizeSpace_ch << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << ")" << std::endl;
+
+        fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
+        std::cout << "\tFE ID range coverage: " << fill_ratio * 100.0 << " %" << std::endl;
+        std::vector<ChannelMapSimpleItem_DET> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
+        for(const auto& item : fItems){
+            uint32_t doped_index;
+            if(!getDopeKey_FE( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index )) {
+                std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
+                item.fe.decode();
+                continue;
+            }
+            else{
+                #if DEBUG_PRINT
+                std::cout << "calculated dope index: 0x" << std::hex << std::setw(8) << std::setfill('0') << doped_index << std::dec << " for FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.id << std::dec << std::endl;
+                #endif
+            }
+            fetodet_dopevector[doped_index] = item.det;
+        }
+        fItemsFEtoDET_dope = fetodet_dopevector;
+
+        if(createInvMap){
+            ChannelMapDopeness::initialize_InvMap();
+        }
+
+        std::vector<ChannelMapSimpleItem_FE> fe_items;
+        std::vector<ChannelMapSimpleItem_DET> det_items;
+        for(const auto& item : fItems){
+            fe_items.push_back(item.fe);
+            det_items.push_back(item.det);
+        }
+        fItemsFE = fe_items;
+        fItemsDET = det_items;
+        fe_items.clear();
+        det_items.clear();
+
+        std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
+        return fill_ratio;
+
+        #if DEBUG_PRINT
+        std::cout << "initialized ChannelMapDopeness with " << fItemsFE.size() << " items." << std::endl;
+        #endif
+
+    }// void ChannelMapDopeness::initialize
+
+    void ChannelMapDopeness::readCSV(const std::string& file_path) {
         std::ifstream file(file_path);
         if (!file.is_open()) {
             std::cerr << "file open fail : " << file_path << std::endl;
@@ -66,6 +170,7 @@ namespace chmap {
             std::cout << "file opened: " << file_path << std::endl;
             #endif
         }
+
 
         // read csv header
         std::string line;
@@ -136,124 +241,94 @@ namespace chmap {
         std::cout << "total loaded items: " << fItems.size() << std::endl;
         #endif
 
-        #if DEBUG_PRINT
-        std::cout << "start sorting fItems by fe.id" << std::endl;
-        #endif
-        // sort fItems by fe.id
-        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe.id < right.fe.id; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
-        });
-        #if DEBUG_PRINT
-        std::cout << "finished sorting fItems" << std::endl;
-        #endif
+    }
 
-        /* below include/channel_map_simple_item.hpp(2026.03.26)
-        namespace chmap {
-            struct ChannelMapSimpleItem_FE {
-                uint32_t id;
-                // id = (ip3rd << 16) | (ip4th << 8) | channel で初期化。それぞれ最大FF
-                ChannelMapSimpleItem_FE(uint8_t ip3rd, uint8_t ip4th, uint16_t ch) : id((uint32_t(ip3rd) << 16) | (uint32_t(ip4th) << 8) | uint32_t(ch) ) {}
-                public:
-                void decode();
-            };
-            struct ChannelMapSimpleItem_DET {
-                uint32_t name;// detector name in 4 char
-                uint16_t plane;// plane name in 2 char
-                uint8_t segment;// segment number in 8bit int (0-255)
-                uint32_t channel;// channel name in 4 char
-                public: 
-                void decode();
-            };
-            struct ChannelMapSimpleItem {
-                ChannelMapSimpleItem_FE fe;
-                ChannelMapSimpleItem_DET det;
-            };
-        }
-        */
+    double ChannelMapDopeness::initialize_InvMap() {
+        double fill_ratio;
 
-        std::cout << "[ChannelMapDopeness::initialize] dope vector initialize start" << std::endl;
-        std::cout << "\tnumber of items: " << fItems.size() << std::endl;
-        // どこからどこまで空間を作るかスキャン
-        min_ip3rd = 0xFF; // used in getDopeKey_FE()
-        min_ip4th = 0xFF; // used in getDopeKey_FE()
-        min_ch = 0xFF;    // used in getDopeKey_FE()
-        max_ip3rd = 0;    // used in getDopeKey_FE()
-        max_ip4th = 0;    // used in getDopeKey_FE()
-        max_ch = 0;       // used in getDopeKey_FE()
-        uint8_t buf;
+        // scan DET to FE side
+        min_name[0] = 0xFF;
+        min_name[1] = 0xFF;
+        min_name[2] = 0xFF;
+        min_name[3] = 0xFF;
+        max_name[0] = 0;
+        max_name[1] = 0;
+        max_name[2] = 0;
+        max_name[3] = 0;
+        min_plane[0] = 0xFF;
+        min_plane[1] = 0xFF;
+        max_plane[0] = 0;
+        max_plane[1] = 0;
+        min_segment = 0xFF;
+        max_segment = 0;
+        min_channel[0] = 0xFF;
+        min_channel[1] = 0xFF;
+        min_channel[2] = 0xFF;
+        min_channel[3] = 0xFF;
+        max_channel[0] = 0;
+        max_channel[1] = 0;
+        max_channel[2] = 0;
+        max_channel[3] = 0;
         for(const auto& item : fItems){
-            auto fe = item.fe;
-            buf = (fe.id>>16) & 0xFF; // ip3rd
-            if(buf < min_ip3rd) min_ip3rd = buf;
-            if(buf > max_ip3rd) max_ip3rd = buf;
-            buf = (fe.id>>8) & 0xFF; // ip4th
-            if(buf < min_ip4th) min_ip4th = buf;
-            if(buf > max_ip4th) max_ip4th = buf;
-            buf = fe.id & 0xFF; // ch
-            if(buf < min_ch) min_ch = buf;
-            if(buf > max_ch) max_ch = buf;
+            auto det = item.det;
+            for(int i=0; i<4; ++i){
+                uint8_t buf = (det.name >> (8*(3-i))) & 0xFF; // nameを左から8bitずつ分割
+                if(buf < min_name[i]) min_name[i] = buf;
+                if(buf > max_name[i]) max_name[i] = buf;
+            }
+            for(int i=0; i<2; ++i){
+                uint8_t buf = (det.plane >> (8*(1-i))) & 0xFF; // planeを左から8bitずつ分割
+                if(buf < min_plane[i]) min_plane[i] = buf;
+                if(buf > max_plane[i]) max_plane[i] = buf;
+            }
+            if(det.segment < min_segment) min_segment = det.segment;
+            if(det.segment > max_segment) max_segment = det.segment;
+            for(int i=0; i<4; ++i){
+                uint8_t buf = (det.channel >> (8*(3-i))) & 0xFF; // channelを左から8bitずつ分割
+                if(buf < min_channel[i]) min_channel[i] = buf;
+                if(buf > max_channel[i]) max_channel[i] = buf;
+            }
         }
         #if 1
-        std::cout << "min_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << std::dec << std::endl;
-        std::cout << "max_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << std::dec << std::endl;
-        std::cout << "min_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << std::dec << std::endl;
-        std::cout << "max_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << std::dec << std::endl;
-        std::cout << "min_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << std::dec << std::endl;
-        std::cout << "max_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << std::dec << std::endl;
-        std::cout << "calculated FE key space: " << (max_ip3rd - min_ip3rd + 1) << " * " << (max_ip4th - min_ip4th + 1) << " * " << (max_ch - min_ch + 1) << std::endl;
-        #endif
-        sizeSpace_ip3rd = max_ip3rd - min_ip3rd + 1;
-        sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
-        sizeSpace_ch = max_ch - min_ch + 1;
-        sizeSpace_key = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch;
-        getDopeKey_FE(min_ip3rd, min_ip4th, min_ch, minId); // minIdを参照で渡している。関数内で代入がある。
-        getDopeKey_FE(max_ip3rd, max_ip4th, max_ch, maxId); // maxIdを参照で渡している。関数内で代入がある。
-        // スキャン終わり
-
-
-        std::cout << "\tFE key space size: " << sizeSpace_key << std::endl;
-        std::cout << "\t\tsizeSpace_ip3rd: 0x" << std::setw(2) << std::hex << sizeSpace_ip3rd << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << ")" << std::endl;
-        std::cout << "\t\tsizeSpace_ip4th: 0x" << std::setw(2) << std::hex << sizeSpace_ip4th << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << ")" << std::endl;
-        std::cout << "\t\tsizeSpace_ch: 0x" << std::setw(2) << std::hex << sizeSpace_ch << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << ")" << std::endl;
-
-        fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_key;
-        std::cout << "\tFE ID range coverage: " << fill_ratio * 100.0 << " %" << std::endl;
-        std::vector<ChannelMapSimpleItem_DET> det_dopevector(sizeSpace_key); // fe.idをインデックスとするdope-vectorを用意
-        for(const auto& item : fItems){
-            uint32_t doped_index;
-            if(!getDopeKey_FE( (item.fe.id>>16) & 0xFF, (item.fe.id>>8) & 0xFF, item.fe.id & 0xFF, doped_index )) {
-                std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << item.fe.id << std::endl;
-                continue;
-            }
-            else{
-                #if DEBUG_PRINT
-                std::cout << "calculated dope index: 0x" << std::hex << std::setw(8) << std::setfill('0') << doped_index << std::dec << " for FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.id << std::dec << std::endl;
-                #endif
-            }
-            det_dopevector[doped_index] = item.det;
-        }
-        fItemsDET_dope = det_dopevector;
-
-        std::vector<ChannelMapSimpleItem_FE> fe_items;
-        std::vector<ChannelMapSimpleItem_DET> det_items;
-        for(const auto& item : fItems){
-            fe_items.push_back(item.fe);
-            det_items.push_back(item.det);
-        }
-        fItemsFE = fe_items;
-        fItemsDET = det_items;
-        fe_items.clear();
-        det_items.clear();
-
-        std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
-        return fill_ratio;
-
-        #if DEBUG_PRINT
-        std::cout << "initialized ChannelMapDopeness with " << fItemsFE.size() << " items." << std::endl;
+        std::cout << "min_name: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[3]) << std::dec << std::endl;
+        std::cout << "max_name: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[3]) << std::dec << std::endl;
+        std::cout << "min_plane: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_plane[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_plane[1]) << std::dec << std::endl;
+        std::cout << "max_plane: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_plane[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_plane[1]) << std::dec << std::endl;
+        std::cout << "min_segment: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_segment) << std::dec << std::endl;
+        std::cout << "max_segment: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_segment) << std::dec << std::endl;
+        std::cout << "min_channel: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[3]) << std::dec << std::endl;
+        std::cout << "max_channel: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[3]) << std::dec << std::endl;
         #endif
 
-    }// void ChannelMapDopeness::initialize
+        for(int i=0; i<4; ++i){
+            sizeSpace_name[i] = max_name[i] - min_name[i] + 1;
+            sizeSpace_part[i] = sizeSpace_name[i];
+            min_DET_part[i] = min_name[i];
+            max_DET_part[i] = max_name[i];
+        }
+        for(int i=0; i<2; ++i){
+            sizeSpace_plane[i] = max_plane[i] - min_plane[i] + 1;
+            sizeSpace_part[i+4] = sizeSpace_plane[i];
+            min_DET_part[i+4] = min_plane[i];
+            max_DET_part[i+4] = max_plane[i];
+        }
+        sizeSpace_segment = max_segment - min_segment + 1;
+        sizeSpace_part[6] = sizeSpace_segment;
+        min_DET_part[6] = min_segment;
+        max_DET_part[6] = max_segment;
+        for(int i=0; i<4; ++i){
+            sizeSpace_channel[i] = max_channel[i] - min_channel[i] + 1;
+            sizeSpace_part[i+7] = sizeSpace_channel[i];
+            min_DET_part[i+7] = min_channel[i];
+            max_DET_part[i+7] = max_channel[i];
+        }
+        std::cout << "\tDET name space size: " << sizeSpace_name[0] << " * " << sizeSpace_name[1] << " * " << sizeSpace_name[2] << " * " << sizeSpace_name[3] << std::endl;
+        std::cout << "\tDET plane space size: " << sizeSpace_plane[0] << " * " << sizeSpace_plane[1] << std::endl;
+        std::cout << "\tDET segment space size: " << sizeSpace_segment << std::endl;
+        std::cout << "\tDET channel space size: " << sizeSpace_channel[0] << " * " << sizeSpace_channel[1] << " * " << sizeSpace_channel[2] << " * " << sizeSpace_channel[3] << std::endl;
+        sizeSpace_DETKey = sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] * sizeSpace_plane[0] * sizeSpace_plane[1] * sizeSpace_segment * sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3];
 
+    }
     // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
         if(ip3rd < min_ip3rd || ip3rd > max_ip3rd || ip4th < min_ip4th || ip4th > max_ip4th || ch < min_ch || ch > max_ch) {
@@ -266,6 +341,56 @@ namespace chmap {
     uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
         return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
     } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
+
+    bool ChannelMapDopeness::getDopeKey_DET(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
+        uint8_t buf;
+        // check if the input values are within the defined space
+        for(int i=0; i<4; ++i){
+            buf = (name >> (8*(3-i))) & 0xFF; // nameを左から8bitずつ分割
+            if(buf < min_name[i] || buf > max_name[i]) {
+                return false;
+            }
+        }
+        for(int i=0; i<2; ++i){
+            buf = (plane >> (8*(1-i))) & 0xFF; // planeを左から8bitずつ分割
+            if(buf < min_plane[i] || buf > max_plane[i]) {
+                return false;
+            }
+        }
+        buf = segment & 0xFF;
+        if(buf < min_segment || buf > max_segment) {
+            return false;
+        }
+        for(int i=0; i<4; ++i){
+            buf = (channel >> (8*(3-i))) & 0xFF; // channelを左から8bitずつ分割
+            if(buf < min_channel[i] || buf > max_channel[i]) {
+                return false;
+            }
+        }
+
+        // calculate the dope key
+        uint8_t ret_part[11];
+        for(int i=0; i<4; ++i){
+            ret_part[i] = (name >> (8*(3-i))) & 0xFF; // nameを左から8bitずつ分割
+        }
+        for(int i=0; i<2; ++i){
+            ret_part[i+4] = (plane >> (8*(1-i))) & 0xFF; // planeを左から8bitずつ分割
+        }
+        ret_part[6] = segment & 0xFF;
+        for(int i=0; i<4; ++i){
+            ret_part[i+7] = (channel >> (8*(3-i))) & 0xFF; // channelを左から8bitずつ分割
+        }
+
+        retKey = 0;
+        uint32_t cofactor;
+        for(int i=0; i<11; ++i){
+            for(int j=0; j<11-i - 1; ++j){
+                cofactor += sizeSpace_part[i+1 + j];
+            }
+            retKey += (ret_part[i] - min_DET_part[i]) * cofactor;
+        }
+        return true;
+    }
 
     std::vector<std::string> ChannelMapDopeness::split_line(const std::string& line, char delimiter) {
         std::vector<std::string> tokens;
@@ -372,11 +497,8 @@ namespace chmap {
         } // for loop for tokens
 
         ChannelMapSimpleItem_FE fe_item(fe_ip_3rd_4th >> 8, fe_ip_3rd_4th & 0xFF, fe_channel);
-        ChannelMapSimpleItem_DET det_item;
-        det_item.name = det_name;
-        det_item.plane = det_plane;
-        det_item.segment = det_segment;
-        det_item.channel = det_channel;
+        ChannelMapSimpleItem_DET det_item(det_name, det_plane, det_segment, det_channel);
+
         #if DEBUG_PRINT
         std::cout << "constructed ChannelMapSimpleItem_FE: id=" << std::hex << fe_item.id << std::dec << std::endl;
         std::cout << "constructed ChannelMapSimpleItem_DET: name=" << std::hex << det_item.name << std::dec
@@ -387,119 +509,8 @@ namespace chmap {
         return ChannelMapSimpleItem{fe_item, det_item};
     }// ChannelMapSimpleItem ChannelMapDopeness::makeSimpleItem
 
-    void ChannelMapDopeness::simplify_detector_names(){
-        // 1st is original name, 2nd is simplified name(uint32_t)
-        // if simplified name is shrter than 4 char, fill with space char in the end
-        const std::vector<std::pair<std::string, std::string>> detnames = {
-            {"utof", "UTOF"},
-            {"dtof", "DTOF"},
-            {"ltof", "LTOF"},
-            {"t0", "T0  "},
-            {"t0ref", "T0RF"},
-            {"t1", "T1  "},
-            {"all_charged", "ALCH"},
-            {"bftref", "BFTR"},
-            {"bht", "BHT "},
-            {"bft", "BFT "},
-            {"sft", "SFT "},
-            {"bdc", "BDC "},
-            {"kldc", "KLDC"},
-            {"left", "LEFT"},
-            {"right", "RIGT"},
-            {"top", "TOP "},
-            {"bottom", "BOTM"},
-            {"upstream", "UPST"},
-            {"downstream", "DOST"},
-            {"nil", "NIL "}
-        };
-        // make simplified map
-        for(const auto& name_pair : detnames){
-            uint32_t simplified = four_char_to_uint32(
-                name_pair.second[0],
-                name_pair.second[1],
-                name_pair.second[2],
-                name_pair.second[3]
-            );
-            mapdata_string_simplify_map32[name_pair.first] = simplified;
-        }
-
-        // 1st is original name, 2nd is simplified name(uint16_t)
-        const std::vector<std::pair<std::string, std::string>> detplanes = {
-            {"X", "X "},
-            {"U", "U "},
-            {"V", "V "},
-            {"Xp", "XP"},
-            {"Up", "UP"},
-            {"Vp", "VP"},
-            {"nil", "NI"}            
-        };
-        // make simplified map
-        for(const auto& plane_pair : detplanes){
-            uint16_t simplified = two_char_to_uint16(
-                plane_pair.second[0],
-                plane_pair.second[1]
-            );
-            mapdata_string_simplify_map16[plane_pair.first] = simplified;
-        }
-    }// void ChannelMapDopeness::simplify_detector_names
-
-    uint32_t ChannelMapDopeness::four_char_to_uint32(char a, char b, char c, char d) {
-        // 4つのcharをuint32_tに変換するルールを規定
-        return (uint32_t(uint8_t(a)) << 24) | (uint32_t(uint8_t(b)) << 16) | (uint32_t(uint8_t(c)) << 8) | uint32_t(uint8_t(d));
-    }// uint32_t ChannelMapDopeness::four_char_to_uint32
-
-    uint16_t ChannelMapDopeness::two_char_to_uint16(char a, char b) {
-        // 2つのcharをuint16_tに変換するルールを規定
-        return (uint16_t(uint8_t(a)) << 8) | uint16_t(uint8_t(b));
-    }// uint16_t ChannelMapDopeness::two_char_to_uint16
-
-    bool ChannelMapDopeness::isTokenNumeric(const std::string& token) {
-        // return true if token is numeric
-        return !token.empty() && std::all_of(token.begin(), token.end(), ::isdigit);
-    } // bool ChannelMapDopeness::isTokenNumeric
-
-    uint32_t ChannelMapDopeness::parse_to32(const std::string& token) {
-        // assuming token is for example "0", "utof", "t0", "all_charged", "200", and parse to "00000000", "55544F46", "54302020", "414C4348", "000000C8" respectively
-        if (isTokenNumeric(token)) {
-            return static_cast<uint32_t>(std::stoul(token, nullptr, 0));
-        } else {
-            auto it = mapdata_string_simplify_map32.find(token);// check in detname_simplify_map
-            if(it == mapdata_string_simplify_map32.end()) {
-                std::cerr << "unknown token for uint32_t conversion: " << token << std::endl;
-                std::exit(1);
-            } else {
-                uint32_t simplified = it->second;
-                return simplified;
-            }
-        }
-    }// uint32_t ChannelMapDopeness::parse_to32
-
-    uint16_t ChannelMapDopeness::parse_to16(const std::string& token) {
-        if (isTokenNumeric(token)) {
-            return static_cast<uint16_t>(std::stoul(token, nullptr, 0));
-        } else {
-            auto it = mapdata_string_simplify_map16.find(token);// check in detname_simplify_map
-            if(it == mapdata_string_simplify_map16.end()) {
-                std::cerr << "unknown token for uint16_t conversion: " << token << std::endl;
-                std::exit(1);
-            } else {
-                uint16_t simplified = it->second;
-                return simplified;
-            }
-        }
-    }// uint16_t ChannelMapDopeness::parse_to16
-
-    uint8_t ChannelMapDopeness::parse_to8(const std::string& token) {
-        if (isTokenNumeric(token)) {
-            return static_cast<uint8_t>(std::stoul(token, nullptr, 0));
-        } else {
-            std::cerr << "unknown token for uint8_t conversion: " << token << std::endl;
-            std::exit(1);
-        }
-    }// uint8_t ChannelMapDopeness::parse_to8
-
     ChannelMapSimpleItem_DET ChannelMapDopeness::getDETItem(uint32_t doped_index){
-        return fItemsDET_dope[doped_index];
+        return fItemsFEtoDET_dope[doped_index];
     }// ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
 
     void ChannelMapDopeness::printAllItemsFE() {
@@ -514,7 +525,15 @@ namespace chmap {
         std::cout << "DET items count: " << fItemsDET.size() << std::endl;
         std::cout << "All DET Items:" << std::endl;
         for(auto& item : fItemsFE) {
-            ChannelMapSimpleItem_DET det_item = getDETItem(item.id);
+            uint32_t doped_index;
+            if(!getDopeKey_FE( (item.ip3rd) & 0xFF, (item.ip4th) & 0xFF, item.ch & 0xFF, doped_index)) {
+                std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
+                item.decode();
+                continue;
+            }else {
+
+            }
+            ChannelMapSimpleItem_DET det_item = getDETItem(doped_index);
             det_item.decode();
         }
     }// void ChannelMapDopeness::printAllItemsDET
@@ -524,7 +543,7 @@ namespace chmap {
         for(const auto& item : fItemsFE) {
             auto range = std::equal_range(fItemsFE.begin(), fItemsFE.end(), item,
                 [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right) {
-                    return left.id < right.id;
+                    return left < right;
                 } // 狭義弱順序の不等号はfItemsFEをソートする順番に合わせる必要がある。
             );
             size_t count = std::distance(range.first, range.second);
@@ -548,7 +567,7 @@ namespace chmap {
         int duplicate_totalCount = 0;
         for(const auto& item : fItemsFE_copy){
             auto range = std::equal_range(fItemsFE_copy.begin(), fItemsFE_copy.end(), item, [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right){
-                return left.id < right.id;
+                return left < right;
             });
             size_t count = std::distance(range.first, range.second);
             if(count > 1){
