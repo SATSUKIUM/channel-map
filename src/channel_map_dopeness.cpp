@@ -250,11 +250,13 @@ namespace chmap {
             min_DET_part[i+7] = min_channel[i];
             max_DET_part[i+7] = max_channel[i];
         }
-        std::cout << "\tDET name space size: " << sizeSpace_name[0] << " * " << sizeSpace_name[1] << " * " << sizeSpace_name[2] << " * " << sizeSpace_name[3] << std::endl;
-        std::cout << "\tDET plane space size: " << sizeSpace_plane[0] << " * " << sizeSpace_plane[1] << std::endl;
+        std::cout << "\tDET name space size: " << sizeSpace_name[0] << " * " << sizeSpace_name[1] << " * " << sizeSpace_name[2] << " * " << sizeSpace_name[3] << " = " << sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] << std::endl;
+        std::cout << "\tDET plane space size: " << sizeSpace_plane[0] << " * " << sizeSpace_plane[1] << " = " << sizeSpace_plane[0] * sizeSpace_plane[1] << std::endl;
         std::cout << "\tDET segment space size: " << sizeSpace_segment << std::endl;
-        std::cout << "\tDET channel space size: " << sizeSpace_channel[0] << " * " << sizeSpace_channel[1] << " * " << sizeSpace_channel[2] << " * " << sizeSpace_channel[3] << std::endl;
+        std::cout << "\tDET channel space size: " << sizeSpace_channel[0] << " * " << sizeSpace_channel[1] << " * " << sizeSpace_channel[2] << " * " << sizeSpace_channel[3] << " = " << sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3] << std::endl;
+
         sizeSpace_DETKey = sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] * sizeSpace_plane[0] * sizeSpace_plane[1] * sizeSpace_segment * sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3];
+        std::cout << "\tcalculated DET key space: " << sizeSpace_DETKey << std::endl;
 
     }
     // ↓このコードの本質
