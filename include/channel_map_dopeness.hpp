@@ -15,6 +15,7 @@
 namespace chmap {
 
     class ChannelMapDopeness {
+        #include "channel_map_dictionary.hpp"
         public:
             static ChannelMapDopeness& get_instance();
             ~ChannelMapDopeness();
