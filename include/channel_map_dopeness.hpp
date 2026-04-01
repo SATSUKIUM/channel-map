@@ -8,14 +8,14 @@
 #include <unordered_map> // only use in initialize, not in DAQ search
 
 #include "channel_map_simple_item.hpp"
+#include "channel_map_dictionary.hpp"
 
-#include "channel_tuple.hpp"
-#include "element.hpp"
+// #include "channel_tuple.hpp"
+// #include "element.hpp"
 
 namespace chmap {
 
     class ChannelMapDopeness {
-        #include "channel_map_dictionary.hpp"
         public:
             static ChannelMapDopeness& get_instance();
             ~ChannelMapDopeness();
