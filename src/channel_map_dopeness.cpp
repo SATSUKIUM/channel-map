@@ -172,8 +172,13 @@ namespace chmap {
     }// void ChannelMapDopeness::initialize
 
     void ChannelMapDopeness::initialize_InvMap() {
+        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
+            return left.det < right.det;
+        });
         // make binary search det to fe map
-
+        for(const auto& item : fItems){
+            fItemsDETtoFE_binary.push_back(item.fe);
+        }
     }
     // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
@@ -189,7 +194,20 @@ namespace chmap {
     } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
 
     bool ChannelMapDopeness::getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
-
+        auto det_item = ChannelMapSimpleItem_DET(name, plane, segment, channel);
+        auto it = std::lower_bound(
+            fItemsDET.begin(),
+            fItemsDET.end(),
+            det_item,
+            [](const ChannelMapSimpleItem_DET& left, const ChannelMapSimpleItem_DET& right){
+                return left < right;
+            });
+        if(it != fItemsDET.end() && *it == det_item){// lower_boundが見つかる かつ lower_boundが探しているものと同じである
+            retKey = std::distance(fItemsDET.begin(), it);
+            return true;
+        }else{
+            return false;
+        }
     } // bool ChannelMapDopeness::getRank_DETtoFE
 
 
