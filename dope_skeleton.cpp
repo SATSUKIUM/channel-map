@@ -109,12 +109,8 @@ int main(int argc, char* argv[]) {
         std::cout << "query: " << static_cast<uint32_t>(ip3rd) << ", " << static_cast<uint32_t>(ip4th) << ", " << static_cast<uint32_t>(ch) << std::endl;
 
         if(isCreateInvMap){
-            uint32_t det_name = det_item.name;
-            uint16_t det_plane = det_item.plane;
-            uint8_t det_segment = det_item.segment;
-            uint32_t det_channel = det_item.channel;
             uint32_t rank_inv;
-            if(!channel_map_dopeness.getRank_DETtoFE(det_name, det_plane, det_segment, det_channel, rank_inv)) {
+            if(!channel_map_dopeness.getRank_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.channel, rank_inv)) {
                 std::cout << "\tDET info is out of range in getRank_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
                 continue;
             }
