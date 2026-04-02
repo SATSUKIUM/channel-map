@@ -41,11 +41,13 @@ namespace chmap {
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment
-        private:
+
             bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
             uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
             bool getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
             uint32_t unchecked_getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
+        private:
+
             /*
             FE key: 0x00FFFFFF (ip3rd: 8bit, ip4th: 8bit, ch: 8bit)
             ip3rd, ip4th, chのそれぞれのとりうる値の範囲で張られるdope-vectorの準備
