@@ -76,7 +76,7 @@ namespace chmap {
         #endif
         // sort fItems by fe.id
         std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe < right.fe; // checkDuplicateFEIDsの狭義弱順序がこの不等号の向きに依存している
+            return left.fe < right.fe; // checkDuplicateFEIDsの狭義弱順序はこの不等号の向きに依存している
         });
         #if DEBUG_PRINT
         std::cout << "finished sorting fItems" << std::endl;
@@ -171,110 +171,9 @@ namespace chmap {
 
     }// void ChannelMapDopeness::initialize
 
-    double ChannelMapDopeness::initialize_InvMap() {
-        double fill_ratio;
+    void ChannelMapDopeness::initialize_InvMap() {
+        // make binary search det to fe map
 
-        // scan DET to FE side
-        min_name[0] = 0xFF;
-        min_name[1] = 0xFF;
-        min_name[2] = 0xFF;
-        min_name[3] = 0xFF;
-        max_name[0] = 0;
-        max_name[1] = 0;
-        max_name[2] = 0;
-        max_name[3] = 0;
-        min_plane[0] = 0xFF;
-        min_plane[1] = 0xFF;
-        max_plane[0] = 0;
-        max_plane[1] = 0;
-        min_segment = 0xFF;
-        max_segment = 0;
-        min_channel[0] = 0xFF;
-        min_channel[1] = 0xFF;
-        min_channel[2] = 0xFF;
-        min_channel[3] = 0xFF;
-        max_channel[0] = 0;
-        max_channel[1] = 0;
-        max_channel[2] = 0;
-        max_channel[3] = 0;
-        for(const auto& item : fItems){
-            auto det = item.det;
-            for(int i=0; i<4; ++i){
-                uint8_t buf = (det.name >> (8*(3-i))) & 0xFF; // nameを左から8bitずつ分割
-                if(buf < min_name[i]) min_name[i] = buf;
-                if(buf > max_name[i]) max_name[i] = buf;
-            }
-            for(int i=0; i<2; ++i){
-                uint8_t buf = (det.plane >> (8*(1-i))) & 0xFF; // planeを左から8bitずつ分割
-                if(buf < min_plane[i]) min_plane[i] = buf;
-                if(buf > max_plane[i]) max_plane[i] = buf;
-            }
-            if(det.segment < min_segment) min_segment = det.segment;
-            if(det.segment > max_segment) max_segment = det.segment;
-            for(int i=0; i<4; ++i){
-                uint8_t buf = (det.channel >> (8*(3-i))) & 0xFF; // channelを左から8bitずつ分割
-                if(buf < min_channel[i]) min_channel[i] = buf;
-                if(buf > max_channel[i]) max_channel[i] = buf;
-            }
-        }
-        #if 1
-        std::cout << "min_name: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name[3]) << std::dec << std::endl;
-        std::cout << "max_name: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name[3]) << std::dec << std::endl;
-        std::cout << "min_plane: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_plane[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_plane[1]) << std::dec << std::endl;
-        std::cout << "max_plane: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_plane[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_plane[1]) << std::dec << std::endl;
-        std::cout << "min_segment: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_segment) << std::dec << std::endl;
-        std::cout << "max_segment: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_segment) << std::dec << std::endl;
-        std::cout << "min_channel: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_channel[3]) << std::dec << std::endl;
-        std::cout << "max_channel: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[0]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[1]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[2]) << " " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_channel[3]) << std::dec << std::endl;
-        #endif
-
-        for(int i=0; i<4; ++i){
-            sizeSpace_name[i] = max_name[i] - min_name[i] + 1;
-            sizeSpace_part[i] = sizeSpace_name[i];
-            min_DET_part[i] = min_name[i];
-            max_DET_part[i] = max_name[i];
-        }
-        for(int i=0; i<2; ++i){
-            sizeSpace_plane[i] = max_plane[i] - min_plane[i] + 1;
-            sizeSpace_part[i+4] = sizeSpace_plane[i];
-            min_DET_part[i+4] = min_plane[i];
-            max_DET_part[i+4] = max_plane[i];
-        }
-        sizeSpace_segment = max_segment - min_segment + 1;
-        sizeSpace_part[6] = sizeSpace_segment;
-        min_DET_part[6] = min_segment;
-        max_DET_part[6] = max_segment;
-        for(int i=0; i<4; ++i){
-            sizeSpace_channel[i] = max_channel[i] - min_channel[i] + 1;
-            sizeSpace_part[i+7] = sizeSpace_channel[i];
-            min_DET_part[i+7] = min_channel[i];
-            max_DET_part[i+7] = max_channel[i];
-        }
-        std::cout << "\tDET name space size: " << sizeSpace_name[0] << " * " << sizeSpace_name[1] << " * " << sizeSpace_name[2] << " * " << sizeSpace_name[3] << " = " << sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] << std::endl;
-        std::cout << "\tDET plane space size: " << sizeSpace_plane[0] << " * " << sizeSpace_plane[1] << " = " << sizeSpace_plane[0] * sizeSpace_plane[1] << std::endl;
-        std::cout << "\tDET segment space size: " << sizeSpace_segment << std::endl;
-        std::cout << "\tDET channel space size: " << sizeSpace_channel[0] << " * " << sizeSpace_channel[1] << " * " << sizeSpace_channel[2] << " * " << sizeSpace_channel[3] << " = " << sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3] << std::endl;
-
-        sizeSpace_DETKey = sizeSpace_name[0] * sizeSpace_name[1] * sizeSpace_name[2] * sizeSpace_name[3] * sizeSpace_plane[0] * sizeSpace_plane[1] * sizeSpace_segment * sizeSpace_channel[0] * sizeSpace_channel[1] * sizeSpace_channel[2] * sizeSpace_channel[3];
-        std::cout << "\tcalculated DET key space: " << sizeSpace_DETKey << std::endl;
-        std::cout << "\tDET ID coverage: " << (static_cast<double>(fItems.size()) / sizeSpace_DETKey) * 100.0 << " %" << std::endl;
-
-        std::vector<ChannelMapSimpleItem_FE> dettofe_dopevector(sizeSpace_DETKey); // DETのname, plane, segment, channelをインデックスとするdope-vectorを用意
-        for(const auto& item : fItems){
-            uint64_t doped_index;
-            if(!getDopeKey_DETtoFE(item.det.name, item.det.plane, item.det.segment, item.det.channel, doped_index)) {
-                std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
-                item.det.decode();
-                continue;
-            }
-            #if 1
-            std::cout << "try: " << doped_index << std::endl;
-            #endif
-            dettofe_dopevector[doped_index] = item.fe;
-        }
-        fItemsDETtoFE_dope = dettofe_dopevector;
-
-        return static_cast<double>(fItems.size()) / sizeSpace_DETKey;
     }
     // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
@@ -289,71 +188,17 @@ namespace chmap {
         return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
     } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
 
-    // ↓このコードの本質
-    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint64_t& retKey) const {
-        uint8_t buf;
-        // check if the input values are within the defined space
-        for(int i=0; i<4; ++i){
-            buf = (name >> (8*(3-i))) & 0xFF; // nameを左から8bitずつ分割
-            if(buf < min_name[i] || buf > max_name[i]) {
-                return false;
-            }
-        }
-        for(int i=0; i<2; ++i){
-            buf = (plane >> (8*(1-i))) & 0xFF; // planeを左から8bitずつ分割
-            if(buf < min_plane[i] || buf > max_plane[i]) {
-                return false;
-            }
-        }
-        buf = segment & 0xFF;
-        if(buf < min_segment || buf > max_segment) {
-            return false;
-        }
-        for(int i=0; i<4; ++i){
-            buf = (channel >> (8*(3-i))) & 0xFF; // channelを左から8bitずつ分割
-            if(buf < min_channel[i] || buf > max_channel[i]) {
-                return false;
-            }
-        }
+    bool ChannelMapDopeness::getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
 
-        // calculate the dope key
-        uint8_t ret_part[11];
-        for(int i=0; i<4; ++i){
-            ret_part[i] = (name >> (8*(3-i))) & 0xFF; // nameを左から8bitずつ分割
-        }
-        for(int i=0; i<2; ++i){
-            ret_part[i+4] = (plane >> (8*(1-i))) & 0xFF; // planeを左から8bitずつ分割
-        }
-        ret_part[6] = segment & 0xFF;
-        for(int i=0; i<4; ++i){
-            ret_part[i+7] = (channel >> (8*(3-i))) & 0xFF; // channelを左から8bitずつ分割
-        }
-
-        retKey = 0;
-        uint64_t cofactor;
-        // for(int i=0; i<11; ++i){
-        //     for(int j=0; j<11-i - 1; ++j){
-        //         cofactor += sizeSpace_part[i+1 + j];
-        //     }
-        //     retKey += (ret_part[i] - min_DET_part[i]) * cofactor;
-        // }
-        for(int i=0; i<11; ++i){
-            cofactor = 1;
-            for(int j=0; j<i; ++j){
-                cofactor *= sizeSpace_part[j];
-            }
-            retKey += (ret_part[i] - min_DET_part[i]) * cofactor;
-        }
-        return true;
-    }
+    } // bool ChannelMapDopeness::getRank_DETtoFE
 
 
     ChannelMapSimpleItem_DET ChannelMapDopeness::getDETItem(uint32_t doped_index){
         return fItemsFEtoDET_dope[doped_index];
     } // ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
 
-    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint64_t doped_index){
-        return fItemsDETtoFE_dope[doped_index];
+    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint32_t rank){
+        return fItemsDETtoFE_binary[rank];
     } // ChannelMapSimpleItem_FE* ChannelMapDopeness::getFEIItem
 
     void ChannelMapDopeness::printAllItemsFE() {
