@@ -28,6 +28,7 @@
 #define CHECK_DUPLICATE_FE_ID 0
 #define PRINT_ALL_ITEMS_FE 0
 #define DUMMY 0
+#define isInvMap 0
 #define ntrials 1000000
 
 /*
@@ -37,11 +38,14 @@ int main(int argc, char* argv[]) {
     auto t0 = std::chrono::high_resolution_clock::now();
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = std::chrono::high_resolution_clock::now();
+    bool isCreateInvMap = false;
 
     std::string input_file_path = argv[1];
     chmap::ChannelMapDopeness& channel_map_dopeness = chmap::ChannelMapDopeness::get_instance();
     t0 = std::chrono::high_resolution_clock::now();
-    bool isCreateInvMap = true;;
+    #if isInvMap
+    isCreateInvMap = true;
+    #endif
     channel_map_dopeness.initialize(input_file_path, isCreateInvMap); // initialize()の第2引数は、逆引きマップを作るかどうか
     t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\n[in dope_skeleton.cpp] ChannelMapDopeness initialized in " << std::chrono::duration<double, std::micro>(t1 - t0).count() << " microseconds." << std::endl;
@@ -106,8 +110,11 @@ int main(int argc, char* argv[]) {
             continue;
         }
         chmap::ChannelMapSimpleItem_DET det_item = channel_map_dopeness.getDETItem(doped_index);
+        #if isInvMap
         std::cout << "query: " << static_cast<uint32_t>(ip3rd) << ", " << static_cast<uint32_t>(ip4th) << ", " << static_cast<uint32_t>(ch) << std::endl;
+        #endif
 
+        #if isInvMap
         if(isCreateInvMap){
             uint32_t rank_inv;
             if(!channel_map_dopeness.getRank_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.channel, rank_inv)) {
@@ -117,6 +124,7 @@ int main(int argc, char* argv[]) {
             chmap::ChannelMapSimpleItem_FE fe_item_inv = channel_map_dopeness.getFEIItem(rank_inv);
             fe_item_inv.decode();
         }
+        #endif
 
 
         t0 = std::chrono::high_resolution_clock::now();
@@ -132,14 +140,15 @@ int main(int argc, char* argv[]) {
             doped_index = channel_map_dopeness.unchecked_getDopeKey_FE(ip3rd, ip4th, ch);
             chmap::ChannelMapSimpleItem_DET det_item_inner = channel_map_dopeness.getDETItem(doped_index);
             #endif
-            det_name = det_item_inner.name;
-            det_plane = det_item_inner.plane;
-            det_segment = det_item_inner.segment;
-            det_channel = det_item_inner.channel;
+            // det_name = det_item_inner.name;
+            // det_plane = det_item_inner.plane;
+            // det_segment = det_item_inner.segment;
+            // det_channel = det_item_inner.channel;
         }
         t1 =  std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
             chmap::ChannelMapSimpleItem_DET det_item_inner;
+            if(1);
         }
         t2 =  std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
