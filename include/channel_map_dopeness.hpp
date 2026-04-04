@@ -62,6 +62,9 @@ namespace chmap {
                     std::vector<std::string> inverse_d; // index to string
                     std::vector<std::string> names_str;
             };
+            NameIndexDictionary detname_dictionary;
+            NameIndexDictionary plane_dictionary;
+            NameIndexDictionary readout_channel_dictionary;
         private:
 
             /*
