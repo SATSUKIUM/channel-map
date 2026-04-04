@@ -46,6 +46,19 @@ namespace chmap {
             uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
             bool getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
             uint32_t unchecked_getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
+
+            class NameIndexDictionary{
+                public:
+                    void newWord(const std::string& str); // just adding new word
+                    void sortWords(); // sort words
+                    void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
+                    bool getIndex(const std::string& str, uint8_t& idx) const;
+                    bool invIndex(uint8_t idx, std::string& str) const;
+                private:
+                    std::vector<std::pair<std::string, uint8_t>> forward_d; // string to index
+                    std::vector<std::string> inverse_d; // index to string
+                    std::vector<std::string> names_str;
+            };
         private:
 
             /*
@@ -87,8 +100,6 @@ namespace chmap {
             std::vector<ChannelMapSimpleItem_FE> fItemsDETtoFE_binary; // sorted by DET operator<, for binary search
 
             ChannelMapDopeness() = default; // private default constructor
-
-
     };// class ChannelMapDopeness
 }// namespace chmap
 
