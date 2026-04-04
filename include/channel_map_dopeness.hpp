@@ -103,9 +103,9 @@ namespace chmap {
             void scanNamesForDictionary(const std::string& file_path); // just collecting unique strings and assigning index is done in this function. The actual dictionary is built in NameIndexDictionary::buildDictionary() after sorting the collected unique strings.
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
-            ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens);
-            ChannelMapSimpleItem_FE makeFEItem(const std::vector<std::string>& tokens);
-            ChannelMapSimpleItem_DET makeDETItem(const std::vector<std::string>& tokens);
+            ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens); // to be {fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data}
+            ChannelMapSimpleItem_FE makeFEItem(const std::vector<std::string>& tokens); // to be {0xc0a80205, 0x01, 0x00} ipfull, ch, data
+            ChannelMapSimpleItem_DET makeDETItem(const std::vector<std::string>& tokens); // to be {0x01, 0x01, 0x01, 0x0001, 0x01} detname_idx, plane_idx, segment, channel_number, readout_channel_idx
             void defineDictionary();
             uint32_t four_char_to_uint32(char a, char b, char c, char d);
             uint16_t two_char_to_uint16(char a, char b);
