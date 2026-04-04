@@ -20,7 +20,7 @@ namespace chmap {
 
         std::cout << "\tsegment: " << static_cast<int>(segment) << std::endl;
 
-        std::cout << "\tchannel number: 0x" << std::hex << std::setw(8) << std::setfill('0') << channel_number << std::dec << std::endl;
+        std::cout << "\tchannel number: 0x" << std::hex << std::setw(16) << std::setfill('0') << channel_number << std::dec << std::endl;
 
         std::cout << "\treadout channel: 0x" << std::hex << std::setw(8) << std::setfill('0');
         std::cout << readout_channel << std::dec;
