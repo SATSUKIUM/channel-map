@@ -1,33 +1,32 @@
 #include "channel_map_simple_item.hpp"
+#include "channel_map_dopeness.hpp"
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 namespace chmap {
     void ChannelMapSimpleItem_DET::decode() const {
+        std::string detname_str, plane_str, readout_channel_str;
         // print member variables
-        std::cout << "\tDET name: 0x" << std::hex << std::setw(8) << std::setfill('0') << name;
-        std::cout
-            << " (in char: "
-            << static_cast<char>((name >> 24) & 0xFF)
-            << static_cast<char>((name >> 16) & 0xFF)
-            << static_cast<char>((name >> 8) & 0xFF)
-            << static_cast<char>(name & 0xFF)
-            << ")," << std::endl;
-        std::cout << "\tplane: 0x" << std::hex << std::setw(4) << std::setfill('0') << plane;
-        std::cout
-            << " (in char: "
-            << static_cast<char>((plane >> 8) & 0xFF)
-            << static_cast<char>(plane & 0xFF)
-            << ")," << std::endl;
+        std::cout << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << name;
+        if(ChannelMapDopeness::get_instance().detname_dictionary.invIndex(name, detname_str)){
+            std::cout << " (detname: " << detname_str << ")" << std::endl;
+        }
+
+        std::cout << "\tplane: 0x" << std::hex << std::setw(8) << std::setfill('0') << plane;
+        if(ChannelMapDopeness::get_instance().plane_dictionary.invIndex(plane, plane_str)){
+            std::cout << " (plane: " << plane_str << ")" << std::endl;
+        }
+
         std::cout << "\tsegment: " << static_cast<int>(segment) << std::endl;
-        std::cout << "\tchannel: 0x" << std::hex << std::setw(8) << std::setfill('0');
-        std::cout << channel
-            << " (in char: "
-            << static_cast<char>((channel >> 24) & 0xFF)
-            << static_cast<char>((channel >> 16) & 0xFF)
-            << static_cast<char>((channel >> 8) & 0xFF)
-            << static_cast<char>(channel & 0xFF)
-            << ")" << std::endl;
+
+        std::cout << "\tchannel number: 0x" << std::hex << std::setw(8) << std::setfill('0') << channel_number << std::dec << std::endl;
+
+        std::cout << "\treadout channel: 0x" << std::hex << std::setw(8) << std::setfill('0');
+        std::cout << readout_channel << std::dec;
+        if(ChannelMapDopeness::get_instance().readout_channel_dictionary.invIndex(readout_channel, readout_channel_str)){
+            std::cout << " (readout channel: " << readout_channel_str << ")";
+        }
     } // void ChannelMapSimpleItem_DET::decode()
 
     void ChannelMapSimpleItem_FE::decode() const {
