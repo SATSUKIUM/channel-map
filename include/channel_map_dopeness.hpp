@@ -31,8 +31,8 @@ namespace chmap {
 
             bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
             // uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
-            bool getDopeKey_DETtoFE(std::string name, std::string plane, uint8_t segment, uint16_t channel, uint32_t& retKey) const;
-            // uint32_t unchecked_getDopeKey_DETtoFE(std::string name, std::string plane, uint8_t segment, uint16_t channel) const;
+            bool getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane_idx, uint8_t segment, uint16_t channel_number, uint8_t readout_channel_idx, uint32_t& retKey) const;
+            // uint32_t unchecked_getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane_idx, uint8_t segment, uint16_t channel_number, uint8_t readout_channel_idx) const;
 
             ChannelMapSimpleItem_DET getDETItem(uint32_t doped_index);
             ChannelMapSimpleItem_FE getFEIItem(uint32_t doped_index);
@@ -104,6 +104,8 @@ namespace chmap {
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens);
+            ChannelMapSimpleItem_FE makeFEItem(const std::vector<std::string>& tokens);
+            ChannelMapSimpleItem_DET makeDETItem(const std::vector<std::string>& tokens);
             void defineDictionary();
             uint32_t four_char_to_uint32(char a, char b, char c, char d);
             uint16_t two_char_to_uint16(char a, char b);
