@@ -27,6 +27,52 @@ if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
     // usual process}
 */
 namespace chmap {  
+    void ChannelMapDopeness::scanNamesForDictionary(const std::string& file_path) {
+        // called after loading header, before loading mapdata lines
+        // data to be assumed "fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data"
+        int fe_magic = 3; // id, channel, data
+        int fe_count = 0;
+        int det_magic = 6; // id, plane, segment, channel, readout, data
+        int det_count = 0;
+        std::ifstream file_(file_path);
+
+        std::string line;
+        // skip csv header
+        if (std::getline(file_, line)) {}
+        // scan mapdata lines for collecting unique strings for dictionary
+        while(std::getline(file_, line)){
+            if(line.back() == '\r'){ // for Windwos-style line ending
+                #if DEBUG_PRINT
+                std::cout << "found Windows-style line ending" << std::endl;
+                #endif
+                line.pop_back();
+            }
+            auto tokens = split_line(line);
+            if (tokens.size() != m_header.size()) {
+                std::cerr << "bad file format : " << line << std::endl;
+                continue;
+            }
+
+            for(int i=0; i<tokens.size(); i++){
+                if(m_element_type[i] == "fe"){
+                    fe_count++;
+                }
+                else if(m_element_type[i] == "detector"){
+                    if(det_count == 0){
+                        detname_dictionary.newWord(tokens[i]);
+                    }else if(det_count == 1){
+                        plane_dictionary.newWord(tokens[i]);
+                    }else if(det_count == 4){
+                        readout_channel_dictionary.newWord(tokens[i]);
+                    }
+                    det_count++;
+                }
+            }
+            fe_count = 0;
+            det_count = 0;
+        } // while std::getline(file_, line) for scanning mapdata lines for collecting unique strings for dictionary
+    } // void ChannelMapDopeness::scanNamesForDictionary
+
     void ChannelMapDopeness::readCSV(const std::string& file_path) {
         std::ifstream file(file_path);
         if (!file.is_open()) {
@@ -37,12 +83,13 @@ namespace chmap {
             std::cout << "file opened: " << file_path << std::endl;
             #endif
         }
+        
 
 
         // read csv header
         std::string line;
         if (std::getline(file, line)) {
-            // load header, as template, assuming "fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.data"
+            // load header, as template, assuming "fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data"
             for(const auto& header_part : split_line(line)) {
                 if (std::count(m_header.begin(), m_header.end(), header_part) > 0) {
                     std::cerr << "found duplicate header column : " << header_part << std::endl;
@@ -73,6 +120,14 @@ namespace chmap {
         #if DEBUG_PRINT
         std::cout << "start loading mapdata lines" << std::endl;
         #endif
+
+        scanNamesForDictionary(file_path);
+        ChannelMapDopeness::get_instance().detname_dictionary.sortWords();
+        ChannelMapDopeness::get_instance().detname_dictionary.buildDictionary();
+        ChannelMapDopeness::get_instance().plane_dictionary.sortWords();
+        ChannelMapDopeness::get_instance().plane_dictionary.buildDictionary();
+        ChannelMapDopeness::get_instance().readout_channel_dictionary.sortWords();
+        ChannelMapDopeness::get_instance().readout_channel_dictionary.buildDictionary();
 
         // load mapdata lines
         while (std::getline(file, line)) {
@@ -125,17 +180,19 @@ namespace chmap {
         uint64_t fe_ip_full;
         uint16_t fe_ip_3rd_4th;
         uint8_t fe_channel;
-        uint32_t det_name;
-        uint16_t det_plane;
+        uint8_t det_name_idx;
+        uint8_t det_plane_idx;
         uint8_t det_segment;
-        uint32_t det_channel;
+        uint16_t det_channel_number;
+        uint8_t det_readout_channel_idx;
         std::string det_name_str;
         std::string det_plane_str;
-        std::string det_channel_str;
+        std::string det_channel_number_str;
+        std::string det_readout_channel_str;
 
         int fe_magic = 3; // id, channel, data
         int fe_count = 0;
-        int det_magic = 5; // id, plane, segment, channel, data
+        int det_magic = 6; // id, plane, segment, channel, readout, data
         int det_count = 0;
         #if DEBUG_PRINT
         std::cout << "making ChannelMapSimpleItem from tokens:" << std::endl;
@@ -168,54 +225,31 @@ namespace chmap {
                 // parse detector related tokens
                 if(det_count == 0) {
                     det_name_str = tokens[i];
-                    det_name = parse_to32(det_name_str);
-                    #if DEBUG_PRINT
-                    std::cout << "parsing token(det_count == 0): " << tokens[i] << " (string)" << std::endl;
-                    std::cout << "This token is interpreted as detector name in uint32_t format " << std::hex << det_name << std::dec << std::endl;
-                    std::cout << "This uint32_t corresponds to chars: "
-                              << char((det_name >> 24) & 0xFF)
-                              << char((det_name >> 16) & 0xFF)
-                              << char((det_name >> 8) & 0xFF)
-                              << char(det_name & 0xFF)
-                              << std::endl;
-                    #endif
+                    if(!detname_dictionary.getIndex(det_name_str, det_name_idx)){
+                        std::cerr << "failed to get index for detector name: " << det_name_str << std::endl;
+                    }
                 } else if(det_count == 1) {
                     det_plane_str = tokens[i];
-                    det_plane = parse_to16(det_plane_str);
-                    #if DEBUG_PRINT
-                    std::cout << "parsing token(det_count == 1): " << tokens[i] << " (string)" << std::endl;
-                    std::cout << "This token is interpreted as detector plane in uint16_t format " << std::hex << det_plane << std::dec << std::endl;
-                    std::cout << "This uint16_t corresponds to chars: "
-                              << char((det_plane >> 8) & 0xFF)
-                              << char(det_plane & 0xFF)
-                              << std::endl;
-                    #endif
+                    if(!plane_dictionary.getIndex(det_plane_str, det_plane_idx)){
+                        std::cerr << "failed to get index for detector plane: " << det_plane_str << std::endl;
+                    }
                 } else if(det_count == 2) {
                     det_segment = parse_to8(tokens[i]);
-                    #if DEBUG_PRINT
-                    std::cout << "parsing token(det_count == 2): " << tokens[i] << " (string)" << std::endl;
-                    std::cout << "This token is interpreted as detector segment in uint8_t format " << static_cast<uint32_t>(det_segment) << std::endl;
-                    #endif
                 } else if(det_count == 3) {
-                    det_channel_str = tokens[i];
-                    det_channel = parse_to32(det_channel_str);
-                    #if DEBUG_PRINT
-                    std::cout << "parsing token(det_count == 3): " << tokens[i] << " (string)" << std::endl;
-                    std::cout << "This token is interpreted as detector channel in uint32_t format " << std::hex << det_channel << std::dec << std::endl;
-                    std::cout << "This uint32_t corresponds to chars: "
-                              << char((det_channel >> 24) & 0xFF)
-                              << char((det_channel >> 16) & 0xFF)
-                              << char((det_channel >> 8) & 0xFF)
-                              << char(det_channel & 0xFF)
-                              << std::endl;
-                    #endif
+                    det_channel_number_str = tokens[i];
+                    det_channel_number = parse_to32(det_channel_number_str);
+                } else if(det_count == 4) {
+                    det_readout_channel_str = tokens[i];
+                    if(!readout_channel_dictionary.getIndex(det_readout_channel_str, det_readout_channel_idx)){
+                        std::cerr << "failed to get index for detector readout channel: " << det_readout_channel_str << std::endl;
+                    }
                 }
                 det_count++;
             } // if type is fe or detector
         } // for loop for tokens
 
         ChannelMapSimpleItem_FE fe_item(fe_ip_3rd_4th >> 8, fe_ip_3rd_4th & 0xFF, fe_channel);
-        ChannelMapSimpleItem_DET det_item(det_name, det_plane, det_segment, det_channel);
+        ChannelMapSimpleItem_DET det_item(det_name_idx, det_plane_idx, det_segment, det_channel_number, det_readout_channel_idx);
 
         #if DEBUG_PRINT
         std::cout << "constructed ChannelMapSimpleItem_FE: id=" << std::hex << fe_item.id << std::dec << std::endl;
