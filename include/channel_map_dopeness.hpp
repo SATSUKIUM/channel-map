@@ -29,12 +29,18 @@ namespace chmap {
             double initialize(const std::string& file_path, bool createInvMap = false); // 返り値はFEキーの充填率
             void initialize_InvMap();
 
+            bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
+            // uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
+            bool getDopeKey_DETtoFE(std::string name, std::string plane, uint8_t segment, uint16_t channel, uint32_t& retKey) const;
+            // uint32_t unchecked_getDopeKey_DETtoFE(std::string name, std::string plane, uint8_t segment, uint16_t channel) const;
+
             ChannelMapSimpleItem_DET getDETItem(uint32_t doped_index);
-            ChannelMapSimpleItem_FE getFEIItem(uint32_t rank);
+            ChannelMapSimpleItem_FE getFEIItem(uint32_t doped_index);
+
             void printAllItemsFE();
             void printAllItemsDET();
-            void checkDuplicateFEIDs();
-            void checkDuplicateFEIDs_summary();
+            // void checkDuplicateFEIDs();
+            // void checkDuplicateFEIDs_summary();
             void printFEid(ChannelMapSimpleItem_FE fe_item);
             void printDETinfo(ChannelMapSimpleItem_DET det_item);
             int getNumberOfChannels() const { return fItems.size(); }
@@ -42,10 +48,7 @@ namespace chmap {
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment
 
-            bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
-            uint32_t unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
-            bool getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const;
-            uint32_t unchecked_getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel) const;
+
 
             class NameIndexDictionary{
                 public:
@@ -79,8 +82,14 @@ namespace chmap {
             uint32_t maxFEId; // for out of range handling
 
             /*
-            DET key: 88bit = 32bit(name) + 16bit(plane) + 8bit(segment) + 32bit(channel)
+            DET key: 88bit = 8bit(name index) + 8bit(plane index) + 8bit(segment) + 16bit(channel number) + 8bit(readout channel index)
             */
+           uint8_t min_name_idx, min_plane_idx, min_segment, min_channel_number, min_readout_channel_idx;
+           uint8_t max_name_idx, max_plane_idx, max_segment, max_channel_number, max_readout_channel_idx;
+           uint16_t sizeSpace_name_idx, sizeSpace_plane_idx, sizeSpace_segment, sizeSpace_channel_number, sizeSpace_readout_channel_idx;
+           uint32_t sizeSpace_DETKey = 0; // sizeSpace_DETKey = sizeSpace_name_idx * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx
+           uint32_t minDETId; // for out of range handling
+           uint32_t maxDETId; // for out of range handling
             
             std::vector<ChannelMapSimpleItem> fItems;
             std::vector<ChannelMapSimpleItem_FE> fItemsFE; // 実在するfe item
@@ -91,6 +100,7 @@ namespace chmap {
 
             // for reading csv and initialization
             void readCSV(const std::string& file_path);
+            void scanNamesForDictionary(const std::string& file_path); // just collecting unique strings and assigning index is done in this function. The actual dictionary is built in NameIndexDictionary::buildDictionary() after sorting the collected unique strings.
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens);
