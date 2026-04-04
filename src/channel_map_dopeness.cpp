@@ -300,4 +300,41 @@ namespace chmap {
     void ChannelMapDopeness::printDETinfo(ChannelMapSimpleItem_DET det_item) {
         det_item.decode();
     }// void ChannelMapDopeness::printDETinfo
+
+    void ChannelMapDopeness::NameIndexDictionary::newWord(const std::string& str){
+        names_str.push_back(str);
+    } // void ChannelMapDopeness::NameIndexDictionary::newWord
+
+    void ChannelMapDopeness::NameIndexDictionary::sortWords(){
+        std::sort(names_str.begin(), names_str.end());
+    } // void ChannelMapDopeness::NameIndexDictionary::sortWords
+
+    void ChannelMapDopeness::NameIndexDictionary::buildDictionary(){
+        for(size_t i=0; i<names_str.size(); ++i){
+            forward_d.emplace_back(names_str[i], static_cast<uint8_t>(i));
+            inverse_d.push_back(names_str[i]);
+        }
+    } // void ChannelMapDopeness::NameIndexDictionary::buildDictionary
+
+    bool ChannelMapDopeness::NameIndexDictionary::invIndex(uint8_t idx, std::string& str) const {
+        if(idx < inverse_d.size()){
+            str = inverse_d[idx];
+            return true;
+        }else{
+            return false;
+        }
+    } // bool ChannelMapDopeness::NameIndexDictionary::invIndex
+
+    bool ChannelMapDopeness::NameIndexDictionary::getIndex(const std::string& str, uint8_t& idx) const {
+        auto it = std::find_if(forward_d.begin(), forward_d.end(), [&str](const std::pair<std::string, uint8_t>& pair){
+            return pair.first == str;
+        });
+        if(it != forward_d.end()){
+            idx = it->second;
+            return true;
+        }else{
+            return false;
+        }
+    } // bool ChannelMapDopeness::NameIndexDictionary::getIndex
+
 }// namespace chmap

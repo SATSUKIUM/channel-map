@@ -49,6 +49,9 @@ namespace chmap {
 
             class NameIndexDictionary{
                 public:
+                    /*
+                    execute newWord(), newWord(), ... in order, then execute sortWords() once, and finally execute buildDictionary() once.
+                    */
                     void newWord(const std::string& str); // just adding new word
                     void sortWords(); // sort words
                     void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
