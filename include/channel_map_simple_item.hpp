@@ -11,6 +11,7 @@
 // for std::tie
 #include <tuple>
 namespace chmap {
+    class ChannelMapDopeness; // forward declaration to avoid circular dependency
     struct ChannelMapSimpleItem_FE {
         // zero initialized default constructor
         uint8_t ip3rd{}; // 192.168.ip3rd.ip4th
