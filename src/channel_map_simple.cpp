@@ -283,10 +283,10 @@ namespace chmap {
 
         ChannelMapSimpleItem_FE fe_item(fe_ip_3rd_4th >> 8, fe_ip_3rd_4th & 0xFF, fe_channel);
         ChannelMapSimpleItem_DET det_item;
-        det_item.name = det_name;
-        det_item.plane = det_plane;
-        det_item.segment = det_segment;
-        det_item.channel = det_channel;
+        // det_item.name = det_name;
+        // det_item.plane = det_plane;
+        // det_item.segment = det_segment;
+        // det_item.channel = det_channel;
         #if DEBUG_PRINT
         std::cout << "constructed ChannelMapSimpleItem_FE: id=" << std::hex << fe_item.id << std::dec << std::endl;
         std::cout << "constructed ChannelMapSimpleItem_DET: name=" << std::hex << det_item.name << std::dec
@@ -446,11 +446,7 @@ namespace chmap {
         std::cout << "DET items count: " << fItemsDET.size() << std::endl;
         std::cout << "All DET Items:" << std::endl;
         for(const auto& item : fItemsDET) {
-            std::cout << "  DET name: " << std::hex << std::setw(8) << std::setfill('0') << item.name << std::dec
-                      << ", plane: " << std::hex << std::setw(8) << std::setfill('0') << item.plane << std::dec
-                      << ", segment: " << static_cast<uint32_t>(item.segment)
-                      << ", channel: " << std::hex << std::setw(8) << std::setfill('0') << item.channel << std::dec
-                      << std::endl;
+            item.decode();
         }
     }// void ChannelMapSimple::printAllItemsDET
 
@@ -533,7 +529,7 @@ namespace chmap {
             processedLines++;
         }
         #endif
-        #if 1 // char format output
+        #if 0 // char format output
         for(const auto& item : fItems) {
             outfile << "FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.getRawID() << std::dec;
             outfile << "  DET name: " << std::dec
