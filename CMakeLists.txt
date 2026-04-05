@@ -107,11 +107,11 @@ target_link_libraries(dope-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB
 
 ### install
 install(DIRECTORY include/ DESTINATION include)
-install(TARGETS skeleton-program DESTINATION bin)
-install(TARGETS fat-skeleton-program DESTINATION bin)
-install(TARGETS speedtest DESTINATION bin)
-install(TARGETS simple-skeleton-program DESTINATION bin)
-install(TARGETS direct-skeleton-program DESTINATION bin)
+# install(TARGETS skeleton-program DESTINATION bin)
+# install(TARGETS fat-skeleton-program DESTINATION bin)
+# install(TARGETS speedtest DESTINATION bin)
+# install(TARGETS simple-skeleton-program DESTINATION bin)
+# install(TARGETS direct-skeleton-program DESTINATION bin)
 install(TARGETS dope-skeleton-program DESTINATION bin)
 install(TARGETS channel-map EXPORT ChannelMapTargets DESTINATION lib)
 install(FILES ${HEADERS} DESTINATION include)
