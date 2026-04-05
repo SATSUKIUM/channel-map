@@ -65,6 +65,7 @@ namespace chmap {
                     bool getIndex(const std::string& str, uint8_t& idx) const; // from string to index
                     bool invIndex(uint8_t idx, std::string& str) const; // from index to which original string
                 private:
+                    // content of dictionary (accessed only through member func)
                     std::vector<std::pair<std::string, uint8_t>> forward_d; // string to index
                     std::vector<std::string> inverse_d; // index to string
                     std::vector<std::string> names_str;
