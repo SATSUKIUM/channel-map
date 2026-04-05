@@ -105,7 +105,7 @@ namespace chmap {
             if(buf < min_ch) min_ch = buf;
             if(buf > max_ch) max_ch = buf;
         }
-        #if 1
+        #if 0
         std::cout << "min_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << std::dec << std::endl;
         std::cout << "max_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << std::dec << std::endl;
         std::cout << "min_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << std::dec << std::endl;
@@ -123,7 +123,7 @@ namespace chmap {
         // スキャン終わり
 
 
-        std::cout << "\tFE key space size: " << sizeSpace_FEKey << std::endl;
+        std::cout << "\tFE key space size: " << sizeSpace_FEKey << " = " << sizeSpace_ip3rd << " * " << sizeSpace_ip4th << " * " << sizeSpace_ch << std::endl;
         std::cout << "\t\tsizeSpace_ip3rd: 0x" << std::setw(2) << std::hex << sizeSpace_ip3rd << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << ")" << std::endl;
         std::cout << "\t\tsizeSpace_ip4th: 0x" << std::setw(2) << std::hex << sizeSpace_ip4th << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << ")" << std::endl;
         std::cout << "\t\tsizeSpace_ch: 0x" << std::setw(2) << std::hex << sizeSpace_ch << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << ")" << std::endl;
@@ -212,12 +212,14 @@ namespace chmap {
         getDopeKey_DETtoFE(min_name_idx, min_plane_idx, min_segment, min_channel_number, min_readout_channel_idx, minDETId); // minDETIdを参照で渡している。関数内で代入がある。
         getDopeKey_DETtoFE(max_name_idx, max_plane_idx, max_segment, max_channel_number, max_readout_channel_idx, maxDETId); // maxDETIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
-        std::cout << "\tDET key space size: " << sizeSpace_DETKey << std::endl;
+        std::cout << "\tDET key space size: " << sizeSpace_DETKey << " = " << sizeSpace_name_idx << " * " << sizeSpace_plane_idx << " * " << sizeSpace_segment << " * " << sizeSpace_channel_number << " * " << sizeSpace_readout_channel_idx << std::endl;
         std::cout << "\t\tname_idx: 0x" << std::setw(2) << std::hex << sizeSpace_name_idx << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name_idx) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name_idx) << ")" << std::endl;
         std::cout << "\t\tplane_idx: 0x" << std::setw(2) << std::hex << sizeSpace_plane_idx << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_plane_idx) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_plane_idx) << ")" << std::endl;
         std::cout << "\t\tsegment: 0x" << std::setw(2) << std::hex << sizeSpace_segment << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_segment) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_segment) << ")" << std::endl;
         std::cout << "\t\tchannel_number: 0x" << std::setw(4) << std::hex << sizeSpace_channel_number << " (" << std::setw(4) << std::setfill('0') << static_cast<uint32_t>(min_channel_number) << " ~ " << std::setw(4) << std::setfill('0') << static_cast<uint32_t>(max_channel_number) << ")" << std::endl;
         std::cout << "\t\treadout_channel_idx: 0x" << std::setw(2) << std::hex << sizeSpace_readout_channel_idx << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_readout_channel_idx) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_readout_channel_idx) << ")" << std::endl;
+
+        std::cout << "\tDET ID range coverage: " << (static_cast<double>(fItems.size()) / sizeSpace_DETKey) * 100.0 << " %" << std::endl;
 
 
         // 逆引き用のdope vectorの初期化
