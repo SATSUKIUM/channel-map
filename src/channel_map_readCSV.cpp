@@ -13,6 +13,7 @@
 #include <variant>
 
 #define DEBUG_PRINT 0
+#define DEBUG_READCSV 1
 #define DEBUG_PRINT_DUMMY_MAKER 0
 #define DEBUG_PRINT_GETFERANK 0
 
@@ -101,7 +102,7 @@ namespace chmap {
                     m_unique_types.push_back(type);
                 }
             }
-            #if DEBUG_PRINT
+            #if DEBUG_READCSV
             std::cout << "header loaded: ";
             for(const auto& h : m_header){
                 std::cout << h << ", ";
