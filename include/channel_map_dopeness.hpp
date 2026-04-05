@@ -109,6 +109,7 @@ namespace chmap {
             // for reading csv and initialization
             void readCSV(const std::string& file_path);
             void scanNamesForDictionary(const std::string& file_path); // just collecting unique strings and assigning index is done in this function. The actual dictionary is built in NameIndexDictionary::buildDictionary() after sorting the collected unique strings.
+            void removeBOM(std::string& str); // remove BOM if exists in the beginning of the string
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens); // to be {fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data}
