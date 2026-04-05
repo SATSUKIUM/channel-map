@@ -13,7 +13,7 @@
 #include <variant>
 
 #define DEBUG_PRINT 0
-#define DEBUG_READCSV 1
+#define DEBUG_READCSV 0
 #define DEBUG_PRINT_DUMMY_MAKER 0
 #define DEBUG_PRINT_GETFERANK 0
 
@@ -147,6 +147,13 @@ namespace chmap {
                 std::cerr << "bad file format : " << line << std::endl;
                 continue;
             }
+            #if DEBUG_READCSV && 0
+            std::cout << "split tokens: ";
+            for(int i=0; i<tokens.size(); ++i){
+                std::cout << tokens[i] << ", ";
+            }
+            std::cout << std::endl;
+            #endif
             ChannelMapSimpleItem item = makeSimpleItem(tokens);
             #if DEBUG_PRINT
             std::cout << "  made ChannelMapSimpleItem: " << std::endl;
@@ -166,12 +173,26 @@ namespace chmap {
 
     } // void ChannelMapDopeness::readCSV
 
-        std::vector<std::string> ChannelMapDopeness::split_line(const std::string& line, char delimiter) {
+    void ChannelMapDopeness::removeBOM(std::string& str) {
+        const std::string UTF8_BOM = "\xEF\xBB\xBF";
+        if (str.compare(0, UTF8_BOM.size(), UTF8_BOM) == 0) {
+            str.erase(0, UTF8_BOM.size());
+            #if DEBUG_PRINT
+            std::cout << "BOM removed from string: " << str << std::endl;
+            #endif
+        }
+    } // void ChannelMapDopeness::removeBOM
+
+    std::vector<std::string> ChannelMapDopeness::split_line(const std::string& line, char delimiter) {
         std::vector<std::string> tokens;
         std::string token;
         std::istringstream iss(line);
         while (std::getline(iss, token, delimiter)) {
+            removeBOM(token);
             tokens.push_back(token);
+            #if DEBUG_READCSV && 0
+            std::cout << "  split token: " << token << std::endl;
+            #endif
         }
         return tokens;
     }// std::vector<std::string> ChannelMapDopeness::split_line
@@ -205,6 +226,7 @@ namespace chmap {
         uint8_t det_readout_channel_idx;
         std::string det_name_str;
         std::string det_plane_str;
+        std::string det_segment_str;
         std::string det_channel_number_str;
         std::string det_readout_channel_str;
 
@@ -249,6 +271,7 @@ namespace chmap {
         uint8_t det_readout_channel_idx;
         std::string det_name_str;
         std::string det_plane_str;
+        std::string det_segment_str;
         std::string det_channel_number_str;
         std::string det_readout_channel_str;
 
@@ -265,15 +288,32 @@ namespace chmap {
         std::vector<std::string> fe_tokens;
         std::vector<std::string> det_tokens;
         for(int i=0; i<len_tokens; ++i) {
+            #if DEBUG_READCSV
+            std::cout << "processing token[" << i << "]: " << tokens[i] << " with element type: \"" << m_element_type[i] << "\"" << std::endl;
+            #endif
             if(m_element_type[i] == "fe"){
                 fe_tokens.push_back(tokens[i]);
+                #if DEBUG_READCSV
+                std::cout << "  identified FE token tokens[" << i << "]: " << tokens[i] << std::endl;
+                #endif
                 fe_count++;
             }
             else if(m_element_type[i] == "detector"){
                 det_tokens.push_back(tokens[i]);
+                #if DEBUG_READCSV
+                std::cout << "  identified DET token tokens[" << i << "]: " << tokens[i] << std::endl;
+                #endif
                 det_count++;
             }
         }
+        #if DEBUG_READCSV
+        for(int i=0; i<fe_tokens.size(); ++i){
+            std::cout << "  FE token: " << fe_tokens[i] << std::endl;
+        }
+        for(int i=0; i<det_tokens.size(); ++i){
+            std::cout << "  DET token: " << det_tokens[i] << std::endl;
+        }
+        #endif
         ChannelMapSimpleItem_FE fe_item = makeFEItem(fe_tokens);
         ChannelMapSimpleItem_DET det_item = makeDETItem(det_tokens);
 
