@@ -27,6 +27,7 @@ namespace chmap {
         if(ChannelMapDopeness::get_instance().readout_channel_dictionary.invIndex(readout_channel, readout_channel_str)){
             std::cout << " (readout channel: " << readout_channel_str << ")";
         }
+        std::cout << std::endl;
     } // void ChannelMapSimpleItem_DET::decode()
 
     void ChannelMapSimpleItem_FE::decode() const {
