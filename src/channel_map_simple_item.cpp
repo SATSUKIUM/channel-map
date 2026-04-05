@@ -10,20 +10,21 @@ namespace chmap {
         // print member variables
         std::cout << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << name;
         if(ChannelMapDopeness::get_instance().detname_dictionary.invIndex(name, detname_str)){
-            std::cout << " (detname: " << detname_str << ")" << std::endl;
+            std::cout << " (detname: " << detname_str << ")";
         }
+        std::cout << std::endl;
 
         std::cout << "\tplane: 0x" << std::hex << std::setw(8) << std::setfill('0') << plane;
         if(ChannelMapDopeness::get_instance().plane_dictionary.invIndex(plane, plane_str)){
-            std::cout << " (plane: " << plane_str << ")" << std::endl;
+            std::cout << " (plane: " << plane_str << ")";
         }
+        std::cout << std::endl;
 
         std::cout << "\tsegment: " << static_cast<int>(segment) << std::endl;
 
         std::cout << "\tchannel number: 0x" << std::hex << std::setw(16) << std::setfill('0') << channel_number << std::dec << std::endl;
 
-        std::cout << "\treadout channel: 0x" << std::hex << std::setw(8) << std::setfill('0');
-        std::cout << readout_channel << std::dec;
+        std::cout << "\treadout channel: 0x" << std::hex << std::setw(8) << std::setfill('0') << readout_channel << std::dec;
         if(ChannelMapDopeness::get_instance().readout_channel_dictionary.invIndex(readout_channel, readout_channel_str)){
             std::cout << " (readout channel: " << readout_channel_str << ")";
         }
