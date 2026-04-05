@@ -72,29 +72,29 @@ write_basic_package_version_file(
 configure_file(ChannelMapConfig.cmake.in ChannelMapConfig.cmake @ONLY)
 
 ### skeleton
-add_executable(skeleton-program skeleton.cpp)
-target_compile_features(skeleton-program PRIVATE cxx_std_17)
-target_link_libraries(skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
+# add_executable(skeleton-program skeleton.cpp)
+# target_compile_features(skeleton-program PRIVATE cxx_std_17)
+# target_link_libraries(skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
 
 ### fat skeleton
-add_executable(fat-skeleton-program fat_skeleton.cpp)
-target_compile_features(fat-skeleton-program PRIVATE cxx_std_17)
-target_link_libraries(fat-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
+# add_executable(fat-skeleton-program fat_skeleton.cpp)
+# target_compile_features(fat-skeleton-program PRIVATE cxx_std_17)
+# target_link_libraries(fat-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
 
 ### speedtest
-add_executable(speedtest speedtest.cpp)
-target_compile_features(speedtest PRIVATE cxx_std_17)
-target_link_libraries(speedtest PRIVATE channel-map ${FILESYSTEM_LIB})
+# add_executable(speedtest speedtest.cpp)
+# target_compile_features(speedtest PRIVATE cxx_std_17)
+# target_link_libraries(speedtest PRIVATE channel-map ${FILESYSTEM_LIB})
 
 ### simple skeleton
-add_executable(simple-skeleton-program simple_skeleton.cpp)
-target_compile_features(simple-skeleton-program PRIVATE cxx_std_17)
-target_link_libraries(simple-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB} ROOT::Core ROOT::Hist ROOT::Tree)
+# add_executable(simple-skeleton-program simple_skeleton.cpp)
+# target_compile_features(simple-skeleton-program PRIVATE cxx_std_17)
+# target_link_libraries(simple-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB} ROOT::Core ROOT::Hist ROOT::Tree)
 
 ### direct skeleton
-add_executable(direct-skeleton-program direct_skeleton.cpp)
-target_compile_features(direct-skeleton-program PRIVATE cxx_std_17)
-target_link_libraries(direct-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
+# add_executable(direct-skeleton-program direct_skeleton.cpp)
+# target_compile_features(direct-skeleton-program PRIVATE cxx_std_17)
+# target_link_libraries(direct-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
 
 ### dope skeleton
 add_executable(dope-skeleton-program dope_skeleton.cpp)
