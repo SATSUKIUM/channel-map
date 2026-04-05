@@ -38,7 +38,10 @@ int main(int argc, char* argv[]) {
     auto t0 = std::chrono::high_resolution_clock::now();
     auto t1 = std::chrono::high_resolution_clock::now();
     auto t2 = std::chrono::high_resolution_clock::now();
-    bool isCreateInvMap = false;
+    auto t0_inv = std::chrono::high_resolution_clock::now();
+    auto t1_inv = std::chrono::high_resolution_clock::now();
+    auto t2_inv = std::chrono::high_resolution_clock::now();
+    bool isCreateInvMap = true;
 
     std::string input_file_path = argv[1];
     chmap::ChannelMapDopeness& channel_map_dopeness = chmap::ChannelMapDopeness::get_instance();
@@ -69,6 +72,8 @@ int main(int argc, char* argv[]) {
     uint8_t test_ch_kldc2 = 96;
 
     uint32_t det_name;
+    uint8_t det_name_idx_inner, det_plane_idx_inner, det_segment_inner, det_readout_channel_idx_inner;
+    uint16_t det_channel_number_inner;
     uint16_t det_plane;
     uint8_t det_segment;
     uint32_t det_channel;
@@ -127,6 +132,16 @@ int main(int argc, char* argv[]) {
         #endif
 
 
+        if(!channel_map_dopeness.getDopeKey_FEtoDET(ip3rd, ip4th, ch, doped_index)) {
+            std::cout << "\tFE id is out of range in getDopeKey_FEtoDET(). This should not happen since it was checked before." << std::endl;
+            continue;
+        }
+        chmap::ChannelMapSimpleItem_DET det_item_outer = channel_map_dopeness.getDETItem(doped_index);
+        if(!channel_map_dopeness.getDopeKey_DETtoFE(det_item_outer, doped_index)){
+            std::cout << "\tDET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
+            continue;
+        }
+        chmap::ChannelMapSimpleItem_FE fe_item_outer = channel_map_dopeness.getFEIItem(doped_index);
         t0 = std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
             #if 1
@@ -151,14 +166,38 @@ int main(int argc, char* argv[]) {
             if(1);
         }
         t2 =  std::chrono::high_resolution_clock::now();
+        
+        det_name_idx_inner = det_item.name;
+        det_plane_idx_inner = det_item.plane;
+        det_segment_inner = det_item.segment;
+        det_channel_number_inner = det_item.channel_number;
+        det_readout_channel_idx_inner = det_item.readout_channel;
+        t0_inv = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<ntrials; i++) {
+            if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name_idx_inner, det_plane_idx_inner, det_segment_inner, det_channel_number_inner, det_readout_channel_idx_inner, doped_index)){
+                std::cout << "\tDET info is out of range in getDopeKey_DETtoFE() in the loop. This should not happen since it was checked before the loop." << std::endl;
+                break;
+            }
+            chmap::ChannelMapSimpleItem_FE fe_item_inner = channel_map_dopeness.getFEIItem(doped_index);
+        }
+        t1_inv = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<ntrials; i++) {
+            chmap::ChannelMapSimpleItem_FE fe_item_inner;
+            if(1);
+        }
+        t2_inv = std::chrono::high_resolution_clock::now();
+
         std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop = (t1 - t0) - (t2 - t1);
-        std::cout << "\tDET name: " << std::hex << std::setw(8) << std::setfill('0') << det_name << std::dec
-                    << ", plane: " << std::hex << std::setw(8) << std::setfill('0') << det_plane << std::dec
-                    << ", segment: " << static_cast<uint8_t>(det_segment)
-                    << ", channel: " << std::hex << std::setw(8) << std::setfill('0') << det_channel << std::dec
-                    << std::endl;
+        det_item_outer.decode();
+        fe_item_outer.decode();
+        
+        
         std::cout << "\n[in dope_skeleton.cpp] Performed " << ntrials << " trials of getDETItem from " << channel_map_dopeness.getNumberOfChannels() << " channels in " << elapsed_subtract_overhead_loop.count() << " microseconds." << " Overhead: " << std::chrono::duration<double , std::micro>(t2 - t1).count() << " microseconds." << std::endl;
         std::cout << "\tAverage time per getDETItem call: " << (elapsed_subtract_overhead_loop.count() / ntrials) << " microseconds." << std::endl;
+
+        std::chrono::duration<double, std::micro> elapsed_subtract_overhead_loop_inv = (t1_inv - t0_inv) - (t2_inv - t1_inv);
+        std::cout << "\n[in dope_skeleton.cpp] Performed " << ntrials << " trials of getFEIItem from " << channel_map_dopeness.getNumberOfChannels() << " channels in " << elapsed_subtract_overhead_loop_inv.count() << " microseconds." << " Overhead: " << std::chrono::duration<double , std::micro>(t2_inv - t1_inv).count() << " microseconds." << std::endl;
+        std::cout << "\tAverage time per getFEIItem call: " << (elapsed_subtract_overhead_loop_inv.count() / ntrials) << " microseconds." << std::endl;
 
         #if OF_BENCHMARK // file out
         of_benchmark << channel_map_dopeness.getNumberOfChannels() << " " << ntrials << " " << std::chrono::duration<double , std::micro>(t1 - t0).count() << " " << std::chrono::duration<double , std::micro>(t2 - t1).count() << " " <<  description <<  std::endl;
