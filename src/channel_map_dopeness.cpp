@@ -172,14 +172,68 @@ namespace chmap {
     }// void ChannelMapDopeness::initialize
 
     void ChannelMapDopeness::initialize_InvMap() {
-        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.det < right.det;
-        });
-        // make binary search det to fe map
+        // dope indexの最大値、最小値をスキャン
+        min_name_idx = 0xFF;
+        min_plane_idx = 0xFF;
+        min_segment = 0xFF;
+        min_channel_number = 0xFFFF;
+        min_readout_channel_idx = 0xFF;
+        max_name_idx = 0;
+        max_plane_idx = 0;
+        max_segment = 0;
+        max_channel_number = 0;
+        max_readout_channel_idx = 0;
+        uint8_t buf8;
+        uint16_t buf16;
         for(const auto& item : fItems){
-            fItemsDETtoFE_binary.push_back(item.fe);
+            auto det = item.det;
+            buf8 = det.name & 0xFF; // name_idx
+            if(buf8 < min_name_idx) min_name_idx = buf8;
+            if(buf8 > max_name_idx) max_name_idx = buf8;
+            buf8 = det.plane & 0xFF; // plane_idx
+            if(buf8 < min_plane_idx) min_plane_idx = buf8;
+            if(buf8 > max_plane_idx) max_plane_idx = buf8;
+            buf8 = det.segment & 0xFF; // segment
+            if(buf8 < min_segment) min_segment = buf8;
+            if(buf8 > max_segment) max_segment = buf8;
+            buf16 = det.channel_number & 0xFFFF; // channel_number
+            if(buf16 < min_channel_number) min_channel_number = buf16;
+            if(buf16 > max_channel_number) max_channel_number = buf16;
+            buf8 = det.readout_channel & 0xFF; // readout_channel_idx
+            if(buf8 < min_readout_channel_idx) min_readout_channel_idx = buf8;
+            if(buf8 > max_readout_channel_idx) max_readout_channel_idx = buf8;
         }
-    }
+        sizeSpace_name_idx = max_name_idx - min_name_idx + 1;
+        sizeSpace_plane_idx = max_plane_idx - min_plane_idx + 1;
+        sizeSpace_segment = max_segment - min_segment + 1;
+        sizeSpace_channel_number = max_channel_number - min_channel_number + 1;
+        sizeSpace_readout_channel_idx = max_readout_channel_idx - min_readout_channel_idx + 1;
+        sizeSpace_DETKey = sizeSpace_name_idx * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx;
+        getDopeKey_DETtoFE(min_name_idx, min_plane_idx, min_segment, min_channel_number, min_readout_channel_idx, minDETId); // minDETIdを参照で渡している。関数内で代入がある。
+        getDopeKey_DETtoFE(max_name_idx, max_plane_idx, max_segment, max_channel_number, max_readout_channel_idx, maxDETId); // maxDETIdを参照で渡している。関数内で代入がある。
+        // スキャン終わり
+        std::cout << "\tDET key space size: " << sizeSpace_DETKey << std::endl;
+        std::cout << "\t\tname_idx: 0x" << std::setw(2) << std::hex << sizeSpace_name_idx << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_name_idx) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_name_idx) << ")" << std::endl;
+        std::cout << "\t\tplane_idx: 0x" << std::setw(2) << std::hex << sizeSpace_plane_idx << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_plane_idx) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_plane_idx) << ")" << std::endl;
+        std::cout << "\t\tsegment: 0x" << std::setw(2) << std::hex << sizeSpace_segment << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_segment) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_segment) << ")" << std::endl;
+        std::cout << "\t\tchannel_number: 0x" << std::setw(4) << std::hex << sizeSpace_channel_number << " (" << std::setw(4) << std::setfill('0') << static_cast<uint32_t>(min_channel_number) << " ~ " << std::setw(4) << std::setfill('0') << static_cast<uint32_t>(max_channel_number) << ")" << std::endl;
+        std::cout << "\t\treadout_channel_idx: 0x" << std::setw(2) << std::hex << sizeSpace_readout_channel_idx << " (" << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_readout_channel_idx) << " ~ " << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_readout_channel_idx) << ")" << std::endl;
+
+
+        // 逆引き用のdope vectorの初期化
+        std::vector<ChannelMapSimpleItem_FE> dettofe_dopevector(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
+        for(const auto& item : fItems){
+            uint32_t doped_index;
+            if(!getDopeKey_DETtoFE( (item.det.name) & 0xFF, (item.det.plane) & 0xFF, (item.det.segment) & 0xFF, (item.det.channel_number) & 0xFFFF, (item.det.readout_channel) & 0xFF, doped_index )) {
+                std::cerr << "これは設計上ありえないことですが、逆引きのdope keyが範囲外です: " << std::endl;
+                item.det.decode();
+                continue;
+            }
+            dettofe_dopevector[doped_index] = item.fe;
+        }
+        fItemsDETtoFE_dope = dettofe_dopevector;
+    } // void ChannelMapDopeness::initialize_InvMap()
+
     // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
         if(ip3rd < min_ip3rd || ip3rd > max_ip3rd || ip4th < min_ip4th || ip4th > max_ip4th || ch < min_ch || ch > max_ch) {
@@ -189,34 +243,25 @@ namespace chmap {
         return true;
     } // std::optional<uint32_t> ChannelMapDopeness::getDopeKey_FE
 
-    uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
-        return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
-    } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
+    // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
+    //     return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
+    // } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
 
-    bool ChannelMapDopeness::getRank_DETtoFE(uint32_t name, uint16_t plane, uint8_t segment, uint32_t channel, uint32_t& retKey) const {
-        auto det_item = ChannelMapSimpleItem_DET(name, plane, segment, channel);
-        auto it = std::lower_bound(
-            fItemsDET.begin(),
-            fItemsDET.end(),
-            det_item,
-            [](const ChannelMapSimpleItem_DET& left, const ChannelMapSimpleItem_DET& right){
-                return left < right;
-            });
-        if(it != fItemsDET.end() && *it == det_item){// lower_boundが見つかる かつ lower_boundが探しているものと同じである
-            retKey = std::distance(fItemsDET.begin(), it);
-            return true;
-        }else{
+    // ↓このコードの本質
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane, uint8_t segment, uint16_t channelnumber_idx, uint8_t readout_channel_idx, uint32_t& retKey) const {
+        if(name_idx < min_name_idx || name_idx > max_name_idx || plane < min_plane_idx || plane > max_plane_idx || segment < min_segment || segment > max_segment || channelnumber_idx < min_channel_number || channelnumber_idx > max_channel_number || readout_channel_idx < min_readout_channel_idx || readout_channel_idx > max_readout_channel_idx) {
             return false;
         }
-    } // bool ChannelMapDopeness::getRank_DETtoFE
-
+        retKey = ( (name_idx - min_name_idx) * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx ) + ( (plane - min_plane_idx) * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx ) + ( (segment - min_segment) * sizeSpace_channel_number * sizeSpace_readout_channel_idx ) + ( (channelnumber_idx - min_channel_number) * sizeSpace_readout_channel_idx ) + (readout_channel_idx - min_readout_channel_idx);
+        return true;
+    } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
     ChannelMapSimpleItem_DET ChannelMapDopeness::getDETItem(uint32_t doped_index){
         return fItemsFEtoDET_dope[doped_index];
     } // ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
 
-    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint32_t rank){
-        return fItemsDETtoFE_binary[rank];
+    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+        return fItemsDETtoFE_dope[doped_index];
     } // ChannelMapSimpleItem_FE* ChannelMapDopeness::getFEIItem
 
     void ChannelMapDopeness::printAllItemsFE() {
@@ -244,54 +289,54 @@ namespace chmap {
         }
     }// void ChannelMapDopeness::printAllItemsDET
 
-    void ChannelMapDopeness::checkDuplicateFEIDs() {
-        std::cout << "\n[src/channel_map_dopeness.cpp/checkDuplicateFEIDs] checking sequence of FE IDs for duplicates..." << std::endl;
-        for(const auto& item : fItemsFE) {
-            auto range = std::equal_range(fItemsFE.begin(), fItemsFE.end(), item,
-                [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right) {
-                    return left < right;
-                } // 狭義弱順序の不等号はfItemsFEをソートする順番に合わせる必要がある。
-            );
-            size_t count = std::distance(range.first, range.second);
-            if(count > 1) {
-                std::cout << "\tduplicate FEID found(count: " << count << "): ";
-                printFEid(item);
-                for(auto it = range.first; it != range.second; ++it){
-                    ChannelMapSimpleItem_DET det_item = fItemsDET[std::distance(fItemsFE.begin(), it)];
-                    std::cout << "\t\tcorresponding DET info: ";
-                    printDETinfo(det_item);
-                }
-            }
-        }
-        std::cout << "[src/channel_map_dopeness.cpp/checkDuplicateFEIDs] check completed." << std::endl;
-    }// void ChannelMapDopeness::checkDuplicateFEIDs
+    // void ChannelMapDopeness::checkDuplicateFEIDs() {
+    //     std::cout << "\n[src/channel_map_dopeness.cpp/checkDuplicateFEIDs] checking sequence of FE IDs for duplicates..." << std::endl;
+    //     for(const auto& item : fItemsFE) {
+    //         auto range = std::equal_range(fItemsFE.begin(), fItemsFE.end(), item,
+    //             [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right) {
+    //                 return left < right;
+    //             } // 狭義弱順序の不等号はfItemsFEをソートする順番に合わせる必要がある。
+    //         );
+    //         size_t count = std::distance(range.first, range.second);
+    //         if(count > 1) {
+    //             std::cout << "\tduplicate FEID found(count: " << count << "): ";
+    //             printFEid(item);
+    //             for(auto it = range.first; it != range.second; ++it){
+    //                 ChannelMapSimpleItem_DET det_item = fItemsDET[std::distance(fItemsFE.begin(), it)];
+    //                 std::cout << "\t\tcorresponding DET info: ";
+    //                 printDETinfo(det_item);
+    //             }
+    //         }
+    //     }
+    //     std::cout << "[src/channel_map_dopeness.cpp/checkDuplicateFEIDs] check completed." << std::endl;
+    // }// void ChannelMapDopeness::checkDuplicateFEIDs
 
-    void ChannelMapDopeness::checkDuplicateFEIDs_summary(){
-        std::cout << "\n[src/channel_map_dopeness.cpp/checkDuplicateFEIDs_summary] checking sequence of FE IDs for duplicates..." << std::endl;
-        auto fItemsFE_copy = fItemsFE;
-        int duplicate_numGroups = 0;
-        int duplicate_totalCount = 0;
-        for(const auto& item : fItemsFE_copy){
-            auto range = std::equal_range(fItemsFE_copy.begin(), fItemsFE_copy.end(), item, [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right){
-                return left < right;
-            });
-            size_t count = std::distance(range.first, range.second);
-            if(count > 1){
-                duplicate_numGroups++;
-                for(size_t i=0; i<count-1; ++i){// もとのものを残し、重複しているものを削除する
-                    auto it = range.first + 1;
-                    if(it != range.second){
-                        fItemsFE_copy.erase(it);
-                        duplicate_totalCount++;
-                    }
-                    else{
-                        std::cout << "自分の考えが正しければ、このメッセージは出力されてはならない。" << std::endl;
-                    }
-                }
-            }
-        }
-        std::cout << "[src/channel_map_dopeness.cpp/checkDuplicateFEIDs_summary] summary: " << duplicate_numGroups << " groups of duplicates found, total count of duplicates: " << duplicate_totalCount << "(means extra items found)"<< std::endl;
-    }// void ChannelMapDopeness::checkDuplicateFEIDs_summary
+    // void ChannelMapDopeness::checkDuplicateFEIDs_summary(){
+    //     std::cout << "\n[src/channel_map_dopeness.cpp/checkDuplicateFEIDs_summary] checking sequence of FE IDs for duplicates..." << std::endl;
+    //     auto fItemsFE_copy = fItemsFE;
+    //     int duplicate_numGroups = 0;
+    //     int duplicate_totalCount = 0;
+    //     for(const auto& item : fItemsFE_copy){
+    //         auto range = std::equal_range(fItemsFE_copy.begin(), fItemsFE_copy.end(), item, [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right){
+    //             return left < right;
+    //         });
+    //         size_t count = std::distance(range.first, range.second);
+    //         if(count > 1){
+    //             duplicate_numGroups++;
+    //             for(size_t i=0; i<count-1; ++i){// もとのものを残し、重複しているものを削除する
+    //                 auto it = range.first + 1;
+    //                 if(it != range.second){
+    //                     fItemsFE_copy.erase(it);
+    //                     duplicate_totalCount++;
+    //                 }
+    //                 else{
+    //                     std::cout << "自分の考えが正しければ、このメッセージは出力されてはならない。" << std::endl;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     std::cout << "[src/channel_map_dopeness.cpp/checkDuplicateFEIDs_summary] summary: " << duplicate_numGroups << " groups of duplicates found, total count of duplicates: " << duplicate_totalCount << "(means extra items found)"<< std::endl;
+    // }// void ChannelMapDopeness::checkDuplicateFEIDs_summary
 
     void ChannelMapDopeness::printFEid(ChannelMapSimpleItem_FE fe_item) {
         fe_item.decode();
@@ -302,7 +347,10 @@ namespace chmap {
     }// void ChannelMapDopeness::printDETinfo
 
     void ChannelMapDopeness::NameIndexDictionary::newWord(const std::string& str){
-        names_str.push_back(str);
+        if(std::find(names_str.begin(), names_str.end(), str) == names_str.end()){
+            // str is not in names_str, so add it
+            names_str.push_back(str);
+        }
     } // void ChannelMapDopeness::NameIndexDictionary::newWord
 
     void ChannelMapDopeness::NameIndexDictionary::sortWords(){

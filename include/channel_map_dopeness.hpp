@@ -119,7 +119,7 @@ namespace chmap {
             uint8_t parse_to8(const std::string& token);
 
             std::vector<ChannelMapSimpleItem_DET> fItemsFEtoDET_dope; // dope vectorの実体
-            std::vector<ChannelMapSimpleItem_FE> fItemsDETtoFE_binary; // sorted by DET operator<, for binary search
+            std::vector<ChannelMapSimpleItem_FE> fItemsDETtoFE_dope; // 逆引き用のdope vectorの実体
 
             ChannelMapDopeness() = default; // private default constructor
     };// class ChannelMapDopeness
