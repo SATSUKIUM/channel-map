@@ -62,8 +62,8 @@ namespace chmap {
                     void newWord(const std::string& str); // just adding new word
                     void sortWords(); // sort words
                     void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
-                    bool getIndex(const std::string& str, uint8_t& idx) const;
-                    bool invIndex(uint8_t idx, std::string& str) const;
+                    bool getIndex(const std::string& str, uint8_t& idx) const; // from string to index
+                    bool invIndex(uint8_t idx, std::string& str) const; // from index to which original string
                 private:
                     std::vector<std::pair<std::string, uint8_t>> forward_d; // string to index
                     std::vector<std::string> inverse_d; // index to string
