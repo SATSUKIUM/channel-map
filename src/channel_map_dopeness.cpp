@@ -47,13 +47,6 @@ namespace chmap {
     }// ChannelMapDopeness::~ChannelMapDopeness()
     
     double ChannelMapDopeness::initialize(const std::string& file_path, bool createInvMap) {
-        /*
-        1. defineDictionary()で長いstringを4文字charにmapする
-        2. csvを読んで、FE, DETの情報をそれぞれ持つChannelMapSimpleItemをstd::vector<ChannelMapSimpleItem> fItemsに入れる
-        3. fItemsをFEのidの昇順でソートする(不要かも...)
-        4. fItemsをスキャンして、dope vectorのサイズを決める
-
-        */
         double fill_ratio;
 
         defineDictionary(); // prepare detname_simplify_map
@@ -68,7 +61,6 @@ namespace chmap {
         }
         #endif
 
-        // fItems, fItemsFE, fItemsDETの初期化
         readCSV(file_path); // fill fItems
 
         #if DEBUG_PRINT
@@ -76,12 +68,11 @@ namespace chmap {
         #endif
         // sort fItems by fe.id
         std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
-            return left.fe < right.fe; // checkDuplicateFEIDsの狭義弱順序はこの不等号の向きに依存している
+            return left.fe < right.fe;
         });
         #if DEBUG_PRINT
         std::cout << "finished sorting fItems" << std::endl;
         #endif
-
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize start" << std::endl;
         std::cout << "\tnumber of items: " << fItems.size() << std::endl;
@@ -105,15 +96,6 @@ namespace chmap {
             if(buf < min_ch) min_ch = buf;
             if(buf > max_ch) max_ch = buf;
         }
-        #if 0
-        std::cout << "min_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip3rd) << std::dec << std::endl;
-        std::cout << "max_ip3rd: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip3rd) << std::dec << std::endl;
-        std::cout << "min_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ip4th) << std::dec << std::endl;
-        std::cout << "max_ip4th: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ip4th) << std::dec << std::endl;
-        std::cout << "min_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(min_ch) << std::dec << std::endl;
-        std::cout << "max_ch: 0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(max_ch) << std::dec << std::endl;
-        std::cout << "calculated FE key space: " << (max_ip3rd - min_ip3rd + 1) << " * " << (max_ip4th - min_ip4th + 1) << " * " << (max_ch - min_ch + 1) << std::endl;
-        #endif
         sizeSpace_ip3rd = max_ip3rd - min_ip3rd + 1;
         sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
         sizeSpace_ch = max_ch - min_ch + 1;
@@ -121,6 +103,7 @@ namespace chmap {
         getDopeKey_FEtoDET(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
         getDopeKey_FEtoDET(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
+        printFEtoDETscan();
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
         std::vector<ChannelMapSimpleItem_DET> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
@@ -157,11 +140,6 @@ namespace chmap {
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
         return fill_ratio;
-
-        #if DEBUG_PRINT
-        std::cout << "initialized ChannelMapDopeness with " << fItemsFE.size() << " items." << std::endl;
-        #endif
-
     }// void ChannelMapDopeness::initialize
 
     void ChannelMapDopeness::initialize_InvMap() {
@@ -205,7 +183,7 @@ namespace chmap {
         getDopeKey_DETtoFE(min_name_idx, min_plane_idx, min_segment, min_channel_number, min_readout_channel_idx, minDETId); // minDETIdを参照で渡している。関数内で代入がある。
         getDopeKey_DETtoFE(max_name_idx, max_plane_idx, max_segment, max_channel_number, max_readout_channel_idx, maxDETId); // maxDETIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
-
+        printDETtoFEscan();
 
         // 逆引き用のdope vectorの初期化
         std::vector<ChannelMapSimpleItem_FE> dettofe_dopevector(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
@@ -228,11 +206,7 @@ namespace chmap {
         }
         retKey = ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
         return true;
-    } // std::optional<uint32_t> ChannelMapDopeness::getDopeKey_FE
-
-    // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
-    //     return ( (ip3rd - min_ip3rd) * sizeSpace_ip4th * sizeSpace_ch ) + ( (ip4th - min_ip4th) * sizeSpace_ch ) + (ch - min_ch);
-    // } // uint32_t ChannelMapDopeness::unchecked_getDopeKey_FE
+    } // std::optional<uint32_t> ChannelMapDopeness::getDopeKey_FEtoDET
 
     // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane, uint8_t segment, uint16_t channelnumber_idx, uint8_t readout_channel_idx, uint32_t& retKey) const {
@@ -275,55 +249,6 @@ namespace chmap {
             det_item.decode();
         }
     }// void ChannelMapDopeness::printAllItemsDET
-
-    // void ChannelMapDopeness::checkDuplicateFEIDs() {
-    //     std::cout << "\n[src/channel_map_dopeness.cpp/checkDuplicateFEIDs] checking sequence of FE IDs for duplicates..." << std::endl;
-    //     for(const auto& item : fItemsFE) {
-    //         auto range = std::equal_range(fItemsFE.begin(), fItemsFE.end(), item,
-    //             [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right) {
-    //                 return left < right;
-    //             } // 狭義弱順序の不等号はfItemsFEをソートする順番に合わせる必要がある。
-    //         );
-    //         size_t count = std::distance(range.first, range.second);
-    //         if(count > 1) {
-    //             std::cout << "\tduplicate FEID found(count: " << count << "): ";
-    //             printFEid(item);
-    //             for(auto it = range.first; it != range.second; ++it){
-    //                 ChannelMapSimpleItem_DET det_item = fItemsDET[std::distance(fItemsFE.begin(), it)];
-    //                 std::cout << "\t\tcorresponding DET info: ";
-    //                 printDETinfo(det_item);
-    //             }
-    //         }
-    //     }
-    //     std::cout << "[src/channel_map_dopeness.cpp/checkDuplicateFEIDs] check completed." << std::endl;
-    // }// void ChannelMapDopeness::checkDuplicateFEIDs
-
-    // void ChannelMapDopeness::checkDuplicateFEIDs_summary(){
-    //     std::cout << "\n[src/channel_map_dopeness.cpp/checkDuplicateFEIDs_summary] checking sequence of FE IDs for duplicates..." << std::endl;
-    //     auto fItemsFE_copy = fItemsFE;
-    //     int duplicate_numGroups = 0;
-    //     int duplicate_totalCount = 0;
-    //     for(const auto& item : fItemsFE_copy){
-    //         auto range = std::equal_range(fItemsFE_copy.begin(), fItemsFE_copy.end(), item, [](const ChannelMapSimpleItem_FE& left, const ChannelMapSimpleItem_FE& right){
-    //             return left < right;
-    //         });
-    //         size_t count = std::distance(range.first, range.second);
-    //         if(count > 1){
-    //             duplicate_numGroups++;
-    //             for(size_t i=0; i<count-1; ++i){// もとのものを残し、重複しているものを削除する
-    //                 auto it = range.first + 1;
-    //                 if(it != range.second){
-    //                     fItemsFE_copy.erase(it);
-    //                     duplicate_totalCount++;
-    //                 }
-    //                 else{
-    //                     std::cout << "自分の考えが正しければ、このメッセージは出力されてはならない。" << std::endl;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     std::cout << "[src/channel_map_dopeness.cpp/checkDuplicateFEIDs_summary] summary: " << duplicate_numGroups << " groups of duplicates found, total count of duplicates: " << duplicate_totalCount << "(means extra items found)"<< std::endl;
-    // }// void ChannelMapDopeness::checkDuplicateFEIDs_summary
 
     void ChannelMapDopeness::printFEid(ChannelMapSimpleItem_FE fe_item) {
         fe_item.decode();
