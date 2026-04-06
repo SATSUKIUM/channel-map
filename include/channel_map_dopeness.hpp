@@ -122,6 +122,9 @@ namespace chmap {
             uint32_t parse_to32(const std::string& token);
             uint16_t parse_to16(const std::string& token);
             uint8_t parse_to8(const std::string& token);
+            // for print
+            void printFEtoDETscan();
+            void printDETtoFEscan();
 
             std::vector<ChannelMapSimpleItem_DET> fItemsFEtoDET_dope; // dope vectorの実体
             std::vector<ChannelMapSimpleItem_FE> fItemsDETtoFE_dope; // 逆引き用のdope vectorの実体
