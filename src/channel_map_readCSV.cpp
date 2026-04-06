@@ -122,6 +122,7 @@ namespace chmap {
         std::cout << "start loading mapdata lines" << std::endl;
         #endif
 
+        // dictionary should be built before loading mapdata lines (especially before calling makeDETItem)
         scanNamesForDictionary(file_path);
         ChannelMapDopeness::get_instance().detname_dictionary.sortWords();
         ChannelMapDopeness::get_instance().detname_dictionary.buildDictionary();
@@ -129,6 +130,7 @@ namespace chmap {
         ChannelMapDopeness::get_instance().plane_dictionary.buildDictionary();
         ChannelMapDopeness::get_instance().readout_channel_dictionary.sortWords();
         ChannelMapDopeness::get_instance().readout_channel_dictionary.buildDictionary();
+        // dictionary should be built before loading mapdata lines (especially before calling makeDETItem)
 
         // load mapdata lines
         while (std::getline(file, line)) {
