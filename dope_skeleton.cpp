@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
         chmap::ChannelMapSimpleItem_FE fe_item_outer = channel_map_dopeness.getFEIItem(doped_index);
-        uint8_t det_segment;
+        uint8_t det_name, det_plane,det_segment, det_readout_channel;
         uint16_t det_channel_number;
         std::string det_name_str, det_plane_str, det_readout_channel_str;
         t0 = std::chrono::high_resolution_clock::now();
@@ -152,20 +152,11 @@ int main(int argc, char* argv[]) {
                 break;
             }
             chmap::ChannelMapSimpleItem_DET det_item_inner = channel_map_dopeness.getDETItem(doped_index);
-            if(!channel_map_dopeness.detname_dictionary.invIndex(det_item_inner.name, det_name_str)){
-                std::cout << "\tDET name index is out of range in detname_dictionary.invIndex(idx, &str)" << std::endl;
-                break;
-            }
-            if(!channel_map_dopeness.plane_dictionary.invIndex(det_item_inner.plane, det_plane_str)){
-                std::cout << "\tDET plane index is out of range in plane_dictionary.invIndex(idx, &str)" << std::endl;
-                break;
-            }
+            det_name = det_item_inner.name;
+            det_plane = det_item_inner.plane;
             det_segment = det_item_inner.segment;
+            det_readout_channel = det_item_inner.readout_channel;
             det_channel_number = det_item_inner.channel_number;
-            if(!channel_map_dopeness.readout_channel_dictionary.invIndex(det_item_inner.readout_channel, det_readout_channel_str)){
-                std::cout << "\tDET readout channel index is out of range in readout_channel_dictionary.invIndex(idx, &str)" << std::endl;
-                break;
-            }
         }
         t1 =  std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
