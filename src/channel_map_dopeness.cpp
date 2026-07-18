@@ -3,6 +3,8 @@
 #include "channel_tuple.hpp"
 #include "element.hpp"
 
+#include "debugger.h"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -62,6 +64,9 @@ namespace chmap {
         #endif
 
         readCSV(file_path); // fill fItems
+        #if CHECK_INITIALIZATION
+        std::cout << "[ChannelMapDopeness::initialize] readCSV finished, number of items: " << fItems.size() << std::endl;
+        #endif
 
         #if DEBUG_PRINT
         std::cout << "start sorting fItems by fe.id" << std::endl;

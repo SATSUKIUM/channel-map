@@ -3,6 +3,8 @@
 #include "channel_tuple.hpp"
 #include "element.hpp"
 
+#include "debugger.h"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -168,6 +170,10 @@ namespace chmap {
             #endif
             fItems.push_back(item);
         }// while getline(file, line) for loading mapdata
+        #if CHECK_INITIALIZATION
+        std::cout << "[ChannelMapDopeness::readCSV] finished loading mapdata lines, number of items: " << fItems.size() << std::endl;
+        std::cout << "\tlast line: " << line << std::endl;
+        #endif
         #if DEBUG_PRINT
         std::cout << "finished loading mapdata lines" << std::endl;
         std::cout << "total loaded items: " << fItems.size() << std::endl;
