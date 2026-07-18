@@ -113,7 +113,7 @@ namespace chmap {
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
         std::vector<ChannelMapSimpleItem_DET> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
-        std::cout << "\tfItems.size(): " << fItems.size() << std::endl;
+        std::cout << std::dec << "\tfItems.size(): " << fItems.size() << std::endl;
         for(const auto& item : fItems){
             uint32_t doped_index;
             if(!getDopeKey_FEtoDET( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index )) {
@@ -146,7 +146,7 @@ namespace chmap {
         det_items.clear();
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
-        std::cout << "\tnumber of items: " << fItems.size() << std::endl;
+        std::cout << std::dec << "\tnumber of items: " << fItems.size() << std::endl;
         return fill_ratio;
     }// void ChannelMapDopeness::initialize
 
