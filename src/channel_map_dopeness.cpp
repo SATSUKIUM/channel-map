@@ -105,6 +105,7 @@ namespace chmap {
         sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
         sizeSpace_ch = max_ch - min_ch + 1;
         sizeSpace_FEKey = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch;
+        std::cout << "\tfItems.size(): " << fItems.size() << std::endl;
         getDopeKey_FEtoDET(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
         getDopeKey_FEtoDET(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
