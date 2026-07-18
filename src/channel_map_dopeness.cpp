@@ -144,6 +144,7 @@ namespace chmap {
         det_items.clear();
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
+        std::cout << "\tnumber of items: " << fItems.size() << std::endl;
         return fill_ratio;
     }// void ChannelMapDopeness::initialize
 
