@@ -8,7 +8,7 @@
 #include <unordered_map> // only use in initialize, not in DAQ search
 
 #include "chmap/item.hpp"
-#include "chmap/channel_map_dictionary.hpp"
+#include "chmap/dictionary.hpp"
 
 
 namespace chmap {
