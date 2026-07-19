@@ -114,7 +114,7 @@ install(DIRECTORY include/ DESTINATION include)
 # install(TARGETS direct-skeleton-program DESTINATION bin)
 install(TARGETS dope-skeleton-program DESTINATION bin)
 install(TARGETS channel-map EXPORT ChannelMapTargets DESTINATION lib)
-install(FILES ${HEADERS} DESTINATION include)
+# install(FILES ${HEADERS} DESTINATION include)
 install(FILES ${SCRIPT_SOURCE} DESTINATION bin
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
 	GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
