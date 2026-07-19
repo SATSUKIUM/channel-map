@@ -7,11 +7,9 @@
 #include <filesystem>
 #include <unordered_map> // only use in initialize, not in DAQ search
 
-#include "channel_map_simple_item.hpp"
+#include "item.hpp"
 #include "channel_map_dictionary.hpp"
 
-// #include "channel_tuple.hpp"
-// #include "element.hpp"
 
 namespace chmap {
 
@@ -23,28 +21,26 @@ namespace chmap {
             /*
             FEのキーをdope-vectorのインデックスとすることで、バリューへは直接アクセスできるようにする
             */
-            /*
-            DET->FEの「逆引き」を実装してみる
-            */
+
             double initialize(const std::string& file_path, bool createInvMap = false); // 返り値はFEキーの充填率
             void initialize_InvMap();
 
             bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
-            bool getDopeKey_FEtoDET(const ChannelMapSimpleItem_FE& fe_item, uint32_t& retKey) const { // overload expression
+            bool getDopeKey_FEtoDET(const FEAddrItem& fe_item, uint32_t& retKey) const { // overload expression
                 return getDopeKey_FEtoDET(fe_item.ip3rd, fe_item.ip4th, fe_item.ch, retKey);
             }
             bool getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane_idx, uint8_t segment, uint16_t channel_number, uint8_t readout_channel_idx, uint32_t& retKey) const;
-            bool getDopeKey_DETtoFE(const ChannelMapSimpleItem_DET& det_item, uint32_t& retKey) const { // overload expression
+            bool getDopeKey_DETtoFE(const DETIdItem& det_item, uint32_t& retKey) const { // overload expression
                 return getDopeKey_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.channel_number, det_item.readout_channel, retKey);
             }
 
-            ChannelMapSimpleItem_DET getDETItem(uint32_t doped_index);
-            ChannelMapSimpleItem_FE getFEIItem(uint32_t doped_index);
+            DETIdItem getDETItem(uint32_t doped_index);
+            FEAddrItem getFEIItem(uint32_t doped_index);
 
             void printAllItemsFE();
             void printAllItemsDET();
-            void printFEid(ChannelMapSimpleItem_FE fe_item);
-            void printDETinfo(ChannelMapSimpleItem_DET det_item);
+            void printFEid(FEAddrItem fe_item);
+            void printDETinfo(DETIdItem det_item);
             int getNumberOfChannels() const { return fItems.size(); }
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
@@ -96,8 +92,8 @@ namespace chmap {
            uint32_t maxDETId; // for out of range handling
             
             std::vector<ChannelMapSimpleItem> fItems;
-            std::vector<ChannelMapSimpleItem_FE> fItemsFE; // 実在するfe item
-            std::vector<ChannelMapSimpleItem_DET> fItemsDET; // 実在するdet item
+            std::vector<FEAddrItem> fItemsFE; // 実在するfe item
+            std::vector<DETIdItem> fItemsDET; // 実在するdet item
             std::unordered_map<std::string, uint32_t> mapdata_string_simplify_map32;
             std::unordered_map<std::string, uint16_t> mapdata_string_simplify_map16;
 
@@ -109,8 +105,8 @@ namespace chmap {
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens); // to be {fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data}
-            ChannelMapSimpleItem_FE makeFEItem(const std::vector<std::string>& tokens); // to be {0xc0a80205, 0x01, 0x00} ipfull, ch, data
-            ChannelMapSimpleItem_DET makeDETItem(const std::vector<std::string>& tokens); // to be {0x01, 0x01, 0x01, 0x0001, 0x01} detname_idx, plane_idx, segment, channel_number, readout_channel_idx
+            FEAddrItem makeFEItem(const std::vector<std::string>& tokens); // to be {0xc0a80205, 0x01, 0x00} ipfull, ch, data
+            DETIdItem makeDETItem(const std::vector<std::string>& tokens); // to be {0x01, 0x01, 0x01, 0x0001, 0x01} detname_idx, plane_idx, segment, channel_number, readout_channel_idx
             void defineDictionary();
             uint32_t four_char_to_uint32(char a, char b, char c, char d);
             uint16_t two_char_to_uint16(char a, char b);
@@ -122,8 +118,8 @@ namespace chmap {
             void printFEtoDETscan();
             void printDETtoFEscan();
 
-            std::vector<ChannelMapSimpleItem_DET> fItemsFEtoDET_dope; // dope vectorの実体
-            std::vector<ChannelMapSimpleItem_FE> fItemsDETtoFE_dope; // 逆引き用のdope vectorの実体
+            std::vector<DETIdItem> fItemsFEtoDET_dope; // dope vectorの実体
+            std::vector<FEAddrItem> fItemsDETtoFE_dope; // 逆引き用のdope vectorの実体
 
             ChannelMapDopeness() = default; // private default constructor
     };// class ChannelMapDopeness

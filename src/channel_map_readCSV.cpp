@@ -1,5 +1,5 @@
 #include "channel_map_dopeness.hpp"
-#include "channel_map_simple_item.hpp"
+#include "item.hpp"
 #include "channel_tuple.hpp"
 #include "element.hpp"
 
@@ -205,7 +205,7 @@ namespace chmap {
         return tokens;
     }// std::vector<std::string> ChannelMapDopeness::split_line
 
-    ChannelMapSimpleItem_FE ChannelMapDopeness::makeFEItem(const std::vector<std::string>& tokens) {
+    FEAddrItem ChannelMapDopeness::makeFEItem(const std::vector<std::string>& tokens) {
         uint64_t fe_ip_full;
         uint16_t fe_ip_3rd_4th;
         uint8_t fe_channel;
@@ -223,10 +223,10 @@ namespace chmap {
             }
             fe_count++;
         }
-        return ChannelMapSimpleItem_FE(fe_ip_3rd_4th >> 8, fe_ip_3rd_4th & 0xFF, fe_channel);
-    } // ChannelMapSimpleItem_FE ChannelMapDopeness::makeFEItem
+        return FEAddrItem(fe_ip_3rd_4th >> 8, fe_ip_3rd_4th & 0xFF, fe_channel);
+    } // FEAddrItem ChannelMapDopeness::makeFEItem
 
-    ChannelMapSimpleItem_DET ChannelMapDopeness::makeDETItem(const std::vector<std::string>& tokens) {
+    DETIdItem ChannelMapDopeness::makeDETItem(const std::vector<std::string>& tokens) {
         uint8_t det_name_idx;
         uint8_t det_plane_idx;
         uint8_t det_segment;
@@ -264,8 +264,8 @@ namespace chmap {
             }
             det_count++;
         }
-        return ChannelMapSimpleItem_DET(det_name_idx, det_plane_idx, det_segment, det_channel_number, det_readout_channel_idx);
-    } // ChannelMapSimpleItem_DET ChannelMapDopeness::makeDETItem
+        return DETIdItem(det_name_idx, det_plane_idx, det_segment, det_channel_number, det_readout_channel_idx);
+    } // DETIdItem ChannelMapDopeness::makeDETItem
 
     ChannelMapSimpleItem ChannelMapDopeness::makeSimpleItem(const std::vector<std::string>& tokens) {
         int len_tokens = tokens.size();
@@ -322,8 +322,8 @@ namespace chmap {
             std::cout << "  DET token: " << det_tokens[i] << std::endl;
         }
         #endif
-        ChannelMapSimpleItem_FE fe_item = makeFEItem(fe_tokens);
-        ChannelMapSimpleItem_DET det_item = makeDETItem(det_tokens);
+        FEAddrItem fe_item = makeFEItem(fe_tokens);
+        DETIdItem det_item = makeDETItem(det_tokens);
 
 
         // for(int i=0; i<len_tokens; ++i) {

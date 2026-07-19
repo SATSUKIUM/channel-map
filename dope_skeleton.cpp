@@ -1,5 +1,5 @@
 #include "channel_map_dopeness.hpp"
-#include "channel_map_simple_item.hpp"
+#include "item.hpp"
 
 // handle string, and so on.
 #include <string>
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
             std::cout << "FE id for T1 right channel is out of range in getDopeKey_FEtoDET()." << std::endl;
             return 1;
         }
-        chmap::ChannelMapSimpleItem_DET detitem = channel_map_dopeness.getDETItem(doped_index);
+        chmap::DETIdItem detitem = channel_map_dopeness.getDETItem(doped_index);
         detitem.decode();
         std::cout << std::string(80, '=') << std::endl;
 
@@ -107,14 +107,14 @@ int main(int argc, char* argv[]) {
         uint16_t ch = std::get<2>(item);
         const std::string& description = std::get<3>(item);
         std::cout << "\n[in dope_skeleton.cpp] Testing getDETItem for FE id of " << description << ":" << std::endl;
-        channel_map_dopeness.printFEid(chmap::ChannelMapSimpleItem_FE(ip3rd, ip4th, ch));
+        channel_map_dopeness.printFEid(chmap::FEAddrItem(ip3rd, ip4th, ch));
         std::cout << "\t\t(↓Corresponding DET info)" << std::endl;
         uint32_t doped_index;
         if(!channel_map_dopeness.getDopeKey_FEtoDET(ip3rd, ip4th, ch, doped_index)) {
             std::cout << "\tFE id is out of range in getDopeKey_FEtoDET()." << std::endl;
             continue;
         }
-        chmap::ChannelMapSimpleItem_DET det_item = channel_map_dopeness.getDETItem(doped_index);
+        chmap::DETIdItem det_item = channel_map_dopeness.getDETItem(doped_index);
         #if isInvMap
         std::cout << "query: " << static_cast<uint32_t>(ip3rd) << ", " << static_cast<uint32_t>(ip4th) << ", " << static_cast<uint32_t>(ch) << std::endl;
         #endif
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "\tDET info is out of range in getRank_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
                 continue;
             }
-            chmap::ChannelMapSimpleItem_FE fe_item_inv = channel_map_dopeness.getFEIItem(rank_inv);
+            chmap::FEAddrItem fe_item_inv = channel_map_dopeness.getFEIItem(rank_inv);
             fe_item_inv.decode();
         }
         #endif
@@ -136,12 +136,12 @@ int main(int argc, char* argv[]) {
             std::cout << "\tFE id is out of range in getDopeKey_FEtoDET(). This should not happen since it was checked before." << std::endl;
             continue;
         }
-        chmap::ChannelMapSimpleItem_DET det_item_outer = channel_map_dopeness.getDETItem(doped_index);
+        chmap::DETIdItem det_item_outer = channel_map_dopeness.getDETItem(doped_index);
         if(!channel_map_dopeness.getDopeKey_DETtoFE(det_item_outer, doped_index)){
             std::cout << "\tDET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
             continue;
         }
-        chmap::ChannelMapSimpleItem_FE fe_item_outer = channel_map_dopeness.getFEIItem(doped_index);
+        chmap::FEAddrItem fe_item_outer = channel_map_dopeness.getFEIItem(doped_index);
         uint8_t det_name, det_plane,det_segment, det_readout_channel;
         uint16_t det_channel_number;
         std::string det_name_str, det_plane_str, det_readout_channel_str;
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "\tFE id is out of range in getDopeKey_FEtoDET() in the loop. This should not happen since it was checked before the loop." << std::endl;
                 break;
             }
-            chmap::ChannelMapSimpleItem_DET det_item_inner = channel_map_dopeness.getDETItem(doped_index);
+            chmap::DETIdItem det_item_inner = channel_map_dopeness.getDETItem(doped_index);
             det_name = det_item_inner.name;
             det_plane = det_item_inner.plane;
             det_segment = det_item_inner.segment;
@@ -160,7 +160,7 @@ int main(int argc, char* argv[]) {
         }
         t1 =  std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
-            chmap::ChannelMapSimpleItem_DET det_item_inner;
+            chmap::DETIdItem det_item_inner;
             if(1);
         }
         t2 =  std::chrono::high_resolution_clock::now();
@@ -176,12 +176,12 @@ int main(int argc, char* argv[]) {
                 std::cout << "\tDET info is out of range in getDopeKey_DETtoFE() in the loop. This should not happen since it was checked before the loop." << std::endl;
                 break;
             }
-            chmap::ChannelMapSimpleItem_FE fe_item_inner = channel_map_dopeness.getFEIItem(doped_index);
+            chmap::FEAddrItem fe_item_inner = channel_map_dopeness.getFEIItem(doped_index);
 
         }
         t1_inv = std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
-            chmap::ChannelMapSimpleItem_FE fe_item_inner;
+            chmap::FEAddrItem fe_item_inner;
             if(1);
         }
         t2_inv = std::chrono::high_resolution_clock::now();

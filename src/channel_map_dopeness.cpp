@@ -1,5 +1,5 @@
 #include "channel_map_dopeness.hpp"
-#include "channel_map_simple_item.hpp"
+#include "item.hpp"
 #include "channel_tuple.hpp"
 #include "element.hpp"
 
@@ -111,7 +111,7 @@ namespace chmap {
         printFEtoDETscan();
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
-        std::vector<ChannelMapSimpleItem_DET> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
+        std::vector<DETIdItem> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
         for(const auto& item : fItems){
             uint32_t doped_index;
             if(!getDopeKey_FEtoDET( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index )) {
@@ -132,8 +132,8 @@ namespace chmap {
             ChannelMapDopeness::initialize_InvMap();
         }
 
-        std::vector<ChannelMapSimpleItem_FE> fe_items;
-        std::vector<ChannelMapSimpleItem_DET> det_items;
+        std::vector<FEAddrItem> fe_items;
+        std::vector<DETIdItem> det_items;
         for(const auto& item : fItems){
             fe_items.push_back(item.fe);
             det_items.push_back(item.det);
@@ -191,7 +191,7 @@ namespace chmap {
         printDETtoFEscan();
 
         // 逆引き用のdope vectorの初期化
-        std::vector<ChannelMapSimpleItem_FE> dettofe_dopevector(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
+        std::vector<FEAddrItem> dettofe_dopevector(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
         for(const auto& item : fItems){
             uint32_t doped_index;
             if(!getDopeKey_DETtoFE( (item.det.name) & 0xFF, (item.det.plane) & 0xFF, (item.det.segment) & 0xFF, (item.det.channel_number) & 0xFFFF, (item.det.readout_channel) & 0xFF, doped_index )) {
@@ -222,13 +222,13 @@ namespace chmap {
         return true;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
-    ChannelMapSimpleItem_DET ChannelMapDopeness::getDETItem(uint32_t doped_index){
+    DETIdItem ChannelMapDopeness::getDETItem(uint32_t doped_index){
         return fItemsFEtoDET_dope[doped_index];
-    } // ChannelMapSimpleItem_DET* ChannelMapDopeness::getDETItem
+    } // DETIdItem ChannelMapDopeness::getDETItem
 
-    ChannelMapSimpleItem_FE ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+    FEAddrItem ChannelMapDopeness::getFEIItem(uint32_t doped_index){
         return fItemsDETtoFE_dope[doped_index];
-    } // ChannelMapSimpleItem_FE* ChannelMapDopeness::getFEIItem
+    } // FEAddrItem ChannelMapDopeness::getFEIItem
 
     void ChannelMapDopeness::printAllItemsFE() {
         std::cout << "FE items count: " << fItemsFE.size() << std::endl;
@@ -250,16 +250,16 @@ namespace chmap {
             }else {
 
             }
-            ChannelMapSimpleItem_DET det_item = getDETItem(doped_index);
+            DETIdItem det_item = getDETItem(doped_index);
             det_item.decode();
         }
     }// void ChannelMapDopeness::printAllItemsDET
 
-    void ChannelMapDopeness::printFEid(ChannelMapSimpleItem_FE fe_item) {
+    void ChannelMapDopeness::printFEid(FEAddrItem fe_item) {
         fe_item.decode();
     }// void ChannelMapDopeness::printFEid
 
-    void ChannelMapDopeness::printDETinfo(ChannelMapSimpleItem_DET det_item) {
+    void ChannelMapDopeness::printDETinfo(DETIdItem det_item) {
         det_item.decode();
     }// void ChannelMapDopeness::printDETinfo
 
