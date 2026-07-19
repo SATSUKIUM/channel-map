@@ -1,6 +1,6 @@
-#include "channel_map_dopeness.hpp"
-#include "dictionary.hpp"
-#include "item.hpp"
+#include "chmap/channel_map_dopeness.hpp"
+#include "chmap/dictionary.hpp"
+#include "chmap/item.hpp"
 
 #include <iomanip>
 #include <algorithm>

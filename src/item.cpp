@@ -1,5 +1,5 @@
-#include "item.hpp"
-#include "channel_map_dopeness.hpp"
+#include "chmap/item.hpp"
+#include "chmap/channel_map_dopeness.hpp"
 #include <iostream>
 #include <iomanip>
 #include <string>
