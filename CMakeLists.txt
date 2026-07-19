@@ -28,7 +28,7 @@ endif()
 set(CMAKE_BUILD_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 file(GLOB SOURCES "src/*.cpp")
-file(GLOB HEADERS "include/*.hpp")
+file(GLOB HEADERS "include/chmap/*.hpp")
 
 ### main library
 add_library(channel-map SHARED ${SOURCES})
