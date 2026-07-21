@@ -89,7 +89,7 @@ namespace chmap {
         max_ch = 0;       // used in getDopeKey_FE()
         uint8_t buf;
         for(const auto& item : fItems){
-            auto fe = item.fe;
+            const auto& fe = item.fe;
             buf = (fe.ip3rd) & 0xFF; // ip3rd
             if(buf < min_ip3rd) min_ip3rd = buf;
             if(buf > max_ip3rd) max_ip3rd = buf;
@@ -151,7 +151,7 @@ namespace chmap {
         uint8_t buf8;
         uint16_t buf16;
         for(const auto& item : fItems){
-            auto det = item.det;
+            const auto& det = item.det;
             buf8 = det.name & 0xFF; // name_idx
             if(buf8 < min_name_idx) min_name_idx = buf8;
             if(buf8 > max_name_idx) max_name_idx = buf8;
@@ -180,17 +180,17 @@ namespace chmap {
         printDETtoFEscan();
 
         // 逆引き用のdope vectorの初期化
-        std::vector<FEAddrItem> dettofe_dopevector(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
+        fItemsDETtoFE_dope.resize(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
         for(const auto& item : fItems){
             uint32_t doped_index;
-            if(!getDopeKey_DETtoFE( (item.det.name) & 0xFF, (item.det.plane) & 0xFF, (item.det.segment) & 0xFF, (item.det.channel_number) & 0xFFFF, (item.det.readout_channel) & 0xFF, doped_index )) {
+            const auto& det = item.det;
+            if(!getDopeKey_DETtoFE( (det.name) & 0xFF, (det.plane) & 0xFF, (det.segment) & 0xFF, (det.channel_number) & 0xFFFF, (det.readout_channel) & 0xFF, doped_index )) {
                 std::cerr << "これは設計上ありえないことですが、逆引きのdope keyが範囲外です: " << std::endl;
-                item.det.decode();
+                det.decode();
                 continue;
             }
-            dettofe_dopevector[doped_index] = item.fe;
+            fItemsDETtoFE_dope[doped_index] = item.fe;
         }
-        fItemsDETtoFE_dope = dettofe_dopevector;
     } // void ChannelMapDopeness::initialize_InvMap()
 
     // ↓このコードの本質
@@ -239,16 +239,16 @@ namespace chmap {
             }else {
 
             }
-            DETIdItem det_item = getDETItem(doped_index);
+            const DETIdItem& det_item = getDETItem(doped_index);
             det_item.decode();
         }
     }// void ChannelMapDopeness::printAllItemsDET
 
-    void ChannelMapDopeness::printFEid(FEAddrItem fe_item) {
+    void ChannelMapDopeness::printFEid(const FEAddrItem& fe_item) {
         fe_item.decode();
     }// void ChannelMapDopeness::printFEid
 
-    void ChannelMapDopeness::printDETinfo(DETIdItem det_item) {
+    void ChannelMapDopeness::printDETinfo(const DETIdItem& det_item) {
         det_item.decode();
     }// void ChannelMapDopeness::printDETinfo
 

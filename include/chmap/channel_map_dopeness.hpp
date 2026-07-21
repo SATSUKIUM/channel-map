@@ -39,8 +39,8 @@ namespace chmap {
 
             void printAllItemsFE();
             void printAllItemsDET();
-            void printFEid(FEAddrItem fe_item);
-            void printDETinfo(DETIdItem det_item);
+            void printFEid(const FEAddrItem& fe_item);
+            void printDETinfo(const DETIdItem& det_item);
             int getNumberOfChannels() const { return fItems.size(); }
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
