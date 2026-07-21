@@ -111,7 +111,7 @@ namespace chmap {
         printFEtoDETscan();
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
-        std::vector<DETIdItem> fetodet_dopevector(sizeSpace_FEKey); // fe.idをインデックスとするdope-vectorを用意
+        fItemsFEtoDET_dope.resize(sizeSpace_FEKey); // fe.idをインデックスとするdope-vector
         for(const auto& item : fItems){
             uint32_t doped_index;
             if(!getDopeKey_FEtoDET( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index )) {
@@ -124,24 +124,13 @@ namespace chmap {
                 std::cout << "calculated dope index: 0x" << std::hex << std::setw(8) << std::setfill('0') << doped_index << std::dec << " for FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.id << std::dec << std::endl;
                 #endif
             }
-            fetodet_dopevector[doped_index] = item.det;
+            fItemsFEtoDET_dope[doped_index] = item.det;
         }
-        fItemsFEtoDET_dope = fetodet_dopevector;
 
         if(createInvMap){
             ChannelMapDopeness::initialize_InvMap();
         }
 
-        std::vector<FEAddrItem> fe_items;
-        std::vector<DETIdItem> det_items;
-        for(const auto& item : fItems){
-            fe_items.push_back(item.fe);
-            det_items.push_back(item.det);
-        }
-        fItemsFE = fe_items;
-        fItemsDET = det_items;
-        fe_items.clear();
-        det_items.clear();
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
         return fill_ratio;
@@ -231,21 +220,21 @@ namespace chmap {
     } // const FEAddrItem& ChannelMapDopeness::getFEIItem
 
     void ChannelMapDopeness::printAllItemsFE() {
-        std::cout << "FE items count: " << fItemsFE.size() << std::endl;
+        std::cout << "items count: " << fItems.size() << std::endl;
         std::cout << "All FE Items:" << std::endl;
-        for(auto& item : fItemsFE){
-            item.decode();
+        for(auto& item : fItems){
+            item.fe.decode();
         }
     }// void ChannelMapDopeness::printAllItemsFE
 
     void ChannelMapDopeness::printAllItemsDET() {
-        std::cout << "DET items count: " << fItemsDET.size() << std::endl;
+        std::cout << "items count: " << fItems.size() << std::endl;
         std::cout << "All DET Items:" << std::endl;
-        for(auto& item : fItemsFE) {
+        for(auto& item : fItems) {
             uint32_t doped_index;
-            if(!getDopeKey_FEtoDET( (item.ip3rd) & 0xFF, (item.ip4th) & 0xFF, item.ch & 0xFF, doped_index)) {
+            if(!getDopeKey_FEtoDET( (item.fe.ip3rd) & 0xFF, (item.fe.ip4th) & 0xFF, item.fe.ch & 0xFF, doped_index)) {
                 std::cerr << "これは設計上ありえないことですが、dope keyが範囲外です: " << std::endl;
-                item.decode();
+                item.fe.decode();
                 continue;
             }else {
 
