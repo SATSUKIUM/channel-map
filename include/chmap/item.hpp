@@ -11,6 +11,9 @@
 // for std::tie
 #include <tuple>
 
+#include "chmap/geometry.hpp"
+#include "chmap/calibration.hpp"
+
 namespace chmap {
     class ChannelMapDopeness; // forward declaration to avoid circular dependency
 
@@ -54,10 +57,13 @@ namespace chmap {
         uint32_t getRawID() const { // to be discontenued
             return (name << 24) | (plane << 8) | (segment << 0) | channel_number; // 使っちゃダメ。壊れます。
         }
+
+        DETConfItem* detconf = nullptr;
     }; // struct DETIdItem
 
     struct DETConfItem{
-        // pointer to Geometry info, Calibration info
+        std::unique_ptr<GeomItem> geom = nullptr;
+        std::unique_ptr<CalibrationItem> calib = nullptr;
     }; // struct DETConfItem
 
 
