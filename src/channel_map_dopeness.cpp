@@ -222,13 +222,13 @@ namespace chmap {
         return true;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
-    DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index){
+    const DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index){
         return fItemsFEtoDET_dope[doped_index];
-    } // DETIdItem ChannelMapDopeness::getDETItem
+    } // const DETIdItem& ChannelMapDopeness::getDETItem
 
-    FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+    const FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index){
         return fItemsDETtoFE_dope[doped_index];
-    } // FEAddrItem ChannelMapDopeness::getFEIItem
+    } // const FEAddrItem& ChannelMapDopeness::getFEIItem
 
     void ChannelMapDopeness::printAllItemsFE() {
         std::cout << "FE items count: " << fItemsFE.size() << std::endl;
