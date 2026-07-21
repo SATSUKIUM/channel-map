@@ -34,8 +34,8 @@ namespace chmap {
                 return getDopeKey_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.channel_number, det_item.readout_channel, retKey);
             }
 
-            DETIdItem getDETItem(uint32_t doped_index);
-            FEAddrItem getFEIItem(uint32_t doped_index);
+            DETIdItem& getDETItem(uint32_t doped_index);
+            FEAddrItem& getFEIItem(uint32_t doped_index);
 
             void printAllItemsFE();
             void printAllItemsDET();
