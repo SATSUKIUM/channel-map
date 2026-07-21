@@ -8,4 +8,4 @@ namespace chmap {
     };
 } // namespace chmap
 
-#endif CHMAP_CALIBRATION_HPP_
+#endif // CHMAP_CALIBRATION_HPP_

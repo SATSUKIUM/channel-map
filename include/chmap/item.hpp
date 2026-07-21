@@ -11,8 +11,7 @@
 // for std::tie
 #include <tuple>
 
-#include "chmap/geometry.hpp"
-#include "chmap/calibration.hpp"
+#include "chmap/detector_configurations.hpp"
 
 namespace chmap {
     class ChannelMapDopeness; // forward declaration to avoid circular dependency
@@ -60,12 +59,6 @@ namespace chmap {
 
         DETConfItem* detconf = nullptr;
     }; // struct DETIdItem
-
-    struct DETConfItem{
-        std::unique_ptr<GeomItem> geom = nullptr;
-        std::unique_ptr<CalibrationItem> calib = nullptr;
-    }; // struct DETConfItem
-
 
     // ↓無意味だから余裕ある時に消そう
     struct ChannelMapSimpleItem {
