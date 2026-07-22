@@ -17,7 +17,7 @@ if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
     // usual process}
 */
 namespace chmap::dictionary {  
-    uint8_t queryIndex_name(const std::string& name){
+    uint8_t queryIndex_name(const std::string_view& name){
         for(size_t i=0; i<name_dictionary.size(); ++i){
             if(name_dictionary[i] == name){
                 return static_cast<uint8_t>(i);
@@ -25,7 +25,7 @@ namespace chmap::dictionary {
         }
         return 255; // not found
     }
-    uint8_t queryIndex_plane(const std::string& plane){
+    uint8_t queryIndex_plane(const std::string_view& plane){
         for(size_t i=0; i<plane_dictionary.size(); ++i){
             if(plane_dictionary[i] == plane){
                 return static_cast<uint8_t>(i);
@@ -33,7 +33,7 @@ namespace chmap::dictionary {
         }
         return 255; // not found
     }
-    uint8_t queryIndex_readout_channel(const std::string& readout_channel){
+    uint8_t queryIndex_readout_channel(const std::string_view& readout_channel){
         for(size_t i=0; i<readout_channel_dictionary.size(); ++i){
             if(readout_channel_dictionary[i] == readout_channel){
                 return static_cast<uint8_t>(i);
