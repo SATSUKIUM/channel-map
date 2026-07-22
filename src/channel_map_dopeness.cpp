@@ -279,8 +279,22 @@ namespace chmap {
             std::cerr << "[ChannelMapDopeness::registerDETConfItem] key resolution failed" << std::endl;
             return false;
         }
-        std::cerr << "[ChannelMapDopeness::registerDETConfItem] storing detconf at index 0x" << std::hex << doped_index << std::dec << std::endl;
-        fItemsFEtoDET_dope[doped_index].detconf = detconf;
+        if(doped_index >= fItemsDETtoFE_dope.size()) {
+            std::cerr << "[ChannelMapDopeness::registerDETConfItem] DET index out of range: 0x" << std::hex << doped_index << std::dec << std::endl;
+            return false;
+        }
+        const FEAddrItem& fe_item = fItemsDETtoFE_dope[doped_index];
+        uint32_t fe_doped_index;
+        if(!getDopeKey_FEtoDET(fe_item, fe_doped_index)) {
+            std::cerr << "[ChannelMapDopeness::registerDETConfItem] FE key resolution failed after DET lookup" << std::endl;
+            return false;
+        }
+        if(fe_doped_index >= fItemsFEtoDET_dope.size()) {
+            std::cerr << "[ChannelMapDopeness::registerDETConfItem] FE index out of range: 0x" << std::hex << fe_doped_index << std::dec << std::endl;
+            return false;
+        }
+        std::cerr << "[ChannelMapDopeness::registerDETConfItem] storing detconf at FE index 0x" << std::hex << fe_doped_index << std::dec << std::endl;
+        fItemsFEtoDET_dope[fe_doped_index].detconf = detconf;
         return true;
     } // bool ChannelMapDopeness::registerDETConfItem
 
@@ -292,7 +306,18 @@ namespace chmap {
         if(!getDopeKey_DETtoFE(det_item, doped_index)) {
             return false;
         }
-        fItemsFEtoDET_dope[doped_index].detconf = detconf;
+        if(doped_index >= fItemsDETtoFE_dope.size()) {
+            return false;
+        }
+        const FEAddrItem& fe_item = fItemsDETtoFE_dope[doped_index];
+        uint32_t fe_doped_index;
+        if(!getDopeKey_FEtoDET(fe_item, fe_doped_index)) {
+            return false;
+        }
+        if(fe_doped_index >= fItemsFEtoDET_dope.size()) {
+            return false;
+        }
+        fItemsFEtoDET_dope[fe_doped_index].detconf = detconf;
         return true;
     } // bool ChannelMapDopeness::registerDETConfItem
 
