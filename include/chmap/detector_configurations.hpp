@@ -9,7 +9,8 @@
 namespace chmap {
     struct DETConfItem{
             std::unique_ptr<GeomItem> geom = nullptr;
-            std::unique_ptr<CalibrationItem> calib = nullptr;
+            std::unique_ptr<CalibrationItem> calib_dcdriftlen = nullptr;
+            std::unique_ptr<CalibrationItem> calib_dctdccalib = nullptr;
         }; // struct DETConfItem
 } // namespace chmap
 

@@ -9,14 +9,20 @@ namespace chmap {
             virtual ~GeomItem() = default;
 
         private:
-            double globalZ, globalX, globalY;
+            uint32_t dopeKey_DET; // getDetItem[dopeKey_DET] return us the corresponding DETIdItem
+            double globalZ, globalX, globalY; // [mm]
+            double resolutionZ, resolutionX, resolutionY; // [mm]
+            double tiltAngle, rotAngle1, rotAngle2; // [deg] (tiltAngle: z軸周りの回転角, rotAngle: ?軸周りの回転角, rotAngle2: ?軸周りの回転角)(回転の順番もここで定義すべき)
+
     }; // class GeomItem
 
     class GeomItemDC : public GeomItem {
         public:
             virtual ~GeomItemDC() = default;
         private:
-            double localZ, localX, localY;
+            double centerWireNumber; // もし1.0なら、中心のワイヤーは1番ワイヤー。0.5なら、中心のワイヤーは1番と2番の間にある。
+            double wirePitch; // [mm] 測定軸方向のワイヤ間隔
+            double offset; // [mm] 測定軸方向のワイヤのオフセット(微調整のため)
     }; // class GeomItemDC
     
 } // namespace chmap
