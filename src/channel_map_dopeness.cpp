@@ -213,22 +213,31 @@ namespace chmap {
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
     bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const {
+        std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] det_name=" << det_name
+                  << ", det_plane=" << det_plane
+                  << ", segment=" << segment
+                  << ", readout_channel=" << readout_channel
+                  << ", channel_number=" << channel_number << std::endl;
         uint8_t name_idx = 255;
         uint8_t plane_idx = 255;
         uint8_t readout_channel_idx = 255;
         if(!detname_dictionary.getIndex(std::string(det_name), name_idx)) {
+            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] det name lookup failed" << std::endl;
             return false;
         }
         if(!plane_dictionary.getIndex(std::string(det_plane), plane_idx)) {
+            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] plane lookup failed" << std::endl;
             return false;
         }
         if(!readout_channel_dictionary.getIndex(std::string(readout_channel), readout_channel_idx)) {
+            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] readout channel lookup failed" << std::endl;
             return false;
         }
         if(segment < 0 || channel_number < 0) {
+            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] segment or channel_number out of range" << std::endl;
             return false;
         }
-        return getDopeKey_DETtoFE(
+        const bool ok = getDopeKey_DETtoFE(
             name_idx,
             plane_idx,
             static_cast<uint8_t>(segment),
@@ -236,6 +245,12 @@ namespace chmap {
             readout_channel_idx,
             retKey
         );
+        std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] resolved name_idx=" << static_cast<int>(name_idx)
+                  << ", plane_idx=" << static_cast<int>(plane_idx)
+                  << ", readout_channel_idx=" << static_cast<int>(readout_channel_idx)
+                  << ", ok=" << ok
+                  << ", retKey=0x" << std::hex << retKey << std::dec << std::endl;
+        return ok;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
     const DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index) const{
@@ -257,11 +272,14 @@ namespace chmap {
     bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf) {
         uint32_t doped_index;
         if(detconf == nullptr) {
+            std::cerr << "[ChannelMapDopeness::registerDETConfItem] detconf is nullptr" << std::endl;
             return false;
         }
         if(!getDopeKey_DETtoFE(det_name, det_plane, segment, readout_channel, channel_number, doped_index)) {
+            std::cerr << "[ChannelMapDopeness::registerDETConfItem] key resolution failed" << std::endl;
             return false;
         }
+        std::cerr << "[ChannelMapDopeness::registerDETConfItem] storing detconf at index 0x" << std::hex << doped_index << std::dec << std::endl;
         fItemsFEtoDET_dope[doped_index].detconf = detconf;
         return true;
     } // bool ChannelMapDopeness::registerDETConfItem
