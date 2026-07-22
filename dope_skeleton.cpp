@@ -94,8 +94,41 @@ int main(int argc, char* argv[]) {
             std::cout << "FE id for T1 right channel is out of range in getDopeKey_FEtoDET()." << std::endl;
             return 1;
         }
-        chmap::DETIdItem detitem = channel_map_dopeness.getDETItem(doped_index);
+        const chmap::DETIdItem& detitem = channel_map_dopeness.getDETItem(doped_index);
         detitem.decode();
+
+        std::string det_name_str;
+        std::string det_plane_str;
+        std::string det_readout_channel_str;
+        if(!channel_map_dopeness.detname_dictionary.invIndex(detitem.name, det_name_str)) {
+            std::cout << "det name index could not be resolved to string." << std::endl;
+            return 1;
+        }
+        if(!channel_map_dopeness.plane_dictionary.invIndex(detitem.plane, det_plane_str)) {
+            std::cout << "det plane index could not be resolved to string." << std::endl;
+            return 1;
+        }
+        if(!channel_map_dopeness.readout_channel_dictionary.invIndex(detitem.readout_channel, det_readout_channel_str)) {
+            std::cout << "readout channel index could not be resolved to string." << std::endl;
+            return 1;
+        }
+
+        chmap::DETConfItem demo_detconf;
+        if(!channel_map_dopeness.registerDETConfItem(
+                det_name_str,
+                det_plane_str,
+                detitem.segment,
+                det_readout_channel_str,
+                detitem.channel_number,
+                &demo_detconf)) {
+            std::cout << "failed to register DETConfItem." << std::endl;
+            return 1;
+        }
+        if(channel_map_dopeness.getDETItem(doped_index).detconf != &demo_detconf) {
+            std::cout << "DETConfItem pointer was not stored in the dope vector." << std::endl;
+            return 1;
+        }
+        std::cout << "registered DETConfItem pointer for " << det_name_str << ", " << det_plane_str << ", segment " << static_cast<int>(detitem.segment) << ", channel " << detitem.channel_number << std::endl;
         std::cout << std::string(80, '=') << std::endl;
 
     }

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <filesystem>
 #include <unordered_map> // only use in initialize, not in DAQ search
 
@@ -30,12 +31,19 @@ namespace chmap {
                 return getDopeKey_FEtoDET(fe_item.ip3rd, fe_item.ip4th, fe_item.ch, retKey);
             }
             bool getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane_idx, uint8_t segment, uint16_t channel_number, uint8_t readout_channel_idx, uint32_t& retKey) const;
+            bool getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const;
             bool getDopeKey_DETtoFE(const DETIdItem& det_item, uint32_t& retKey) const { // overload expression
                 return getDopeKey_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.channel_number, det_item.readout_channel, retKey);
             }
 
-            const DETIdItem& getDETItem(uint32_t doped_index);
-            const FEAddrItem& getFEIItem(uint32_t doped_index);
+            const DETIdItem& getDETItem(uint32_t doped_index) const;
+            DETIdItem& getDETItem(uint32_t doped_index);
+            const FEAddrItem& getFEIItem(uint32_t doped_index) const;
+            FEAddrItem& getFEIItem(uint32_t doped_index);
+
+            bool registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf);
+            bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);
+            bool registerDETConfItem(uint32_t doped_index, DETConfItem* detconf);
 
             void printAllItemsFE();
             void printAllItemsDET();

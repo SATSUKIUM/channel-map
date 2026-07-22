@@ -1,5 +1,6 @@
 #include "chmap/channel_map_dopeness.hpp"
 #include "chmap/item.hpp"
+#include "chmap/dictionary.hpp"
 #include "chmap/channel_tuple.hpp"
 // #include "chmap/element.hpp"
 
@@ -211,13 +212,76 @@ namespace chmap {
         return true;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
-    const DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index){
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const {
+        const uint8_t name_idx = chmap::dictionary::queryIndex_name(std::string(det_name));
+        const uint8_t plane_idx = chmap::dictionary::queryIndex_plane(std::string(det_plane));
+        const uint8_t readout_channel_idx = chmap::dictionary::queryIndex_readout_channel(std::string(readout_channel));
+        if(name_idx == 255 || plane_idx == 255 || readout_channel_idx == 255) {
+            return false;
+        }
+        if(segment < 0 || channel_number < 0) {
+            return false;
+        }
+        return getDopeKey_DETtoFE(
+            name_idx,
+            plane_idx,
+            static_cast<uint8_t>(segment),
+            static_cast<uint16_t>(channel_number),
+            readout_channel_idx,
+            retKey
+        );
+    } // bool ChannelMapDopeness::getDopeKey_DETtoFE
+
+    const DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index) const{
         return fItemsFEtoDET_dope[doped_index];
     } // const DETIdItem& ChannelMapDopeness::getDETItem
 
-    const FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+    DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index){
+        return fItemsFEtoDET_dope[doped_index];
+    } // DETIdItem& ChannelMapDopeness::getDETItem
+
+    const FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index) const{
         return fItemsDETtoFE_dope[doped_index];
     } // const FEAddrItem& ChannelMapDopeness::getFEIItem
+
+    FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+        return fItemsDETtoFE_dope[doped_index];
+    } // FEAddrItem& ChannelMapDopeness::getFEIItem
+
+    bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf) {
+        uint32_t doped_index;
+        if(detconf == nullptr) {
+            return false;
+        }
+        if(!getDopeKey_DETtoFE(det_name, det_plane, segment, readout_channel, channel_number, doped_index)) {
+            return false;
+        }
+        fItemsFEtoDET_dope[doped_index].detconf = detconf;
+        return true;
+    } // bool ChannelMapDopeness::registerDETConfItem
+
+    bool ChannelMapDopeness::registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf) {
+        uint32_t doped_index;
+        if(detconf == nullptr) {
+            return false;
+        }
+        if(!getDopeKey_DETtoFE(det_item, doped_index)) {
+            return false;
+        }
+        fItemsFEtoDET_dope[doped_index].detconf = detconf;
+        return true;
+    } // bool ChannelMapDopeness::registerDETConfItem
+
+    bool ChannelMapDopeness::registerDETConfItem(uint32_t doped_index, DETConfItem* detconf) {
+        if(detconf == nullptr) {
+            return false;
+        }
+        if(doped_index >= fItemsFEtoDET_dope.size()) {
+            return false;
+        }
+        fItemsFEtoDET_dope[doped_index].detconf = detconf;
+        return true;
+    } // bool ChannelMapDopeness::registerDETConfItem
 
     void ChannelMapDopeness::printAllItemsFE() {
         std::cout << "items count: " << fItems.size() << std::endl;
