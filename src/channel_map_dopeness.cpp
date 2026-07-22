@@ -213,10 +213,16 @@ namespace chmap {
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
     bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const {
-        const uint8_t name_idx = chmap::dictionary::queryIndex_name(std::string(det_name));
-        const uint8_t plane_idx = chmap::dictionary::queryIndex_plane(std::string(det_plane));
-        const uint8_t readout_channel_idx = chmap::dictionary::queryIndex_readout_channel(std::string(readout_channel));
-        if(name_idx == 255 || plane_idx == 255 || readout_channel_idx == 255) {
+        uint8_t name_idx = 255;
+        uint8_t plane_idx = 255;
+        uint8_t readout_channel_idx = 255;
+        if(!detname_dictionary.getIndex(std::string(det_name), name_idx)) {
+            return false;
+        }
+        if(!plane_dictionary.getIndex(std::string(det_plane), plane_idx)) {
+            return false;
+        }
+        if(!readout_channel_dictionary.getIndex(std::string(readout_channel), readout_channel_idx)) {
             return false;
         }
         if(segment < 0 || channel_number < 0) {

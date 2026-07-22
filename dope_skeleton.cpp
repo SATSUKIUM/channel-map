@@ -104,14 +104,17 @@ int main(int argc, char* argv[]) {
             std::cout << "det name index could not be resolved to string." << std::endl;
             return 1;
         }
+        std::cout << "(test) det name string: " << det_name_str << " got from index: " << static_cast<int>(detitem.name) << std::endl;
         if(!channel_map_dopeness.plane_dictionary.invIndex(detitem.plane, det_plane_str)) {
             std::cout << "det plane index could not be resolved to string." << std::endl;
             return 1;
         }
+        std::cout << "(test) det plane string: " << det_plane_str << " got from index: " << static_cast<int>(detitem.plane) << std::endl;
         if(!channel_map_dopeness.readout_channel_dictionary.invIndex(detitem.readout_channel, det_readout_channel_str)) {
             std::cout << "readout channel index could not be resolved to string." << std::endl;
             return 1;
         }
+        std::cout << "(test) det readout channel string: " << det_readout_channel_str << " got from index: " << static_cast<int>(detitem.readout_channel) << std::endl;
 
         chmap::DETConfItem demo_detconf;
         if(!channel_map_dopeness.registerDETConfItem(
