@@ -1,7 +1,4 @@
 #include "chmap/channel_map_dopeness.hpp"
-// #include "item.hpp"
-// #include "channel_tuple.hpp"
-// #include "element.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -16,19 +13,9 @@
 #define DEBUG_PRINT_DUMMY_MAKER 0
 #define DEBUG_PRINT_GETFERANK 0
 
-/*
-dope-vectorの概念を用いたchannel-mapの実装
-ユーザーの運用は下記のように限定させてもらう。bool getDopeKey_FEで各々ハンドリングしてもらう。
-uint32_t doped_index;
-if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
-    // handle out of range key
-    continue;
-}else{
-    // usual process}
-*/
 namespace chmap {
-    void ChannelMapDopeness::defineDictionary(){
-        // 1st is original name, 2nd is simplified name(uint32_t)
+    void ChannelMapDopeness::defineTokenNormalizationRules(){
+        // 1st is original name(written in CSV), 2nd is simplified name(uint32_t)
         // if simplified name is shorter than 4 char, fill with space char in the end
         const std::vector<std::pair<std::string, std::string>> detnames = {
             {"utof", "UTOF"},
@@ -60,7 +47,7 @@ namespace chmap {
                 name_pair.second[2],
                 name_pair.second[3]
             );
-            mapdata_string_simplify_map32[name_pair.first] = simplified;
+            token_normalization_4char[name_pair.first] = simplified;
         }
 
         // 1st is original name, 2nd is simplified name(uint16_t)
@@ -79,9 +66,9 @@ namespace chmap {
                 plane_pair.second[0],
                 plane_pair.second[1]
             );
-            mapdata_string_simplify_map16[plane_pair.first] = simplified;
+            token_normalization_2char[plane_pair.first] = simplified;
         }
-    }// void ChannelMapDopeness::simplify_detector_names
+    }// void ChannelMapDopeness::defineTokenNormalizationRules()
 
     uint32_t ChannelMapDopeness::four_char_to_uint32(char a, char b, char c, char d) {
         // 4つのcharをuint32_tに変換するルールを規定
@@ -103,8 +90,8 @@ namespace chmap {
         if (isTokenNumeric(token)) {
             return static_cast<uint32_t>(std::stoul(token, nullptr, 0));
         } else {
-            auto it = mapdata_string_simplify_map32.find(token);// check in detname_simplify_map
-            if(it == mapdata_string_simplify_map32.end()) {
+            auto it = token_normalization_4char.find(token);// check in detname_simplify_map
+            if(it == token_normalization_4char.end()) {
                 std::cerr << "unknown token for uint32_t conversion: " << token << std::endl;
                 std::exit(1);
             } else {
@@ -118,8 +105,8 @@ namespace chmap {
         if (isTokenNumeric(token)) {
             return static_cast<uint16_t>(std::stoul(token, nullptr, 0));
         } else {
-            auto it = mapdata_string_simplify_map16.find(token);// check in detname_simplify_map
-            if(it == mapdata_string_simplify_map16.end()) {
+            auto it = token_normalization_2char.find(token);// check in detname_simplify_map
+            if(it == token_normalization_2char.end()) {
                 std::cerr << "unknown token for uint16_t conversion: " << token << std::endl;
                 std::exit(1);
             } else {
