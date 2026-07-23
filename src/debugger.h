@@ -3,6 +3,8 @@
 
 // ================================
 #define CHECK_INITIALIZATION 1
+#define CHECK_COUT_DETCONF_REGISTRATION 0
+#define CHECK_COUT_GETDOPEKEY_DETTOFE 0
 
 // ================================
 
