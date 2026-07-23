@@ -52,14 +52,14 @@ namespace chmap {
     double ChannelMapDopeness::initialize(const std::string& file_path, bool createInvMap) {
         double fill_ratio;
 
-        defineDictionary(); // prepare detname_simplify_map
+        defineTokenNormalizationRules(); // prepare detname_simplify_map
         #if DEBUG_PRINT
         std::cout << "str simplify map32:" << std::endl;
-        for(const auto& pair : mapdata_string_simplify_map32){
+        for(const auto& pair : token_normalization_4char){
             std::cout << "  " << pair.first << " -> " << std::hex << pair.second << std::dec << std::endl;
         }
         std::cout << "str simplify map16:" << std::endl;
-        for(const auto& pair : mapdata_string_simplify_map16){
+        for(const auto& pair : token_normalization_2char){
             std::cout << "  " << pair.first << " -> " << std::hex << pair.second << std::dec << std::endl;
         }
         #endif
@@ -109,7 +109,7 @@ namespace chmap {
         getDopeKey_FEtoDET(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
         getDopeKey_FEtoDET(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
-        printFEtoDETscan();
+        printFEtoDETscan(); // print key space coverage
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
         fItemsFEtoDET_dope.resize(sizeSpace_FEKey); // fe.idをインデックスとするdope-vector
@@ -178,7 +178,7 @@ namespace chmap {
         getDopeKey_DETtoFE(min_name_idx, min_plane_idx, min_segment, min_channel_number, min_readout_channel_idx, minDETId); // minDETIdを参照で渡している。関数内で代入がある。
         getDopeKey_DETtoFE(max_name_idx, max_plane_idx, max_segment, max_channel_number, max_readout_channel_idx, maxDETId); // maxDETIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
-        printDETtoFEscan();
+        printDETtoFEscan(); // print key space coverage
 
         // 逆引き用のdope vectorの初期化
         fItemsDETtoFE_dope.resize(sizeSpace_DETKey); // det infoをインデックスとする逆引き用dope-vectorを用意
@@ -213,30 +213,37 @@ namespace chmap {
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
     bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const {
-        std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] det_name=" << det_name
-                  << ", det_plane=" << det_plane
-                  << ", segment=" << segment
-                  << ", readout_channel=" << readout_channel
-                  << ", channel_number=" << channel_number << std::endl;
-        uint8_t name_idx = 255;
-        uint8_t plane_idx = 255;
-        uint8_t readout_channel_idx = 255;
+        uint8_t name_idx = 255u;
+        uint8_t plane_idx = 255u;
+        uint8_t readout_channel_idx = 255u;
+        // convert string to index
         if(!detname_dictionary.getIndex(std::string(det_name), name_idx)) {
-            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] det name lookup failed" << std::endl;
+            #if CHECK_COUT_GETDOPEKEY_DETTOFE
+            std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] det name lookup failed" << std::endl;
+            #endif
             return false;
         }
         if(!plane_dictionary.getIndex(std::string(det_plane), plane_idx)) {
-            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] plane lookup failed" << std::endl;
+            #if CHECK_COUT_GETDOPEKEY_DETTOFE
+            std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] plane lookup failed" << std::endl;
+            #endif
             return false;
         }
         if(!readout_channel_dictionary.getIndex(std::string(readout_channel), readout_channel_idx)) {
-            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] readout channel lookup failed" << std::endl;
+            #if CHECK_COUT_GETDOPEKEY_DETTOFE
+            std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] readout channel lookup failed" << std::endl;
+            #endif
             return false;
         }
+        // check segment and channel_number range
         if(segment < 0 || channel_number < 0) {
-            std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] segment or channel_number out of range" << std::endl;
+            #if CHECK_COUT_GETDOPEKEY_DETTOFE
+            std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] segment or channel_number out of range" << std::endl;
+            #endif
             return false;
         }
+
+        // call the other overload with the resolved indices
         const bool ok = getDopeKey_DETtoFE(
             name_idx,
             plane_idx,
@@ -245,11 +252,7 @@ namespace chmap {
             readout_channel_idx,
             retKey
         );
-        std::cerr << "[ChannelMapDopeness::getDopeKey_DETtoFE] resolved name_idx=" << static_cast<int>(name_idx)
-                  << ", plane_idx=" << static_cast<int>(plane_idx)
-                  << ", readout_channel_idx=" << static_cast<int>(readout_channel_idx)
-                  << ", ok=" << ok
-                  << ", retKey=0x" << std::hex << retKey << std::dec << std::endl;
+
         return ok;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
@@ -279,21 +282,18 @@ namespace chmap {
             std::cerr << "[ChannelMapDopeness::registerDETConfItem] key resolution failed" << std::endl;
             return false;
         }
-        if(doped_index >= fItemsDETtoFE_dope.size()) {
-            std::cerr << "[ChannelMapDopeness::registerDETConfItem] DET index out of range: 0x" << std::hex << doped_index << std::dec << std::endl;
-            return false;
-        }
+
         const FEAddrItem& fe_item = fItemsDETtoFE_dope[doped_index];
         uint32_t fe_doped_index;
         if(!getDopeKey_FEtoDET(fe_item, fe_doped_index)) {
             std::cerr << "[ChannelMapDopeness::registerDETConfItem] FE key resolution failed after DET lookup" << std::endl;
             return false;
         }
-        if(fe_doped_index >= fItemsFEtoDET_dope.size()) {
-            std::cerr << "[ChannelMapDopeness::registerDETConfItem] FE index out of range: 0x" << std::hex << fe_doped_index << std::dec << std::endl;
-            return false;
-        }
-        std::cerr << "[ChannelMapDopeness::registerDETConfItem] storing detconf at FE index 0x" << std::hex << fe_doped_index << std::dec << std::endl;
+
+        #if CHECK_COUT_DETCONF_REGISTRATION
+        std::cout << "[ChannelMapDopeness::registerDETConfItem] storing detconf at FE index 0x" << std::hex << fe_doped_index << std::dec << std::endl;
+        #endif
+
         fItemsFEtoDET_dope[fe_doped_index].detconf = detconf;
         return true;
     } // bool ChannelMapDopeness::registerDETConfItem
@@ -364,44 +364,5 @@ namespace chmap {
     void ChannelMapDopeness::printDETinfo(const DETIdItem& det_item) {
         det_item.decode();
     }// void ChannelMapDopeness::printDETinfo
-
-    void ChannelMapDopeness::NameIndexDictionary::newWord(const std::string& str){
-        if(std::find(names_str.begin(), names_str.end(), str) == names_str.end()){
-            // str is not in names_str, so add it
-            names_str.push_back(str);
-        }
-    } // void ChannelMapDopeness::NameIndexDictionary::newWord
-
-    void ChannelMapDopeness::NameIndexDictionary::sortWords(){
-        std::sort(names_str.begin(), names_str.end());
-    } // void ChannelMapDopeness::NameIndexDictionary::sortWords
-
-    void ChannelMapDopeness::NameIndexDictionary::buildDictionary(){
-        for(size_t i=0; i<names_str.size(); ++i){
-            forward_d.emplace_back(names_str[i], static_cast<uint8_t>(i));
-            inverse_d.push_back(names_str[i]);
-        }
-    } // void ChannelMapDopeness::NameIndexDictionary::buildDictionary
-
-    bool ChannelMapDopeness::NameIndexDictionary::invIndex(uint8_t idx, std::string& str) const {
-        if(idx < inverse_d.size()){
-            str = inverse_d[idx];
-            return true;
-        }else{
-            return false;
-        }
-    } // bool ChannelMapDopeness::NameIndexDictionary::invIndex
-
-    bool ChannelMapDopeness::NameIndexDictionary::getIndex(const std::string& str, uint8_t& idx) const {
-        auto it = std::find_if(forward_d.begin(), forward_d.end(), [&str](const std::pair<std::string, uint8_t>& pair){
-            return pair.first == str;
-        });
-        if(it != forward_d.end()){
-            idx = it->second;
-            return true;
-        }else{
-            return false;
-        }
-    } // bool ChannelMapDopeness::NameIndexDictionary::getIndex
 
 }// namespace chmap
