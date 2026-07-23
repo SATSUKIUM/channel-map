@@ -69,15 +69,15 @@ namespace chmap {
             /*
             DET key: 88bit = 8bit(name index) + 8bit(plane index) + 8bit(segment) + 16bit(channel number) + 8bit(readout channel index)
             */
-           uint8_t min_name_idx, min_plane_idx, min_readout_channel_idx;
-           uint16_t min_segment, min_channel_number;
-           uint8_t max_name_idx, max_plane_idx, max_readout_channel_idx;
-           uint16_t max_segment, max_channel_number;
-           uint16_t sizeSpace_name_idx, sizeSpace_plane_idx, sizeSpace_readout_channel_idx;
-           uint32_t sizeSpace_segment, sizeSpace_channel_number;
-           uint32_t sizeSpace_DETKey = 0; // sizeSpace_DETKey = sizeSpace_name_idx * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx
-           uint32_t minDETId; // for out of range handling
-           uint32_t maxDETId; // for out of range handling
+            uint8_t min_name_idx, min_plane_idx, min_readout_channel_idx;
+            uint16_t min_segment, min_channel_number;
+            uint8_t max_name_idx, max_plane_idx, max_readout_channel_idx;
+            uint16_t max_segment, max_channel_number;
+            uint16_t sizeSpace_name_idx, sizeSpace_plane_idx, sizeSpace_readout_channel_idx;
+            uint32_t sizeSpace_segment, sizeSpace_channel_number;
+            uint32_t sizeSpace_DETKey = 0; // sizeSpace_DETKey = sizeSpace_name_idx * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx
+            uint32_t minDETId; // for out of range handling
+            uint32_t maxDETId; // for out of range handling
             
             std::vector<ChannelMapSimpleItem> fItems;
             std::vector<FEAddrItem> fItemsFE; // 実在するfe item
