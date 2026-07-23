@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
         uint16_t ch = std::get<2>(item);
         const std::string& description = std::get<3>(item);
         std::cout << "\n[in dope_skeleton.cpp] Testing getDETItem for FE id of " << description << ":" << std::endl;
-        channel_map_dopeness.printFEid(chmap::FEAddrItem(ip3rd, ip4th, ch));
+        chmap::FEAddrItem(ip3rd, ip4th, ch).decode();
         std::cout << "\t\t(↓Corresponding DET info)" << std::endl;
         uint32_t doped_index;
         if(!channel_map_dopeness.getDopeKey_FEtoDET(ip3rd, ip4th, ch, doped_index)) {
