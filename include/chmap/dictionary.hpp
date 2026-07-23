@@ -1,23 +1,31 @@
-/*
-This header file is included in the way below.
-[in channel_map_dopeness.hpp]
-namespace chmap {
-    class ChannelMapDopeness {
-        #include "channel_map_dictionary.hpp"
-    ...
-    } // class ChannelMapDopeness
-} // namespace chmap
-*/
-
 #ifndef DICTIONARY_HPP_
 #define DICTIONARY_HPP_
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace chmap::dictionary {
+    class NameIndexDictionary {
+        public:
+            /*
+            usage:
+            execute newWord(), newWord(), ... in order, then execute sortWords() once, and finally execute buildDictionary() once.
+            */
+            void newWord(const std::string& str); // just adding new word
+            void sortWords(); // sort words
+            void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
+            bool getIndex(const std::string& str, uint8_t& idx) const; // from string to index
+            bool invIndex(uint8_t idx, std::string& str) const; // from index to which original string
+        private:
+            // content of dictionary (accessed only through member func)
+            std::vector<std::pair<std::string, uint8_t>> forward_dictionary; // string to index
+            std::vector<std::string> inverse_dictionary; // index to string
+            std::vector<std::string> names_string; // temporary storage for newWord() before buildDictionary()
+    };
+
     uint8_t queryIndex_name(const std::string_view& name);
     uint8_t queryIndex_plane(const std::string_view& plane);
     uint8_t queryIndex_readout_channel(const std::string_view& RO_channel);
