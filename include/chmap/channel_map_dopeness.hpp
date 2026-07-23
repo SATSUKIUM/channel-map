@@ -27,12 +27,12 @@ namespace chmap {
             void initialize_InvMap();
 
             bool getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const;
-            bool getDopeKey_FEtoDET(const FEAddrItem& fe_item, uint32_t& retKey) const { // overload expression
+            bool getDopeKey_FEtoDET(const FEAddrItem& fe_item, uint32_t& retKey) const {
                 return getDopeKey_FEtoDET(fe_item.ip3rd, fe_item.ip4th, fe_item.ch, retKey);
             }
             bool getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane_idx, uint8_t segment, uint16_t channel_number, uint8_t readout_channel_idx, uint32_t& retKey) const;
             bool getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const;
-            bool getDopeKey_DETtoFE(const DETIdItem& det_item, uint32_t& retKey) const { // overload expression
+            bool getDopeKey_DETtoFE(const DETIdItem& det_item, uint32_t& retKey) const {
                 return getDopeKey_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.channel_number, det_item.readout_channel, retKey);
             }
 
@@ -47,8 +47,6 @@ namespace chmap {
 
             void printAllItemsFE();
             void printAllItemsDET();
-            void printFEid(const FEAddrItem& fe_item);
-            void printDETinfo(const DETIdItem& det_item);
             int getNumberOfChannels() const { return fItems.size(); }
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor

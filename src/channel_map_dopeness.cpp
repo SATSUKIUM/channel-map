@@ -357,12 +357,4 @@ namespace chmap {
         }
     }// void ChannelMapDopeness::printAllItemsDET
 
-    void ChannelMapDopeness::printFEid(const FEAddrItem& fe_item) {
-        fe_item.decode();
-    }// void ChannelMapDopeness::printFEid
-
-    void ChannelMapDopeness::printDETinfo(const DETIdItem& det_item) {
-        det_item.decode();
-    }// void ChannelMapDopeness::printDETinfo
-
 }// namespace chmap
