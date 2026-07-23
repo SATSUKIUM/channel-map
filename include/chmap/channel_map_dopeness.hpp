@@ -80,8 +80,6 @@ namespace chmap {
             uint32_t maxDETId; // for out of range handling
             
             std::vector<ChannelMapSimpleItem> fItems;
-            std::vector<FEAddrItem> fItemsFE; // 実在するfe item
-            std::vector<DETIdItem> fItemsDET; // 実在するdet item
             std::unordered_map<std::string, uint32_t> token_normalization_4char; // for normalization of string tokens to 4char uint32_t
             std::unordered_map<std::string, uint16_t> token_normalization_2char; // for normalization of string tokens to 2char uint16_t
 
