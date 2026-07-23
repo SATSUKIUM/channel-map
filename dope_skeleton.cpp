@@ -208,7 +208,7 @@ int main(int argc, char* argv[]) {
         det_readout_channel_idx_inner = det_item.readout_channel;
         t0_inv = std::chrono::high_resolution_clock::now();
         for(int i=0; i<ntrials; i++) {
-            if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name_idx_inner, det_plane_idx_inner, det_segment_inner, det_channel_number_inner, det_readout_channel_idx_inner, doped_index)){
+            if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name_idx_inner, det_plane_idx_inner, det_segment_inner, det_readout_channel_idx_inner, det_channel_number_inner, doped_index)){
                 std::cout << "\tDET info is out of range in getDopeKey_DETtoFE() in the loop. This should not happen since it was checked before the loop." << std::endl;
                 break;
             }

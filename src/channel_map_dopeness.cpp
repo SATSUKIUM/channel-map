@@ -69,19 +69,13 @@ namespace chmap {
         std::cout << "[ChannelMapDopeness::initialize] readCSV finished, number of items: " << fItems.size() << std::endl;
         #endif
 
-        #if DEBUG_PRINT
-        std::cout << "start sorting fItems by fe.id" << std::endl;
-        #endif
         // sort fItems by fe.id
         std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
             return left.fe < right.fe;
         });
-        #if DEBUG_PRINT
-        std::cout << "finished sorting fItems" << std::endl;
-        #endif
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize start" << std::endl;
-        // どこからどこまで空間を作るかスキャン
+        // fItemsFEtoDETのために、どこからどこまで空間を作るかスキャン
         min_ip3rd = 0xFF; // used in getDopeKey_FE()
         min_ip4th = 0xFF; // used in getDopeKey_FE()
         min_ch = 0xFF;    // used in getDopeKey_FE()
@@ -105,10 +99,12 @@ namespace chmap {
         sizeSpace_ip4th = max_ip4th - min_ip4th + 1;
         sizeSpace_ch = max_ch - min_ch + 1;
         sizeSpace_FEKey = sizeSpace_ip3rd * sizeSpace_ip4th * sizeSpace_ch;
-        std::cout << "\tfItems.size(): " << fItems.size() << std::endl;
+        // スキャン終わり
+
+        // dope indexの最大値, 最小値を取得
         getDopeKey_FEtoDET(min_ip3rd, min_ip4th, min_ch, minFEId); // minFEIdを参照で渡している。関数内で代入がある。
         getDopeKey_FEtoDET(max_ip3rd, max_ip4th, max_ch, maxFEId); // maxFEIdを参照で渡している。関数内で代入がある。
-        // スキャン終わり
+
         printFEtoDETscan(); // print key space coverage
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
@@ -129,16 +125,15 @@ namespace chmap {
         }
 
         if(createInvMap){
-            ChannelMapDopeness::initialize_InvMap();
+            initialize_InvMap();
         }
-
 
         std::cout << "[ChannelMapDopeness::initialize] dope vector initialize finished" << std::endl;
         return fill_ratio;
     }// void ChannelMapDopeness::initialize
 
     void ChannelMapDopeness::initialize_InvMap() {
-        // dope indexの最大値、最小値をスキャン
+        // fItemsDETtoFEのために、どこからどこまで空間を作るかスキャン
         min_name_idx = 0xFF;
         min_plane_idx = 0xFF;
         min_segment = 0xFF;
@@ -175,9 +170,12 @@ namespace chmap {
         sizeSpace_channel_number = max_channel_number - min_channel_number + 1;
         sizeSpace_readout_channel_idx = max_readout_channel_idx - min_readout_channel_idx + 1;
         sizeSpace_DETKey = sizeSpace_name_idx * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx;
-        getDopeKey_DETtoFE(min_name_idx, min_plane_idx, min_segment, min_channel_number, min_readout_channel_idx, minDETId); // minDETIdを参照で渡している。関数内で代入がある。
-        getDopeKey_DETtoFE(max_name_idx, max_plane_idx, max_segment, max_channel_number, max_readout_channel_idx, maxDETId); // maxDETIdを参照で渡している。関数内で代入がある。
         // スキャン終わり
+
+        // dope indexの最大値, 最小値を取得
+        getDopeKey_DETtoFE(min_name_idx, min_plane_idx, min_segment, min_readout_channel_idx, min_channel_number, minDETId); // minDETIdを参照で渡している。関数内で代入がある。
+        getDopeKey_DETtoFE(max_name_idx, max_plane_idx, max_segment, max_readout_channel_idx, max_channel_number, maxDETId); // maxDETIdを参照で渡している。関数内で代入がある。
+
         printDETtoFEscan(); // print key space coverage
 
         // 逆引き用のdope vectorの初期化
@@ -185,7 +183,7 @@ namespace chmap {
         for(const auto& item : fItems){
             uint32_t doped_index;
             const auto& det = item.det;
-            if(!getDopeKey_DETtoFE( (det.name) & 0xFF, (det.plane) & 0xFF, (det.segment) & 0xFF, (det.channel_number) & 0xFFFF, (det.readout_channel) & 0xFF, doped_index )) {
+            if(!getDopeKey_DETtoFE( (det.name) & 0xFF, (det.plane) & 0xFF, (det.segment) & 0xFF, (det.readout_channel) & 0xFF, (det.channel_number) & 0xFFFF, doped_index )) {
                 std::cerr << "これは設計上ありえないことですが、逆引きのdope keyが範囲外です: " << std::endl;
                 det.decode();
                 continue;
@@ -194,7 +192,6 @@ namespace chmap {
         }
     } // void ChannelMapDopeness::initialize_InvMap()
 
-    // ↓このコードの本質
     bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
         if(ip3rd < min_ip3rd || ip3rd > max_ip3rd || ip4th < min_ip4th || ip4th > max_ip4th || ch < min_ch || ch > max_ch) {
             return false;
@@ -203,8 +200,7 @@ namespace chmap {
         return true;
     } // std::optional<uint32_t> ChannelMapDopeness::getDopeKey_FEtoDET
 
-    // ↓このコードの本質
-    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane, uint8_t segment, uint16_t channelnumber_idx, uint8_t readout_channel_idx, uint32_t& retKey) const {
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(uint8_t name_idx, uint8_t plane, uint8_t segment, uint8_t readout_channel_idx, uint16_t channelnumber_idx, uint32_t& retKey) const {
         if(name_idx < min_name_idx || name_idx > max_name_idx || plane < min_plane_idx || plane > max_plane_idx || segment < min_segment || segment > max_segment || channelnumber_idx < min_channel_number || channelnumber_idx > max_channel_number || readout_channel_idx < min_readout_channel_idx || readout_channel_idx > max_readout_channel_idx) {
             return false;
         }
@@ -212,7 +208,7 @@ namespace chmap {
         return true;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
-    bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, uint32_t& retKey) const {
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, int channel_number, std::string_view readout_channel, uint32_t& retKey) const {
         uint8_t name_idx = 255u;
         uint8_t plane_idx = 255u;
         uint8_t readout_channel_idx = 255u;
@@ -248,8 +244,8 @@ namespace chmap {
             name_idx,
             plane_idx,
             static_cast<uint8_t>(segment),
-            static_cast<uint16_t>(channel_number),
             readout_channel_idx,
+            static_cast<uint16_t>(channel_number),
             retKey
         );
 
