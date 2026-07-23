@@ -53,27 +53,9 @@ namespace chmap {
 
             ChannelMapDopeness(const ChannelMapDopeness&) = delete; // prevent copy constructor
             ChannelMapDopeness& operator=(const ChannelMapDopeness&) = delete; // prevent copy assignment
-
-            class NameIndexDictionary{
-                public:
-                    /*
-                    usage:
-                    execute newWord(), newWord(), ... in order, then execute sortWords() once, and finally execute buildDictionary() once.
-                    */
-                    void newWord(const std::string& str); // just adding new word
-                    void sortWords(); // sort words
-                    void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
-                    bool getIndex(const std::string& str, uint8_t& idx) const; // from string to index
-                    bool invIndex(uint8_t idx, std::string& str) const; // from index to which original string
-                private:
-                    // content of dictionary (accessed only through member func)
-                    std::vector<std::pair<std::string, uint8_t>> forward_d; // string to index
-                    std::vector<std::string> inverse_d; // index to string
-                    std::vector<std::string> names_str;
-            };
-            NameIndexDictionary detname_dictionary;
-            NameIndexDictionary plane_dictionary;
-            NameIndexDictionary readout_channel_dictionary;
+            dictionary::NameIndexDictionary detname_dictionary;
+            dictionary::NameIndexDictionary plane_dictionary;
+            dictionary::NameIndexDictionary readout_channel_dictionary;
         private:
             /*
             FE key: 0x00FFFFFF (ip3rd: 8bit, ip4th: 8bit, ch: 8bit)
@@ -102,8 +84,8 @@ namespace chmap {
             std::vector<ChannelMapSimpleItem> fItems;
             std::vector<FEAddrItem> fItemsFE; // 実在するfe item
             std::vector<DETIdItem> fItemsDET; // 実在するdet item
-            std::unordered_map<std::string, uint32_t> mapdata_string_simplify_map32;
-            std::unordered_map<std::string, uint16_t> mapdata_string_simplify_map16;
+            std::unordered_map<std::string, uint32_t> token_normalization_4char; // for normalization of string tokens to 4char uint32_t
+            std::unordered_map<std::string, uint16_t> token_normalization_2char; // for normalization of string tokens to 2char uint16_t
 
 
             // for reading csv and initialization
@@ -115,7 +97,7 @@ namespace chmap {
             ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens); // to be {fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data}
             FEAddrItem makeFEItem(const std::vector<std::string>& tokens); // to be {0xc0a80205, 0x01, 0x00} ipfull, ch, data
             DETIdItem makeDETItem(const std::vector<std::string>& tokens); // to be {0x01, 0x01, 0x01, 0x0001, 0x01} detname_idx, plane_idx, segment, channel_number, readout_channel_idx
-            void defineDictionary();
+            void defineTokenNormalizationRules();
             uint32_t four_char_to_uint32(char a, char b, char c, char d);
             uint16_t two_char_to_uint16(char a, char b);
             bool isTokenNumeric(const std::string& token);
