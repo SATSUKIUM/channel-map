@@ -208,7 +208,7 @@ namespace chmap {
         return true;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
-    bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, int channel_number, std::string_view readout_channel, uint32_t& retKey) const {
+    bool ChannelMapDopeness::getDopeKey_DETtoFE(std::string_view det_name, std::string_view det_plane, int segment, std::string_view channel_name, int channel_number, uint32_t& retKey) const {
         uint8_t name_idx = 255u;
         uint8_t plane_idx = 255u;
         uint8_t readout_channel_idx = 255u;
@@ -225,7 +225,7 @@ namespace chmap {
             #endif
             return false;
         }
-        if(!readout_channel_dictionary.getIndex(std::string(readout_channel), readout_channel_idx)) {
+        if(!readout_channel_dictionary.getIndex(std::string(channel_name), readout_channel_idx)) {
             #if CHECK_COUT_GETDOPEKEY_DETTOFE
             std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] readout channel lookup failed" << std::endl;
             #endif
@@ -268,13 +268,13 @@ namespace chmap {
         return fItemsDETtoFE_dope[doped_index];
     } // FEAddrItem& ChannelMapDopeness::getFEIItem
 
-    bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf) {
+    bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view channel_name, int channel_number, DETConfItem* detconf) {
         uint32_t doped_index;
         if(detconf == nullptr) {
             std::cerr << "[ChannelMapDopeness::registerDETConfItem] detconf is nullptr" << std::endl;
             return false;
         }
-        if(!getDopeKey_DETtoFE(det_name, det_plane, segment, readout_channel, channel_number, doped_index)) {
+        if(!getDopeKey_DETtoFE(det_name, det_plane, segment, channel_name, channel_number, doped_index)) {
             std::cerr << "[ChannelMapDopeness::registerDETConfItem] key resolution failed" << std::endl;
             return false;
         }
