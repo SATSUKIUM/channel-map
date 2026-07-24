@@ -328,6 +328,32 @@ namespace chmap {
         return true;
     } // bool ChannelMapDopeness::registerDETConfItem
 
+    bool ChannelMapDopeness::registerGeomItemDC(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf) {
+        uint32_t doped_index;
+        if(detconf == nullptr || geom_item == nullptr) {
+            return false;
+        }
+        if(!getDopeKey_DETtoFE(det_name, det_plane, segment, readout_channel, channel_number, doped_index)) {
+            return false;
+        }
+        return registerGeomItemDC(doped_index, std::move(geom_item), detconf);
+    } // bool ChannelMapDopeness::registerGeomItemDC
+
+    bool ChannelMapDopeness::registerGeomItemDC(const DETIdItem& det_item, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf) {
+        uint32_t doped_index;
+        if(detconf == nullptr || geom_item == nullptr) {
+            return false;
+        }
+        if(!getDopeKey_DETtoFE(det_item, doped_index)) {
+            return false;
+        }
+        return registerGeomItemDC(doped_index, std::move(geom_item), detconf);
+    } // bool ChannelMapDopeness::registerGeomItemDC
+
+    bool ChannelMapDopeness::registerGeomItemDC(uint32_t doped_index, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf) {
+        return registerDETConfSubItem(doped_index, std::move(geom_item), &DETConfItem::geom, detconf);
+    } // bool ChannelMapDopeness::registerGeomItemDC
+
     void ChannelMapDopeness::printAllItemsFE() {
         std::cout << "items count: " << fItems.size() << std::endl;
         std::cout << "All FE Items:" << std::endl;

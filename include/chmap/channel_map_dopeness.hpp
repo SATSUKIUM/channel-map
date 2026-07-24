@@ -2,6 +2,7 @@
 #define CHANNEL_MAP_DOPENESS_HPP_
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -52,6 +53,23 @@ namespace chmap {
             bool registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf);
             bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);
             bool registerDETConfItem(uint32_t doped_index, DETConfItem* detconf);
+
+            bool registerGeomItemDC(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
+            bool registerGeomItemDC(const DETIdItem& det_item, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
+            bool registerGeomItemDC(uint32_t doped_index, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
+
+            template<class BaseT, class DerivedT>
+            bool registerDETConfSubItem(uint32_t doped_index, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* member, DETConfItem* detconf) {
+                if(detconf == nullptr || subitem == nullptr) {
+                    return false;
+                }
+                if(doped_index >= fItemsFEtoDET_dope.size()) {
+                    return false;
+                }
+                detconf->*member = std::move(subitem);
+                fItemsFEtoDET_dope[doped_index].detconf = detconf;
+                return true;
+            }
 
             void printAllItemsFE();
             void printAllItemsDET();
