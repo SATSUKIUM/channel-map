@@ -30,9 +30,6 @@ namespace chmap {
         bool operator==(const FEAddrItem& right) const {
             return std::tie(this->ip3rd, this->ip4th, this->ch) == std::tie(right.ip3rd, right.ip4th, right.ch);
         }
-        uint32_t getRawID() const {
-            return (static_cast<uint32_t>(ip3rd) << 16) | (static_cast<uint32_t>(ip4th) << 8) | static_cast<uint32_t>(ch);
-        }
     }; // struct FEAddrItem
 
     struct DETIdItem {
@@ -52,9 +49,6 @@ namespace chmap {
         }
         bool operator==(const DETIdItem& right) const {
             return std::tie(this->name, this->plane, this->segment, this->channel_number, this->readout_channel) == std::tie(right.name, right.plane, right.segment, right.channel_number, right.readout_channel);
-        }
-        uint32_t getRawID() const { // to be discontenued
-            return (name << 24) | (plane << 8) | (segment << 0) | channel_number; // 使っちゃダメ。壊れます。
         }
 
         DETConfItem* detconf = nullptr;
