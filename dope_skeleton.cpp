@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
             std::cout << "FE id for T1 right channel is out of range in getDopeKey_FEtoDET()." << std::endl;
             return 1;
         }
-        const chmap::DETIdItem& detitem = channel_map_dopeness.getDETItem(doped_index);
+        const chmap::DETIdItem& detitem = channel_map_dopeness.getDETIdItem(doped_index);
         detitem.decode();
 
         std::string det_name_str;
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
             std::cout << "failed to register DETConfItem." << std::endl;
             return 1;
         }
-        if(channel_map_dopeness.getDETItem(doped_index).detconf != &demo_detconf) {
+        if(channel_map_dopeness.getDETIdItem(doped_index).detconf != &demo_detconf) {
             std::cout << "DETConfItem pointer was not stored in the dope vector." << std::endl;
             return 1;
         }
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
         }
         std::cout << "registered GeomItemDC as a subitem of DETConfItem for " << det_name_str << ", " << det_plane_str << ", segment " << static_cast<int>(detitem.segment) << ", channel " << detitem.channel_number << std::endl;
         std::cout << "retrieved GeomItemDC from DETConfItem: " << std::endl;
-        const chmap::GeomItemDC* retrieved_geom_dc = dynamic_cast<const chmap::GeomItemDC*>(channel_map_dopeness.getDETItem(doped_index).detconf->geom.get());
+        const chmap::GeomItemDC* retrieved_geom_dc = dynamic_cast<const chmap::GeomItemDC*>(channel_map_dopeness.getDETIdItem(doped_index).detconf->geom.get());
         if(retrieved_geom_dc) {
             std::cout << "retrieved GeomItemDC successfully." << std::endl;
         } else {
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
             std::cout << "\tFE id is out of range in getDopeKey_FEtoDET()." << std::endl;
             continue;
         }
-        chmap::DETIdItem det_item = channel_map_dopeness.getDETItem(doped_index);
+        chmap::DETIdItem det_item = channel_map_dopeness.getDETIdItem(doped_index);
         #if isInvMap
         std::cout << "query: " << static_cast<uint32_t>(ip3rd) << ", " << static_cast<uint32_t>(ip4th) << ", " << static_cast<uint32_t>(ch) << std::endl;
         #endif
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "\tDET info is out of range in getRank_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
                 continue;
             }
-            chmap::FEAddrItem fe_item_inv = channel_map_dopeness.getFEIItem(rank_inv);
+            chmap::FEAddrItem fe_item_inv = channel_map_dopeness.getFEAddrItem(rank_inv);
             fe_item_inv.decode();
         }
         #endif
@@ -189,12 +189,12 @@ int main(int argc, char* argv[]) {
             std::cout << "\tFE id is out of range in getDopeKey_FEtoDET(). This should not happen since it was checked before." << std::endl;
             continue;
         }
-        chmap::DETIdItem det_item_outer = channel_map_dopeness.getDETItem(doped_index);
+        chmap::DETIdItem det_item_outer = channel_map_dopeness.getDETIdItem(doped_index);
         if(!channel_map_dopeness.getDopeKey_DETtoFE(det_item_outer, doped_index)){
             std::cout << "\tDET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
             continue;
         }
-        chmap::FEAddrItem fe_item_outer = channel_map_dopeness.getFEIItem(doped_index);
+        chmap::FEAddrItem fe_item_outer = channel_map_dopeness.getFEAddrItem(doped_index);
         uint8_t det_name, det_plane,det_segment, det_readout_channel;
         uint16_t det_channel_number;
         std::string det_name_str, det_plane_str, det_readout_channel_str;
@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "\tFE id is out of range in getDopeKey_FEtoDET() in the loop. This should not happen since it was checked before the loop." << std::endl;
                 break;
             }
-            chmap::DETIdItem det_item_inner = channel_map_dopeness.getDETItem(doped_index);
+            chmap::DETIdItem det_item_inner = channel_map_dopeness.getDETIdItem(doped_index);
             det_name = det_item_inner.name;
             det_plane = det_item_inner.plane;
             det_segment = det_item_inner.segment;
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "\tDET info is out of range in getDopeKey_DETtoFE() in the loop. This should not happen since it was checked before the loop." << std::endl;
                 break;
             }
-            chmap::FEAddrItem fe_item_inner = channel_map_dopeness.getFEIItem(doped_index);
+            chmap::FEAddrItem fe_item_inner = channel_map_dopeness.getFEAddrItem(doped_index);
 
         }
         t1_inv = std::chrono::high_resolution_clock::now();
