@@ -54,9 +54,9 @@ namespace chmap {
             bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);
             bool registerDETConfItem(uint32_t doped_index, DETConfItem* detconf);
 
-            bool registerGeomItemDC(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
-            bool registerGeomItemDC(const DETIdItem& det_item, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
-            bool registerGeomItemDC(uint32_t doped_index, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
+            // bool registerGeomItemDC(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
+            // bool registerGeomItemDC(const DETIdItem& det_item, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
+            // bool registerGeomItemDC(uint32_t doped_index, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
 
             template<class BaseT, class DerivedT>
             bool registerDETConfSubItem(uint32_t doped_index, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* member, DETConfItem* detconf) {
