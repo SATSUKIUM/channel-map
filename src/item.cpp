@@ -7,6 +7,11 @@
 namespace chmap {
     void DETIdItem::decode() const {
         std::string detname_str, plane_str, readout_channel_str;
+
+        for(int i=0; i<10; i++){
+            std::cout << name;
+        }
+
         // print member variables
         std::cout << std::endl << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << name;
         if(ChannelMapDopeness::get_instance().detname_dictionary.invIndex(name, detname_str)){
