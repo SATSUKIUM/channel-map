@@ -45,10 +45,10 @@ namespace chmap {
                 return getDopeKey_DETtoFE(det_item.name, det_item.plane, det_item.segment, det_item.readout_channel, det_item.channel_number, retKey);
             }
 
-            const DETIdItem& getDETItem(uint32_t doped_index) const;
-            DETIdItem& getDETItem(uint32_t doped_index);
-            const FEAddrItem& getFEIItem(uint32_t doped_index) const;
-            FEAddrItem& getFEIItem(uint32_t doped_index);
+            const DETIdItem& getDETIdItem(uint32_t doped_index) const;
+            DETIdItem& getDETIdItem(uint32_t doped_index);
+            const FEAddrItem& getFEAddrItem(uint32_t doped_index) const;
+            FEAddrItem& getFEAddrItem(uint32_t doped_index);
 
             bool registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf);
             bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);

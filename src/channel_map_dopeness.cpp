@@ -252,21 +252,21 @@ namespace chmap {
         return ok;
     } // bool ChannelMapDopeness::getDopeKey_DETtoFE
 
-    const DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index) const{
+    const DETIdItem& ChannelMapDopeness::getDETIdItem(uint32_t doped_index) const{
         return fItemsFEtoDET_dope[doped_index];
-    } // const DETIdItem& ChannelMapDopeness::getDETItem
+    } // const DETIdItem& ChannelMapDopeness::getDETIdItem
 
-    DETIdItem& ChannelMapDopeness::getDETItem(uint32_t doped_index){
+    DETIdItem& ChannelMapDopeness::getDETIdItem(uint32_t doped_index){
         return fItemsFEtoDET_dope[doped_index];
-    } // DETIdItem& ChannelMapDopeness::getDETItem
+    } // DETIdItem& ChannelMapDopeness::getDETIdItem
 
-    const FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index) const{
+    const FEAddrItem& ChannelMapDopeness::getFEAddrItem(uint32_t doped_index) const{
         return fItemsDETtoFE_dope[doped_index];
-    } // const FEAddrItem& ChannelMapDopeness::getFEIItem
+    } // const FEAddrItem& ChannelMapDopeness::getFEAddrItem
 
-    FEAddrItem& ChannelMapDopeness::getFEIItem(uint32_t doped_index){
+    FEAddrItem& ChannelMapDopeness::getFEAddrItem(uint32_t doped_index){
         return fItemsDETtoFE_dope[doped_index];
-    } // FEAddrItem& ChannelMapDopeness::getFEIItem
+    } // FEAddrItem& ChannelMapDopeness::getFEAddrItem
 
     bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view channel_name, int channel_number, DETConfItem* detconf) {
         uint32_t doped_index;
@@ -374,7 +374,7 @@ namespace chmap {
             }else {
 
             }
-            const DETIdItem& det_item = getDETItem(doped_index);
+            const DETIdItem& det_item = getDETIdItem(doped_index);
             det_item.decode();
         }
     }// void ChannelMapDopeness::printAllItemsDET
