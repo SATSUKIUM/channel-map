@@ -9,17 +9,17 @@ namespace chmap {
         std::string detname_str, plane_str, readout_channel_str;
 
         for(int i=0; i<10; i++){
-            std::cout << name;
+            std::cout << static_cast<uint32_t>(name);
         }
 
         // print member variables
-        std::cout << std::endl << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << name;
+        std::cout << std::endl << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(name);
         if(ChannelMapDopeness::get_instance().detname_dictionary.invIndex(name, detname_str)){
             std::cout << " (detname: " << detname_str << ")";
         }
         std::cout << std::endl;
 
-        std::cout << "\tplane index: 0x" << std::hex << std::setw(8) << std::setfill('0') << plane;
+        std::cout << "\tplane index: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(plane);
         if(ChannelMapDopeness::get_instance().plane_dictionary.invIndex(plane, plane_str)){
             std::cout << " (plane: " << plane_str << ")";
         }
@@ -27,13 +27,13 @@ namespace chmap {
 
         std::cout << "\tsegment: " << static_cast<int>(segment) << std::endl;
 
-        std::cout << "\tchannel name index: 0x" << std::hex << std::setw(8) << std::setfill('0') << readout_channel << std::dec;
+        std::cout << "\tchannel name index: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(readout_channel) << std::dec;
         if(ChannelMapDopeness::get_instance().readout_channel_dictionary.invIndex(readout_channel, readout_channel_str)){
             std::cout << " (readout channel: " << readout_channel_str << ")";
         }
         std::cout << std::endl;
 
-        std::cout << "\tchannel number: 0x" << std::hex << std::setw(16) << std::setfill('0') << channel_number << std::dec << std::endl;
+        std::cout << "\tchannel number: 0x" << std::hex << std::setw(16) << std::setfill('0') << static_cast<uint64_t>(channel_number) << std::dec << std::endl;
 
 
     } // void DETIdItem::decode()
