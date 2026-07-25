@@ -132,6 +132,23 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         std::cout << "registered DETConfItem pointer for " << det_name_str << ", " << det_plane_str << ", segment " << static_cast<int>(detitem.segment) << ", channel " << detitem.channel_number << std::endl;
+
+        std::unique_ptr<chmap::GeomItemDC> geom_dc = std::make_unique<chmap::GeomItemDC>();
+        geom_dc->SetGlobalPosition(0.0, 0.0, 100.0);
+        geom_dc->SetResolution(0.1, 0.1, 0.1);
+        geom_dc->SetRotationAngles(0.0, 0.0, 0.0);
+        if(!channel_map_dopeness.registerDETConfSubItem<chmap::GeomItem, chmap::GeomItemDC>(doped_index, std::move(geom_dc), &chmap::DETConfItem::geom)) {
+            std::cout << "failed to register GeomItemDC as a subitem of DETConfItem." << std::endl;
+            return 1;
+        }
+        std::cout << "registered GeomItemDC as a subitem of DETConfItem for " << det_name_str << ", " << det_plane_str << ", segment " << static_cast<int>(detitem.segment) << ", channel " << detitem.channel_number << std::endl;
+        std::cout << "retrieved GeomItemDC from DETConfItem: " << std::endl;
+        const chmap::GeomItemDC* retrieved_geom_dc = dynamic_cast<const chmap::GeomItemDC*>(channel_map_dopeness.getDETItem(doped_index).detconf->geom.get());
+        if(retrieved_geom_dc) {
+            std::cout << "retrieved GeomItemDC successfully." << std::endl;
+        } else {
+            std::cout << "failed to retrieve GeomItemDC." << std::endl;
+        }
         std::cout << std::string(80, '=') << std::endl;
 
     }
