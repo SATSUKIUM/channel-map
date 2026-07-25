@@ -8,12 +8,7 @@ namespace chmap {
     void DETIdItem::decode() const {
         std::string detname_str, plane_str, readout_channel_str;
 
-        for(int i=0; i<10; i++){
-            std::cout << static_cast<uint32_t>(name);
-        }
-
-        // print member variables
-        std::cout << std::endl << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(name);
+        std::cout << "\tdetname index: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(name);
         if(ChannelMapDopeness::get_instance().detname_dictionary.invIndex(name, detname_str)){
             std::cout << " (detname: " << detname_str << ")";
         }
@@ -33,7 +28,7 @@ namespace chmap {
         }
         std::cout << std::endl;
 
-        std::cout << "\tchannel number: 0x" << std::hex << std::setw(16) << std::setfill('0') << static_cast<uint64_t>(channel_number) << std::dec << std::endl;
+        std::cout << "\tchannel number: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(channel_number) << std::dec << std::endl;
 
 
     } // void DETIdItem::decode()
