@@ -54,22 +54,11 @@ namespace chmap {
             bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);
             bool registerDETConfItem(uint32_t doped_index, DETConfItem* detconf);
 
-            // bool registerGeomItemDC(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
-            // bool registerGeomItemDC(const DETIdItem& det_item, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
-            // bool registerGeomItemDC(uint32_t doped_index, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf);
-
-            template<class BaseT, class DerivedT>
-            bool registerDETConfSubItem(uint32_t doped_index, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* member, DETConfItem* detconf) {
-                if(detconf == nullptr || subitem == nullptr) {
-                    return false;
-                }
-                if(doped_index >= fItemsFEtoDET_dope.size()) {
-                    return false;
-                }
-                detconf->*member = std::move(subitem);
-                fItemsFEtoDET_dope[doped_index].detconf = detconf;
+            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(uint32_t dopeKey_FEtoDET, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* member) {
+                DETConfItem* detconfitem = getOrCreateDETConfItem(dopeKey_FEtoDET);
+                detconfitem->*member = std::move(subitem);
                 return true;
-            }
+            };
 
             void printAllItemsFE();
             void printAllItemsDET();
@@ -132,6 +121,9 @@ namespace chmap {
 
             std::vector<DETIdItem> fItemsFEtoDET_dope; // dope vectorの実体
             std::vector<FEAddrItem> fItemsDETtoFE_dope; // 逆引き用のdope vectorの実体
+
+            std::vector< std::unique_ptr< DETConfItem > > fDetConfItems; // 登録されるDETConfItemの寿命を延ばす人
+            DETConfItem* getOrCreateDETConfItem(uint32_t dopeKey_FEtoDET); // dopeKey_FEtoDETに対応するDETConfItemを返す。なければ作る。
 
             ChannelMapDopeness() = default; // private default constructor
     };// class ChannelMapDopeness
