@@ -379,4 +379,15 @@ namespace chmap {
         }
     }// void ChannelMapDopeness::printAllItemsDET
 
+    DETConfItem* ChannelMapDopeness::getOrCreateDETConfItem(uint32_t dopeKey_FEtoDET) {
+        DETConfItem* detconfitem = fItemsFEtoDET_dope[dopeKey_FEtoDET].detconf;
+        if(detconfitem == nullptr) {
+            auto newp = std::make_unique<DETConfItem>();
+            fDetConfItems.push_back(std::move(newp)); // 所有権をfDetConfItemsに移すため
+            fItemsFEtoDET_dope[dopeKey_FEtoDET].detconf = fDetConfItems.back().get();
+            detconfitem = fItemsFEtoDET_dope[dopeKey_FEtoDET].detconf;
+        }
+        return detconfitem;
+    } // DETConfItem* ChannelMapDopeness::getOrCreateDETConfItem
+
 }// namespace chmap
