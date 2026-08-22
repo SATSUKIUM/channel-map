@@ -14,6 +14,10 @@ namespace chmap {
     class CalibrationItem_DCDriftLength : public CalibrationItem {
         public:
             virtual ~CalibrationItem_DCDriftLength() = default;
+            void SetApproximation(int approxOrder_, const std::vector<double>& coeffs_) {
+                approxOrder = approxOrder_;
+                coeffs = coeffs_;
+            }
         private:
             int approxOrder; // the number of coefficients for polynomial approximation of drift length
             std::vector<double> coeffs; // coefficients for polynomial approximation of drift length
@@ -23,6 +27,10 @@ namespace chmap {
     class CalibrationItem_DCTdcCalib : public CalibrationItem {
         public:
             virtual ~CalibrationItem_DCTdcCalib() = default;
+            void SetTdcCalibration(double offset_, double scale_) {
+                offset = offset_;
+                scale = scale_;
+            }
         private:
             double offset, scale; // relative time = (absolute time * scale) + offset
     };
