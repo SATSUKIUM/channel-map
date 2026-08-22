@@ -137,13 +137,13 @@ int main(int argc, char* argv[]) {
         geom_dc->SetGlobalPosition(0.0, 0.0, 100.0);
         geom_dc->SetResolution(0.1, 0.1, 0.1);
         geom_dc->SetRotationAngles(0.0, 0.0, 0.0);
-        if(!channel_map_dopeness.registerDETConfSubItem<chmap::GeomItem, chmap::GeomItemDC>(dopeKey_FEtoDET, std::move(geom_dc), &chmap::DETConfItem::geom)) {
+        if(!channel_map_dopeness.registerDETConfSubItem<chmap::GeomItem, chmap::GeomItemDC>(dopeKey_FEtoDET, std::move(geom_dc), &chmap::DETConfItem::membername_geom)) {
             std::cout << "failed to register GeomItemDC as a subitem of DETConfItem." << std::endl;
             return 1;
         }
         std::cout << "registered GeomItemDC as a subitem of DETConfItem for " << det_name_str << ", " << det_plane_str << ", segment " << static_cast<int>(detitem.segment) << ", channel " << detitem.channel_number << std::endl;
         std::cout << "retrieved GeomItemDC from DETConfItem: " << std::endl;
-        const chmap::GeomItemDC* retrieved_geom_dc = dynamic_cast<const chmap::GeomItemDC*>(channel_map_dopeness.getDETIdItem(dopeKey_FEtoDET).detconf->geom.get());
+        const chmap::GeomItemDC* retrieved_geom_dc = dynamic_cast<const chmap::GeomItemDC*>(channel_map_dopeness.getDETIdItem(dopeKey_FEtoDET).detconf->membername_geom.get());
         if(retrieved_geom_dc) {
             std::cout << "retrieved GeomItemDC successfully." << std::endl;
         } else {
