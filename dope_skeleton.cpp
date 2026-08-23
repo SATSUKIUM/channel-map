@@ -184,21 +184,36 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         else{
-            std::cout << "det name string: " << det_name_str << " got from index: " << static_cast<int>(det_name_idx) << std::endl;
+            std::cout << "det name string: \"" << det_name_str << "\" got from index: \"" << static_cast<int>(det_name_idx) << "\"" << std::endl;
+            if(std::string("kldc") == det_name_str) {
+                std::cout << "det name string matches expected value \"kldc\"." << std::endl;
+            } else {
+                std::cout << "det name string does not match expected value \"kldc\"." << std::endl;
+            }
         }
         if(!channel_map_dopeness.plane_dictionary.invIndex(det_plane_idx, det_plane_str)) {
             std::cout << "det plane index could not be resolved to string." << std::endl;
             return 1;
         }
         else{
-            std::cout << "det plane string: " << det_plane_str << " got from index: " << static_cast<int>(det_plane_idx) << std::endl;
+            std::cout << "det plane string: \"" << det_plane_str << "\" got from index: \"" << static_cast<int>(det_plane_idx) << "\"" << std::endl;
+            if(std::string("U") == det_plane_str) {
+                std::cout << "det plane string matches expected value \"U\"." << std::endl;
+            } else {
+                std::cout << "det plane string does not match expected value \"U\"." << std::endl;
+            }
         }
         if(!channel_map_dopeness.readout_channel_dictionary.invIndex(det_readout_channel_idx, det_readout_channel_str)) {
             std::cout << "readout channel index could not be resolved to string." << std::endl;
             return 1;
         }
         else{
-            std::cout << "det readout channel string: " << det_readout_channel_str << " got from index: " << static_cast<int>(det_readout_channel_idx) << std::endl;
+            std::cout << "det readout channel string: \"" << det_readout_channel_str << "\" got from index: \"" << static_cast<int>(det_readout_channel_idx) << "\"" << std::endl;
+            if(std::string("0") == det_readout_channel_str) {
+                std::cout << "det readout channel string matches expected value \"0\"." << std::endl;
+            } else {
+                std::cout << "det readout channel string does not match expected value \"0\"." << std::endl;
+            }
         }
 
         std::cout << std::string(80, '=') << std::endl;
