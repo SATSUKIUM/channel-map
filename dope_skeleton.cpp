@@ -179,6 +179,8 @@ int main(int argc, char* argv[]) {
         uint8_t det_readout_channel_idx = detitem.readout_channel;
         uint16_t det_channel_number = detitem.channel_number;
         std::string det_name_str, det_plane_str, det_readout_channel_str;
+
+        // test for index to string conversion
         if(!channel_map_dopeness.detname_dictionary.invIndex(det_name_idx, det_name_str)) {
             std::cout << "det name index could not be resolved to string." << std::endl;
             return 1;
@@ -216,6 +218,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        // test for inverse mapping (DET -> FE)
         uint32_t dopeKey_DETtoFE;
         if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name_idx, det_plane_idx, det_segment, det_readout_channel_idx, det_channel_number, dopeKey_DETtoFE)) {
             std::cout << "DET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
@@ -239,6 +242,18 @@ int main(int argc, char* argv[]) {
                 std::cout << "Consistency check for getDopeKey_DETtoFE() passed." << std::endl;
             } else {
                 std::cout << "Consistency check for getDopeKey_DETtoFE() failed." << std::endl;
+            }
+        }
+
+        if(!channel_map_dopeness.getDopeKey_DETtoFE(detitem, dopeKey_DETtoFE_check)) {
+            std::cout << "DET info is out of range in getDopeKey_DETtoFE() for consistency check with DETIdItem. This should not happen since it was obtained from a valid doped_index." << std::endl;
+            return 1;
+        }
+        else{
+            if(dopeKey_DETtoFE_check == dopeKey_DETtoFE) {
+                std::cout << "Consistency check for getDopeKey_DETtoFE() with DETIdItem passed." << std::endl;
+            } else {
+                std::cout << "Consistency check for getDopeKey_DETtoFE() with DETIdItem failed." << std::endl;
             }
         }
 
