@@ -89,6 +89,7 @@ int main(int argc, char* argv[]) {
     #if 1
     {
         std::cout << std::string(80, '=') << std::endl;
+        // t1について動作確認
         uint32_t dopeKey_FEtoDET;
         if(!channel_map_dopeness.getDopeKey_FEtoDET(test_ip3rd_T1right, test_ip4th_T1right, test_ch_T1right, dopeKey_FEtoDET)) {
             std::cout << "FE id for T1 right channel is out of range in getDopeKey_FEtoDET()." << std::endl;
@@ -97,6 +98,7 @@ int main(int argc, char* argv[]) {
         const chmap::DETIdItem& detitem = channel_map_dopeness.getDETIdItem(dopeKey_FEtoDET);
         detitem.decode();
 
+        // test for index to string conversion
         std::string det_name_str;
         std::string det_plane_str;
         std::string det_readout_channel_str;
@@ -116,6 +118,7 @@ int main(int argc, char* argv[]) {
         }
         std::cout << "(test) det readout channel string: " << det_readout_channel_str << " got from index: " << static_cast<int>(detitem.readout_channel) << std::endl;
 
+        // test for registering DETConfItem
         chmap::DETConfItem demo_detconf;
         if(!channel_map_dopeness.registerDETConfItem(
                 det_name_str,
