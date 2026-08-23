@@ -216,6 +216,19 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        uint32_t dopeKey_DETtoFE;
+        if(!channel_map_dopeness.getDopeKey_DETtoFE(det_name_idx, det_plane_idx, det_segment, det_readout_channel_idx, det_channel_number, dopeKey_DETtoFE)) {
+            std::cout << "DET info is out of range in getDopeKey_DETtoFE(). This should not happen since it was obtained from a valid doped_index." << std::endl;
+            return 1;
+        }
+        chmap::FEAddrItem fe_item_inv = channel_map_dopeness.getFEAddrItem(dopeKey_DETtoFE);
+        fe_item_inv.decode();
+        if(fe_item_inv.ip3rd == test_ip3rd_kldc2 && fe_item_inv.ip4th == test_ip4th_kldc2 && fe_item_inv.ch == test_ch_kldc2) {
+            std::cout << "Inverse mapping (DET -> FE) is consistent with the original FE id." << std::endl;
+        } else {
+            std::cout << "Inverse mapping (DET -> FE) is NOT consistent with the original FE id." << std::endl;
+        }
+
         std::cout << std::string(80, '=') << std::endl;
     }
 
