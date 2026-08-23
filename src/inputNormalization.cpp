@@ -37,7 +37,8 @@ namespace chmap {
             {"bottom", "BOTM"},
             {"upstream", "UPST"},
             {"downstream", "DOST"},
-            {"nil", "NIL "}
+            {"nil", "NIL "},
+            {"0", "0   "}
         };
         // make simplified map
         for(const auto& name_pair : detnames){

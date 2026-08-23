@@ -61,7 +61,7 @@ namespace chmap::dictionary {
             {"Vp", "VP"},
             {"nil", "NI"} 
 */
-    inline constexpr std::array<std::string_view, 7> readout_channel_dictionary = {"LEFT", "RIGT", "TOP ", "BOTM", "UPST", "DOST", "NI  "};
+    inline constexpr std::array<std::string_view, 8> readout_channel_dictionary = {"    ", "LEFT", "RIGT", "TOP ", "BOTM", "UPST", "DOST", "NI  "};
 /*
             {"left", "LEFT"},
             {"right", "RIGT"},
