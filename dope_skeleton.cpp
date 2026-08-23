@@ -159,6 +159,7 @@ int main(int argc, char* argv[]) {
     {
         // test for KLDC
         std::cout << std::string(80, '=') << std::endl;
+        std::cout << "[in dope_skeleton.cpp] Testing getDETItem for FE id of KLDC 2 U' plane channel 16:" << std::endl;
 /*
     // test kldc 2 U' plane channel 16
     uint8_t test_ip3rd_kldc2 = 0x02;
