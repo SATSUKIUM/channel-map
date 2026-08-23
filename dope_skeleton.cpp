@@ -229,6 +229,19 @@ int main(int argc, char* argv[]) {
             std::cout << "Inverse mapping (DET -> FE) is NOT consistent with the original FE id." << std::endl;
         }
 
+        uint32_t dopeKey_DETtoFE_check;
+        if(!channel_map_dopeness.getDopeKey_DETtoFE(std::string("kldc"), std::string("U"), static_cast<uint8_t>(2), std::string("0"), static_cast<uint16_t>(95), dopeKey_DETtoFE_check)) {
+            std::cout << "DET info is out of range in getDopeKey_DETtoFE() for consistency check. This should not happen since it was obtained from a valid doped_index." << std::endl;
+            return 1;
+        }
+        else{
+            if(dopeKey_DETtoFE_check == dopeKey_DETtoFE) {
+                std::cout << "Consistency check for getDopeKey_DETtoFE() passed." << std::endl;
+            } else {
+                std::cout << "Consistency check for getDopeKey_DETtoFE() failed." << std::endl;
+            }
+        }
+
         std::cout << std::string(80, '=') << std::endl;
     }
 
