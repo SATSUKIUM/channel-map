@@ -153,9 +153,46 @@ int main(int argc, char* argv[]) {
             std::cout << "failed to retrieve GeomItemDC." << std::endl;
         }
         std::cout << std::string(80, '=') << std::endl;
-
     }
     #endif
+
+    {
+        // test for KLDC
+        std::cout << std::string(80, '=') << std::endl;
+/*
+    // test kldc 2 U' plane channel 16
+    uint8_t test_ip3rd_kldc2 = 0x02;
+    uint8_t test_ip4th_kldc2 = 0xB2;
+    uint8_t test_ch_kldc2 = 96;
+*/
+        uint32_t dopeKey_FEtoDET;
+        if(!channel_map_dopeness.getDopeKey_FEtoDET(test_ip3rd_kldc2, test_ip4th_kldc2, test_ch_kldc2, dopeKey_FEtoDET)) {
+            std::cout << "FE id for KLDC 2 U' plane channel 16 is out of range in getDopeKey_FEtoDET()." << std::endl;
+            return 1;
+        }
+        const chmap::DETIdItem& detitem = channel_map_dopeness.getDETIdItem(dopeKey_FEtoDET);
+        detitem.decode();
+        uint8_t det_name_idx = detitem.name;
+        uint8_t det_plane_idx = detitem.plane;
+        uint8_t det_segment = detitem.segment;
+        uint8_t det_readout_channel_idx = detitem.readout_channel;
+        uint16_t det_channel_number = detitem.channel_number;
+        std::string det_name_str, det_plane_str, det_readout_channel_str;
+        if(!channel_map_dopeness.detname_dictionary.invIndex(det_name_idx, det_name_str)) {
+            std::cout << "det name index could not be resolved to string." << std::endl;
+            return 1;
+        }
+        if(!channel_map_dopeness.plane_dictionary.invIndex(det_plane_idx, det_plane_str)) {
+            std::cout << "det plane index could not be resolved to string." << std::endl;
+            return 1;
+        }
+        if(!channel_map_dopeness.readout_channel_dictionary.invIndex(det_readout_channel_idx, det_readout_channel_str)) {
+            std::cout << "readout channel index could not be resolved to string." << std::endl;
+            return 1;
+        }
+
+        std::cout << std::string(80, '=') << std::endl;
+    }
 
     for(const auto& item : test_items) {
         uint8_t ip3rd = std::get<0>(item);
