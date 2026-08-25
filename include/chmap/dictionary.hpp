@@ -12,13 +12,13 @@ namespace chmap::dictionary {
         public:
             /*
             usage:
-            execute newWord(), newWord(), ... in order, then execute sortWords() once, and finally execute buildDictionary() once.
+            call newWord(), newWord(), ... in order, then call sortWords() once, and finally call buildDictionary() once.
             */
             void newWord(const std::string& str); // just adding new word
             void sortWords(); // sort words
             void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
-            bool getIndex(const std::string& str, uint8_t& idx) const; // from string to index
-            bool invIndex(uint8_t idx, std::string& str) const; // from index to which original string
+            bool StringToIndex(const std::string& str, uint8_t& idx) const; // from string to index
+            bool IndexToString(uint8_t idx, std::string& str) const; // from index to which original string
         private:
             // content of dictionary (accessed only through member func)
             std::vector<std::pair<std::string, uint8_t>> forward_dictionary; // string to index

@@ -213,19 +213,19 @@ namespace chmap {
         uint8_t plane_idx = 255u;
         uint8_t readout_channel_idx = 255u;
         // convert string to index
-        if(!detname_dictionary.getIndex(std::string(det_name), name_idx)) {
+        if(!detname_dictionary.StringToIndex(std::string(det_name), name_idx)) {
             #if CHECK_COUT_GETDOPEKEY_DETTOFE
             std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] det name lookup failed" << std::endl;
             #endif
             return false;
         }
-        if(!plane_dictionary.getIndex(std::string(det_plane), plane_idx)) {
+        if(!plane_dictionary.StringToIndex(std::string(det_plane), plane_idx)) {
             #if CHECK_COUT_GETDOPEKEY_DETTOFE
             std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] plane lookup failed" << std::endl;
             #endif
             return false;
         }
-        if(!readout_channel_dictionary.getIndex(std::string(channel_name), readout_channel_idx)) {
+        if(!readout_channel_dictionary.StringToIndex(std::string(channel_name), readout_channel_idx)) {
             #if CHECK_COUT_GETDOPEKEY_DETTOFE
             std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] readout channel lookup failed" << std::endl;
             #endif

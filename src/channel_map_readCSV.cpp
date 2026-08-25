@@ -243,12 +243,12 @@ namespace chmap {
         for(int i=0; i<tokens.size(); i++){
             if(det_count == 0){
                 det_name_str = tokens[i];
-                if(!detname_dictionary.getIndex(det_name_str, det_name_idx)){
+                if(!detname_dictionary.StringToIndex(det_name_str, det_name_idx)){
                     std::cerr << "failed to get index for detector name: " << det_name_str << std::endl;
                 }
             }else if(det_count == 1){
                 det_plane_str = tokens[i];
-                if(!plane_dictionary.getIndex(det_plane_str, det_plane_idx)){
+                if(!plane_dictionary.StringToIndex(det_plane_str, det_plane_idx)){
                     std::cerr << "failed to get index for detector plane: " << det_plane_str << std::endl;
                 }
             }else if(det_count == 2){
@@ -258,7 +258,7 @@ namespace chmap {
                 det_channel_number = parse_to32(det_channel_number_str);
             }else if(det_count == 4){
                 det_readout_channel_str = tokens[i];
-                if(!readout_channel_dictionary.getIndex(det_readout_channel_str, det_readout_channel_idx)){
+                if(!readout_channel_dictionary.StringToIndex(det_readout_channel_str, det_readout_channel_idx)){
                     std::cerr << "failed to get index for detector readout channel: " << det_readout_channel_str << std::endl;
                 }
             }
