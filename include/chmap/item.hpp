@@ -55,7 +55,7 @@ namespace chmap {
     }; // struct DETIdItem
 
     // ↓無意味だから余裕ある時に消そう
-    struct ChannelMapSimpleItem {
+    struct ItemPair {
         FEAddrItem fe;
         DETIdItem det;
     };

@@ -94,7 +94,7 @@ namespace chmap {
             uint32_t minDETId; // for out of range handling
             uint32_t maxDETId; // for out of range handling
             
-            std::vector<ChannelMapSimpleItem> fItems;
+            std::vector<ItemPair> fItems;
             std::unordered_map<std::string, uint32_t> token_normalization_4char; // for normalization of string tokens to 4char uint32_t
             std::unordered_map<std::string, uint16_t> token_normalization_2char; // for normalization of string tokens to 2char uint16_t
 
@@ -105,7 +105,7 @@ namespace chmap {
             void removeBOM(std::string& str); // remove BOM if exists in the beginning of the string
             std::vector<std::string> split_line(const std::string& line, char delimiter = ',');
             std::vector<std::string> m_header, m_element_type, m_unique_types;
-            ChannelMapSimpleItem makeSimpleItem(const std::vector<std::string>& tokens); // to be {fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data}
+            ItemPair makeItemPair(const std::vector<std::string>& tokens); // to be {fe.id, fe.channel, fe.data, detector.id, detector.plane, detector.segment, detector.channel, detector.readout, detector.data}
             FEAddrItem buildFEItemFromStringTokens(const std::vector<std::string>& tokens);
             DETIdItem buildDETItemFromStringTokens(const std::vector<std::string>& tokens);
             void defineTokenNormalizationRules();

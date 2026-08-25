@@ -158,9 +158,9 @@ namespace chmap {
             }
             std::cout << std::endl;
             #endif
-            ChannelMapSimpleItem item = makeSimpleItem(tokens);
+            ItemPair item = makeItemPair(tokens);
             #if DEBUG_PRINT
-            std::cout << "  made ChannelMapSimpleItem: " << std::endl;
+            std::cout << "  made ItemPair: " << std::endl;
             std::cout << "    FE id: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.fe.id << std::dec << std::endl;
             std::cout << "    DET name: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.det.name << std::dec
                       << ", plane: 0x" << std::hex << std::setw(4) << std::setfill('0') << item.det.plane << std::dec
@@ -255,7 +255,7 @@ namespace chmap {
                 det_segment = parse_to8(tokens[i]);
             }else if(det_count == 3){
                 det_channel_number_str = tokens[i];
-                det_channel_number = parse_to32(det_channel_number_str);
+                det_channel_number = parse_to16(det_channel_number_str);
             }else if(det_count == 4){
                 det_readout_channel_str = tokens[i];
                 if(!readout_channel_dictionary.StringToIndex(det_readout_channel_str, det_readout_channel_idx)){
@@ -267,7 +267,7 @@ namespace chmap {
         return DETIdItem(det_name_idx, det_plane_idx, det_segment, det_channel_number, det_readout_channel_idx);
     } // DETIdItem ChannelMapDopeness::buildDETItemFromStringTokens
 
-    ChannelMapSimpleItem ChannelMapDopeness::makeSimpleItem(const std::vector<std::string>& tokens) {
+    ItemPair ChannelMapDopeness::makeItemPair(const std::vector<std::string>& tokens) {
         int len_tokens = tokens.size();
         uint64_t fe_ip_full;
         uint16_t fe_ip_3rd_4th;
@@ -288,7 +288,7 @@ namespace chmap {
         int det_magic = 6; // id, plane, segment, channel, readout, data
         int det_count = 0;
         #if DEBUG_PRINT
-        std::cout << "making ChannelMapSimpleItem from tokens:" << std::endl;
+        std::cout << "making ItemPair from tokens:" << std::endl;
         for(const auto& t : tokens){
             std::cout << "  " << t << std::endl;
         }
@@ -325,6 +325,6 @@ namespace chmap {
         FEAddrItem fe_item = buildFEItemFromStringTokens(fe_tokens);
         DETIdItem det_item = buildDETItemFromStringTokens(det_tokens);
 
-        return ChannelMapSimpleItem{fe_item, det_item};
-    }// ChannelMapSimpleItem ChannelMapDopeness::makeSimpleItem
+        return ItemPair{fe_item, det_item};
+    }// ItemPair ChannelMapDopeness::makeItemPair
 }

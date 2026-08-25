@@ -70,7 +70,7 @@ namespace chmap {
         #endif
 
         // sort fItems by fe.id
-        std::sort(fItems.begin(), fItems.end(), [](const ChannelMapSimpleItem& left, const ChannelMapSimpleItem& right) {
+        std::sort(fItems.begin(), fItems.end(), [](const ItemPair& left, const ItemPair& right) {
             return left.fe < right.fe;
         });
 
