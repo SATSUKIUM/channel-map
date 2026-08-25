@@ -34,7 +34,7 @@ namespace chmap::dictionary {
         }
     }
 
-    bool NameIndexDictionary::invIndex(uint8_t idx, std::string& str) const {
+    bool NameIndexDictionary::IndexToString(uint8_t idx, std::string& str) const {
         if(idx < inverse_dictionary.size()){
             str = inverse_dictionary[idx];
             return true;
@@ -42,7 +42,7 @@ namespace chmap::dictionary {
         return false;
     }
 
-    bool NameIndexDictionary::getIndex(const std::string& str, uint8_t& idx) const {
+    bool NameIndexDictionary::StringToIndex(const std::string& str, uint8_t& idx) const {
         auto it = std::find_if(forward_dictionary.begin(), forward_dictionary.end(), [&str](const std::pair<std::string, uint8_t>& pair){
             return pair.first == str;
         });
