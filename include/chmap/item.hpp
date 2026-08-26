@@ -61,5 +61,4 @@ namespace chmap {
 }
 
 
-
 #endif // CHMAP_ITEM_HPP_
