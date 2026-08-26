@@ -102,17 +102,17 @@ int main(int argc, char* argv[]) {
         std::string det_name_str;
         std::string det_plane_str;
         std::string det_readout_channel_str;
-        if(!channel_map_dopeness.detname_dictionary.invIndex(detitem.name, det_name_str)) {
+        if(!channel_map_dopeness.detname_dictionary.IndexToString(detitem.name, det_name_str)) {
             std::cout << "det name index could not be resolved to string." << std::endl;
             return 1;
         }
         std::cout << "(test) det name string: " << det_name_str << " got from index: " << static_cast<int>(detitem.name) << std::endl;
-        if(!channel_map_dopeness.plane_dictionary.invIndex(detitem.plane, det_plane_str)) {
+        if(!channel_map_dopeness.plane_dictionary.IndexToString(detitem.plane, det_plane_str)) {
             std::cout << "det plane index could not be resolved to string." << std::endl;
             return 1;
         }
         std::cout << "(test) det plane string: " << det_plane_str << " got from index: " << static_cast<int>(detitem.plane) << std::endl;
-        if(!channel_map_dopeness.readout_channel_dictionary.invIndex(detitem.readout_channel, det_readout_channel_str)) {
+        if(!channel_map_dopeness.readout_channel_dictionary.IndexToString(detitem.readout_channel, det_readout_channel_str)) {
             std::cout << "readout channel index could not be resolved to string." << std::endl;
             return 1;
         }
@@ -181,7 +181,7 @@ int main(int argc, char* argv[]) {
         std::string det_name_str, det_plane_str, det_readout_channel_str;
 
         // test for index to string conversion
-        if(!channel_map_dopeness.detname_dictionary.invIndex(det_name_idx, det_name_str)) {
+        if(!channel_map_dopeness.detname_dictionary.IndexToString(det_name_idx, det_name_str)) {
             std::cout << "det name index could not be resolved to string." << std::endl;
             return 1;
         }
@@ -193,7 +193,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "det name string does not match expected value \"kldc\"." << std::endl;
             }
         }
-        if(!channel_map_dopeness.plane_dictionary.invIndex(det_plane_idx, det_plane_str)) {
+        if(!channel_map_dopeness.plane_dictionary.IndexToString(det_plane_idx, det_plane_str)) {
             std::cout << "det plane index could not be resolved to string." << std::endl;
             return 1;
         }
@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "det plane string does not match expected value \"U\"." << std::endl;
             }
         }
-        if(!channel_map_dopeness.readout_channel_dictionary.invIndex(det_readout_channel_idx, det_readout_channel_str)) {
+        if(!channel_map_dopeness.readout_channel_dictionary.IndexToString(det_readout_channel_idx, det_readout_channel_str)) {
             std::cout << "readout channel index could not be resolved to string." << std::endl;
             return 1;
         }
