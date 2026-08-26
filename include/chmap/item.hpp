@@ -54,7 +54,6 @@ namespace chmap {
         DETConfItem* detconf = nullptr;
     }; // struct DETIdItem
 
-    // ↓無意味だから余裕ある時に消そう
     struct ItemPair {
         FEAddrItem fe;
         DETIdItem det;
