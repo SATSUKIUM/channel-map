@@ -50,15 +50,32 @@ namespace chmap {
             const FEAddrItem& getFEAddrItem(uint32_t doped_index) const;
             FEAddrItem& getFEAddrItem(uint32_t doped_index);
 
+            // register DETConfItem
             bool registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf);
             bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);
             bool registerDETConfItem(uint32_t doped_index, DETConfItem* detconf);
 
-            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(uint32_t dopeKey_FEtoDET, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* member) {
+            // register subitem of DETConfItem
+            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(uint32_t dopeKey_FEtoDET, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* nameOfMember) {
                 DETConfItem* detconfitem = getOrCreateDETConfItem(dopeKey_FEtoDET);
-                detconfitem->*member = std::move(subitem);
+                detconfitem->*nameOfMember = std::move(subitem);
                 return true;
             };
+            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(std::string_view detName, std::string_view plane, uint8_t segment, std::string_view channelName, uint16_t channelNumber, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* nameOfMember){
+                uint32_t doped_index;
+                if(!getDopeKey_DETtoFE(detName, plane, segment, channelName, channelNumber, doped_index)) {
+                    return false;
+                }
+                return registerDETConfSubItem<BaseT, DerivedT>(doped_index, std::move(subitem), nameOfMember);
+            };
+            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(const DETIdItem& det_item, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* nameOfMember){
+                uint32_t doped_index;
+                if(!getDopeKey_DETtoFE(det_item, doped_index)) {
+                    return false;
+                }
+                return registerDETConfSubItem<BaseT, DerivedT>(doped_index, std::move(subitem), nameOfMember);
+            };
+            
 
             void printAllItemsFE();
             void printAllItemsDET();
