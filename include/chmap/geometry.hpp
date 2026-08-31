@@ -22,6 +22,15 @@ namespace chmap {
                 rotAngle1 = rot1_;
                 rotAngle2 = rot2_;
             }
+            double GetGlobalX() const { return globalX; }
+            double GetGlobalY() const { return globalY; }
+            double GetGlobalZ() const { return globalZ; }
+            double GetResolutionX() const { return resolutionX; }
+            double GetResolutionY() const { return resolutionY; }
+            double GetResolutionZ() const { return resolutionZ; }
+            double GetTiltAngle() const { return tiltAngle; }
+            double GetRotAngle1() const { return rotAngle1; }
+            double GetRotAngle2() const { return rotAngle2; }
 
         private:
             uint32_t dopeKey_DET; // getDetItem[dopeKey_DET] return us the corresponding DETIdItem
@@ -39,6 +48,10 @@ namespace chmap {
                 wirePitch = wirePitch_;
                 offset = offset_;
             }
+
+            double GetCenterWireNumber() const { return centerWireNumber; }
+            double GetWirePitch() const { return wirePitch; }
+            double GetOffset() const { return offset; }
         private:
             double centerWireNumber; // もし1.0なら、中心のワイヤーは1番ワイヤー。0.5なら、中心のワイヤーは1番と2番の間にある。
             double wirePitch; // [mm] 測定軸方向のワイヤ間隔

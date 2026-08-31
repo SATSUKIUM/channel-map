@@ -18,6 +18,9 @@ namespace chmap {
                 approxOrder = approxOrder_;
                 coeffs = coeffs_;
             }
+
+            int GetApproximationOrder() const { return approxOrder; }
+            const std::vector<double>& GetCoefficients() const { return coeffs; }
         private:
             int approxOrder; // the number of coefficients for polynomial approximation of drift length
             std::vector<double> coeffs; // coefficients for polynomial approximation of drift length
@@ -31,6 +34,9 @@ namespace chmap {
                 offset = offset_;
                 scale = scale_;
             }
+
+            double GetOffset() const { return offset; }
+            double GetScale() const { return scale; }
         private:
             double offset, scale; // relative time = (absolute time * scale) + offset
     };
