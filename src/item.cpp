@@ -47,4 +47,28 @@ namespace chmap {
             << std::setw(3) << std::setfill('0') << ((ip4th) & 0xFF)
             << ", channel: " << (ch & 0xFF) << std::endl;
     } // void FEAddrItem::decode()
+
+    std::string DETIdItem::getDetectorName() const {
+        std::string detname_str;
+        if(ChannelMapDopeness::get_instance().detname_dictionary.IndexToString(name, detname_str)){
+            return detname_str;
+        }
+        return "";
+    }
+
+    std::string DETIdItem::getDetectorPlane() const {
+        std::string plane_str;
+        if(ChannelMapDopeness::get_instance().plane_dictionary.IndexToString(plane, plane_str)){
+            return plane_str;
+        }
+        return "";
+    }
+
+    std::string DETIdItem::getReadoutChannelName() const {
+        std::string readout_channel_str;
+        if(ChannelMapDopeness::get_instance().readout_channel_dictionary.IndexToString(readout_channel, readout_channel_str)){
+            return readout_channel_str;
+        }
+        return "";
+    }
 } // namespace chmap

@@ -43,6 +43,9 @@ namespace chmap {
             : name(name_idx), plane(plane_idx), segment(segment_), channel_number(channel_number_), readout_channel(readout_channel_idx) {}
         public: 
         void decode() const;
+        std::string getDetectorName() const;
+        std::string getDetectorPlane() const;
+        std::string getReadoutChannelName() const;
         // define operator< for sorting and comparison
         bool operator<(const DETIdItem& right) const {
             return std::tie(this->name, this->plane, this->segment, this->channel_number, this->readout_channel) < std::tie(right.name, right.plane, right.segment, right.channel_number, right.readout_channel);
