@@ -2,6 +2,7 @@
 #define CHMAP_CALIBRATION_HPP_
 
 #include <vector>
+#include <cmath>
 
 namespace chmap {
     class CalibrationItem {
@@ -21,6 +22,13 @@ namespace chmap {
 
             int GetApproximationOrder() const { return approxOrder; }
             const std::vector<double>& GetCoefficients() const { return coeffs; }
+            double GetDriftLength(double driftTime) const {
+                double driftLength = 0.0;
+                for (int i = 0; i < approxOrder; ++i) {
+                    driftLength += coeffs[i] * std::pow(driftTime, i);
+                }
+                return driftLength;
+            }
         private:
             int approxOrder; // the number of coefficients for polynomial approximation of drift length
             std::vector<double> coeffs; // coefficients for polynomial approximation of drift length
