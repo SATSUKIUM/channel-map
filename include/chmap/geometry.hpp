@@ -52,13 +52,18 @@ namespace chmap {
             double GetCenterWireNumber() const { return centerWireNumber; }
             double GetWirePitch() const { return wirePitch; }
             double GetOffset() const { return offset; }
-            double GetWirePosition(int wireNumber) const {
-                return (wireNumber - centerWireNumber) * wirePitch + offset;
+            double GetWirePosition() const {
+                return wirePosition;
+            }
+            void CalcWirePosition(int wireNumber) {
+                wirePosition = (wireNumber - centerWireNumber) * wirePitch + offset;
             }
         private:
             double centerWireNumber; // もし1.0なら、中心のワイヤーは1番ワイヤー。0.5なら、中心のワイヤーは1番と2番の間にある。
             double wirePitch; // [mm] 測定軸方向のワイヤ間隔
             double offset; // [mm] 測定軸方向のワイヤのオフセット(微調整のため)
+
+            double wirePosition{DOUBLE_MAX};
     }; // class GeomItemDC
     
 } // namespace chmap
