@@ -63,7 +63,7 @@ namespace chmap {
             double wirePitch; // [mm] 測定軸方向のワイヤ間隔
             double offset; // [mm] 測定軸方向のワイヤのオフセット(微調整のため)
 
-            double wirePosition{DOUBLE_MAX};
+            double wirePosition{};
     }; // class GeomItemDC
     
 } // namespace chmap
