@@ -33,7 +33,7 @@ namespace chmap {
         std::cout << std::endl;
 
         // channel number
-        std::cout << "\tchannel number: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(channel_number) << std::dec << std::endl;
+        std::cout << "\tchannel number: 0x" << std::hex << std::setw(8) << std::setfill('0') << static_cast<uint32_t>(channel_number) << std::dec << "(0d" << std::setw(5) << std::setfill(' ') << static_cast<int>(channel_number) << ")" << std::endl;
 
 
     } // void DETIdItem::decode()
