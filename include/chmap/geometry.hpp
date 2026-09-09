@@ -31,6 +31,7 @@ namespace chmap {
             double GetTiltAngle() const { return tiltAngle; }
             double GetRotAngle1() const { return rotAngle1; }
             double GetRotAngle2() const { return rotAngle2; }
+            void decode() const;
 
         private:
             uint32_t dopeKey_DET; // getDetItem[dopeKey_DET] return us the corresponding DETIdItem
@@ -58,6 +59,7 @@ namespace chmap {
             void CalcWirePosition(int wireNumber) {
                 wirePosition = (wireNumber - centerWireNumber) * wirePitch + offset;
             }
+            void decode() const;
         private:
             double centerWireNumber; // もし1.0なら、中心のワイヤーは1番ワイヤー。0.5なら、中心のワイヤーは1番と2番の間にある。
             double wirePitch; // [mm] 測定軸方向のワイヤ間隔
