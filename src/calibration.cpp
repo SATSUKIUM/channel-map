@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <string>
 
-void chmap::CalibrationItem_DCDriftLength::decode() {
+void chmap::CalibrationItem_DCDriftLength::decode() const {
     std::cout << "\tDC Drift Length Calibration: approxOrder = " << approxOrder << ", coefficients = [";
     for (size_t i = 0; i < coeffs.size(); ++i) {
         std::cout << coeffs[i];
@@ -16,7 +16,7 @@ void chmap::CalibrationItem_DCDriftLength::decode() {
     return;
 } // void chmap::CalibrationItem_DCDriftLength::decode()
 
-void chmap::CalibrationItem_DCTdcCalib::decode() {
+void chmap::CalibrationItem_DCTdcCalib::decode() const {
     std::cout << "\tDC TDC Calibration: offset = " << offset << ", scale = " << scale << std::endl;
     return;
 } // void chmap::CalibrationItem_DCTdcCalib::decode()
