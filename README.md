@@ -1,6 +1,6 @@
 # channel-map
 
-Channel mapping library between Detector and Readout FEE
+A Realtime processing oriented channel mapping library between Detector and Readout FEE
 
 Development and test environment: AMD RYZEN7 3800X, AlmaLinux9.8, gcc/g++ 11.5.0
 
