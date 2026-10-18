@@ -2,15 +2,17 @@
 
 Channel mapping library between Detector and Readout FEE
 
-Development and test environment: KEKCC Intel Xeon Gold 6230 20C40Tx2 @2.10 GHz, CentOS Linux 7.9.2009, gcc/g++ 8.3.0 (c++17 required)
+Development and test environment: AMD RYZEN7 3800X, AlmaLinux9.8, gcc/g++ 11.5.0
 
 ## Install
 
 Build channel-map.
 
 ```sh
-cmake -S . -B .build
-cmake --build .build --target install
+git clone 
+cd channel-map/
+cmake -S . -B .build -DCMAKE_INSTALL_PREFIX=$NESTDAQ
+cmake --build .build --parallel=$(nproc) --target install
 ```
 
 Add the following to your project's CMakeLists.txt.
@@ -21,7 +23,7 @@ find_package(ChannelMap REQUIRED)
 target_link_libraries(YourProject ChannelMap::ChannelMap)
 ```
 
-For Makefile, the following.
+<!-- For Makefile, the following.
 
 ```make
 chmap_config	= /path/to/channel-map/bin/chmap-config
@@ -34,7 +36,7 @@ LDFLAGS			+= $(shell $(chmap_config) --libs)
 ```sh
 xargs rm < .build/install_manifest.txt
 rm -rf .build
-```
+``` -->
 
 ## Parameter format
 
