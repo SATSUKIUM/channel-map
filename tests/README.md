@@ -43,3 +43,25 @@ These timings are indicative only and do not establish performance on Linux/DAQ.
 Rebuild the library and consumers together: dictionary internals and detector
 name index assignments have changed. The HTML under docs documents this API and explicitly identifies its source
 commit. See docs/index.html for the Japanese usage guide.
+
+## Initialization diagnostics
+
+```sh
+c++ -std=c++17 -O2 -Iinclude tests/initialization_diagnostics.cpp src/*.cpp -o /tmp/channel-map-diagnostics
+/tmp/channel-map-diagnostics /tmp/channel-map-diagnostics.csv
+/tmp/channel-map-diagnostics /tmp/channel-map-diagnostics.csv overflow
+```
+
+Duplicate FE addresses and DET identifiers are printed to stderr with both
+mappings and their loaded-record numbers, even if inverse lookup is disabled.
+Identical repeated records are also reported. Loading continues without rejecting
+or deduplicating records; one-to-one mapping remains the user's responsibility.
+No duplicate checks are added to runtime lookup.
+
+Before allocating either lookup array, initialization warns if the combined
+planned array storage exceeds 1 GB (1,000,000,000 bytes). The estimate uses
+sizeof(DETIdItem) and sizeof(FEAddrItem), excludes other storage and allocator
+overhead, and does not impose a memory limit. Inverse dimensions are multiplied
+in 64 bits; a count beyond the uint32_t key space is rejected to prevent wrapped
+allocation and out-of-bounds access. Memory threshold tests call the diagnostic
+helper directly and do not allocate gigabytes.

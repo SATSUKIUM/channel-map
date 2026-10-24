@@ -5,6 +5,9 @@
 // #include "chmap/element.hpp"
 
 #include "debugger.h"
+#include "initializationDiagnostics.hpp"
+#include <limits>
+#include <stdexcept>
 
 #include <fstream>
 #include <iostream>
@@ -65,6 +68,7 @@ namespace chmap {
         #endif
 
         readCSV(file_path); // fill fItems
+        detail::warnDuplicateMappings(fItems);
         #if CHECK_INITIALIZATION
         std::cout << "[ChannelMapDopeness::initialize] readCSV finished, number of items: " << fItems.size() << std::endl;
         #endif
@@ -108,6 +112,7 @@ namespace chmap {
         printFEtoDETscan(); // print key space coverage
         fill_ratio = static_cast<double>(fItems.size()) / sizeSpace_FEKey;
 
+        detail::warnMapMemory(sizeSpace_FEKey, 0);
         fItemsFEtoDET_dope.resize(sizeSpace_FEKey); // fe.idをインデックスとするdope-vector
         for(const auto& item : fItems){
             uint32_t doped_index;
@@ -169,7 +174,13 @@ namespace chmap {
         sizeSpace_segment = max_segment - min_segment + 1;
         sizeSpace_channel_number = max_channel_number - min_channel_number + 1;
         sizeSpace_readout_channel_idx = max_readout_channel_idx - min_readout_channel_idx + 1;
-        sizeSpace_DETKey = sizeSpace_name_idx * sizeSpace_plane_idx * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx;
+        // Widen before multiplying so the estimate cannot wrap at 32 bits.
+        const uint64_t inverseSlots = uint64_t(sizeSpace_name_idx) * sizeSpace_plane_idx
+            * sizeSpace_segment * sizeSpace_channel_number * sizeSpace_readout_channel_idx;
+        detail::warnMapMemory(sizeSpace_FEKey, inverseSlots);
+        if (inverseSlots > std::numeric_limits<uint32_t>::max())
+            throw std::overflow_error("Inverse map exceeds the uint32_t key space");
+        sizeSpace_DETKey = static_cast<uint32_t>(inverseSlots);
         // スキャン終わり
 
         // dope indexの最大値, 最小値を取得
