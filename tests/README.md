@@ -41,5 +41,5 @@ Registered-channel benchmark, -O3, separate translation units, three rounds:
 legacy 3.52–3.72 ns/lookup, checked 1.96–2.06 ns/lookup, matching checksums.
 These timings are indicative only and do not establish performance on Linux/DAQ.
 Rebuild the library and consumers together: dictionary internals and detector
-name index assignments have changed. The HTML under docs remains the explicitly
-dated snapshot of the earlier commit, not documentation of this new API.
+name index assignments have changed. The HTML under docs documents this API and explicitly identifies its source
+commit. See docs/index.html for the Japanese usage guide.
