@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cctype>
+#include <stdexcept>
 
 #include <variant>
 
@@ -127,7 +128,7 @@ namespace chmap {
         // dictionary should be built before loading mapdata lines (especially before calling makeDETItem)
         scanNamesForDictionary(file_path);
         ChannelMapDopeness::get_instance().detname_dictionary.sortWords();
-        ChannelMapDopeness::get_instance().detname_dictionary.buildDictionary();
+        ChannelMapDopeness::get_instance().detname_dictionary.buildDictionary(true);
         ChannelMapDopeness::get_instance().plane_dictionary.sortWords();
         ChannelMapDopeness::get_instance().plane_dictionary.buildDictionary();
         ChannelMapDopeness::get_instance().readout_channel_dictionary.sortWords();
@@ -168,6 +169,8 @@ namespace chmap {
                       << ", channel: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.det.channel << std::dec
                       << std::endl;
             #endif
+            if (item.fe.ip3rd == 0 && item.fe.ip4th == 0 && item.fe.ch == 0)
+                throw std::runtime_error("FEE address (0, 0, 0) is reserved for unmapped slots");
             fItems.push_back(item);
         }// while getline(file, line) for loading mapdata
         #if CHECK_INITIALIZATION

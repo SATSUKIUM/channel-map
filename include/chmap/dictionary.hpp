@@ -16,11 +16,12 @@ namespace chmap::dictionary {
             */
             void newWord(const std::string& str); // just adding new word
             void sortWords(); // sort words
-            void buildDictionary(); // assing index to each word on sorted order, and build forward and inverse dictionary
+            void buildDictionary(bool reserveZero = false); // assing index to each word on sorted order, and build forward and inverse dictionary
             bool StringToIndex(const std::string& str, uint8_t& idx) const; // from string to index
             bool IndexToString(uint8_t idx, std::string& str) const; // from index to which original string
         private:
             // content of dictionary (accessed only through member func)
+            bool zero_reserved = false;
             std::vector<std::pair<std::string, uint8_t>> forward_dictionary; // string to index
             std::vector<std::string> inverse_dictionary; // index to string
             std::vector<std::string> names_string; // temporary storage for newWord() before buildDictionary()

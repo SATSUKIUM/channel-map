@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cctype>
+#include <stdexcept>
 
 /*
 dope-vectorの概念を用いたchannel-mapの実装
@@ -27,15 +28,22 @@ namespace chmap::dictionary {
         std::sort(names_string.begin(), names_string.end());
     }
 
-    void NameIndexDictionary::buildDictionary(){
+    void NameIndexDictionary::buildDictionary(bool reserveZero){
+        zero_reserved = reserveZero;
+        const size_t first = reserveZero ? 1 : 0;
+        if (names_string.size() > 256 - first)
+            throw std::runtime_error("Too many names for uint8_t dictionary");
+        forward_dictionary.clear();
+        inverse_dictionary.clear();
+        if (reserveZero) inverse_dictionary.emplace_back();
         for(size_t i = 0; i < names_string.size(); ++i){
-            forward_dictionary.emplace_back(names_string[i], static_cast<uint8_t>(i));
+            forward_dictionary.emplace_back(names_string[i], static_cast<uint8_t>(i + first));
             inverse_dictionary.push_back(names_string[i]);
         }
     }
 
     bool NameIndexDictionary::IndexToString(uint8_t idx, std::string& str) const {
-        if(idx < inverse_dictionary.size()){
+        if((!zero_reserved || idx != 0) && idx < inverse_dictionary.size()){
             str = inverse_dictionary[idx];
             return true;
         }

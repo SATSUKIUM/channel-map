@@ -192,6 +192,32 @@ namespace chmap {
         }
     } // void ChannelMapDopeness::initialize_InvMap()
 
+    const DETIdItem* ChannelMapDopeness::findDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
+        if (fItemsFEtoDET_dope.empty()) return nullptr;
+        uint32_t key;
+        if (!getDopeKey_FEtoDET(ip3rd, ip4th, ch, key)) return nullptr;
+        const auto& item = fItemsFEtoDET_dope[key];
+        return item.name == 0 ? nullptr : &item;
+    }
+
+    const FEAddrItem* ChannelMapDopeness::findFE(uint8_t name, uint8_t plane, uint8_t segment,
+                                               uint8_t readout, uint16_t channel) const {
+        if (fItemsDETtoFE_dope.empty()) return nullptr;
+        uint32_t key;
+        if (!getDopeKey_DETtoFE(name, plane, segment, readout, channel, key)) return nullptr;
+        const auto& item = fItemsDETtoFE_dope[key];
+        return (item.ip3rd | item.ip4th | item.ch) == 0 ? nullptr : &item;
+    }
+
+    const FEAddrItem* ChannelMapDopeness::findFE(std::string_view name, std::string_view plane,
+                                               int segment, std::string_view readout, int channel) const {
+        if (fItemsDETtoFE_dope.empty()) return nullptr;
+        uint32_t key;
+        if (!getDopeKey_DETtoFE(name, plane, segment, readout, channel, key)) return nullptr;
+        const auto& item = fItemsDETtoFE_dope[key];
+        return (item.ip3rd | item.ip4th | item.ch) == 0 ? nullptr : &item;
+    }
+
     bool ChannelMapDopeness::getDopeKey_FEtoDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch, uint32_t& retKey) const {
         if(ip3rd < min_ip3rd || ip3rd > max_ip3rd || ip4th < min_ip4th || ip4th > max_ip4th || ch < min_ch || ch > max_ch) {
             return false;
@@ -232,7 +258,7 @@ namespace chmap {
             return false;
         }
         // check segment and channel_number range
-        if(segment < 0 || channel_number < 0) {
+        if(segment < 0 || segment > 255 || channel_number < 0 || channel_number > 65535) {
             #if CHECK_COUT_GETDOPEKEY_DETTOFE
             std::cout << "[ChannelMapDopeness::getDopeKey_DETtoFE] segment or channel_number out of range" << std::endl;
             #endif
@@ -269,59 +295,24 @@ namespace chmap {
     } // FEAddrItem& ChannelMapDopeness::getFEAddrItem
 
     bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view channel_name, int channel_number, DETConfItem* detconf) {
-        uint32_t doped_index;
-        if(detconf == nullptr) {
-            std::cerr << "[ChannelMapDopeness::registerDETConfItem] detconf is nullptr" << std::endl;
-            return false;
-        }
-        if(!getDopeKey_DETtoFE(det_name, det_plane, segment, channel_name, channel_number, doped_index)) {
-            std::cerr << "[ChannelMapDopeness::registerDETConfItem] key resolution failed" << std::endl;
-            return false;
-        }
-
-        const FEAddrItem& fe_item = fItemsDETtoFE_dope[doped_index];
-        uint32_t fe_doped_index;
-        if(!getDopeKey_FEtoDET(fe_item, fe_doped_index)) {
-            std::cerr << "[ChannelMapDopeness::registerDETConfItem] FE key resolution failed after DET lookup" << std::endl;
-            return false;
-        }
-
-        #if CHECK_COUT_DETCONF_REGISTRATION
-        std::cout << "[ChannelMapDopeness::registerDETConfItem] storing detconf at FE index 0x" << std::hex << fe_doped_index << std::dec << std::endl;
-        #endif
-
-        fItemsFEtoDET_dope[fe_doped_index].detconf = detconf;
-        return true;
-    } // bool ChannelMapDopeness::registerDETConfItem
+        if (!detconf) return false;
+        const auto* fe = findFE(det_name, det_plane, segment, channel_name, channel_number);
+        uint32_t fe_key;
+        return fe && getDopeKey_FEtoDET(*fe, fe_key) && registerDETConfItem(fe_key, detconf);
+    }
 
     bool ChannelMapDopeness::registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf) {
-        uint32_t doped_index;
-        if(detconf == nullptr) {
-            return false;
-        }
-        if(!getDopeKey_DETtoFE(det_item, doped_index)) {
-            return false;
-        }
-        if(doped_index >= fItemsDETtoFE_dope.size()) {
-            return false;
-        }
-        const FEAddrItem& fe_item = fItemsDETtoFE_dope[doped_index];
-        uint32_t fe_doped_index;
-        if(!getDopeKey_FEtoDET(fe_item, fe_doped_index)) {
-            return false;
-        }
-        if(fe_doped_index >= fItemsFEtoDET_dope.size()) {
-            return false;
-        }
-        fItemsFEtoDET_dope[fe_doped_index].detconf = detconf;
-        return true;
-    } // bool ChannelMapDopeness::registerDETConfItem
+        if (!detconf) return false;
+        const auto* fe = findFE(det_item);
+        uint32_t fe_key;
+        return fe && getDopeKey_FEtoDET(*fe, fe_key) && registerDETConfItem(fe_key, detconf);
+    }
 
     bool ChannelMapDopeness::registerDETConfItem(uint32_t doped_index, DETConfItem* detconf) {
         if(detconf == nullptr) {
             return false;
         }
-        if(doped_index >= fItemsFEtoDET_dope.size()) {
+        if(doped_index >= fItemsFEtoDET_dope.size() || fItemsFEtoDET_dope[doped_index].name == 0) {
             return false;
         }
         fItemsFEtoDET_dope[doped_index].detconf = detconf;
