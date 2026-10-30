@@ -1,130 +1,81 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(ChannelMap)
-
-execute_process(
-  COMMAND sh script/chmap-config --version
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE PROJECT_VERSION
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-message(STATUS "${PROJECT_NAME}: version ${PROJECT_VERSION}")
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" CHANNEL_MAP_VERSION LIMIT_COUNT 1)
+project(ChannelMap VERSION ${CHANNEL_MAP_VERSION} LANGUAGES CXX)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "${PROJECT_NAME}: version ${PROJECT_VERSION}, build type ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
     set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif()
-
 set(CMAKE_BUILD_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
-file(GLOB SOURCES "src/*.cpp")
-file(GLOB HEADERS "include/chmap/*.hpp")
-
-### main library
-add_library(channel-map SHARED ${SOURCES})
+add_library(channel-map SHARED
+    src/calibration.cpp
+    src/channel_map_dopeness.cpp
+    src/channel_map_readCSV.cpp
+    src/dictionary.cpp
+    src/geometry.cpp
+    src/inputNormalization.cpp
+    src/item.cpp
+    src/printerKeySpace.cpp
+)
+target_compile_features(channel-map PUBLIC cxx_std_17)
+# CMake 3.23+ keeps these headers ahead of older system-installed copies.
+set_target_properties(channel-map PROPERTIES IMPORTED_NO_SYSTEM TRUE)
 target_include_directories(channel-map PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
-) ### ビルド時はソースディレクトリ、インストール後はインストール先のincludeを参照
-
-### filesystem
+)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(channel-map PUBLIC stdc++fs)
 endif()
-
-### CERN ROOT
-find_package(ROOT REQUIRED)
-
-### script
-set(SCRIPT_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/script/chmap-config)
-
-### debug
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-DDEBUG)
-    ### root for debug
-    list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-    find_package(ROOT)
-    ### measure search time
-    add_executable(search-time debug/search-time.cpp)
-    target_compile_features(search-time PRIVATE cxx_std_17)
-    target_link_libraries(search-time PRIVATE channel-map ${FILESYSTEM_LIB}
-    				      ROOT::Core ROOT::Hist)
-    install(TARGETS search-time DESTINATION bin)
+    target_compile_definitions(channel-map PRIVATE DEBUG)
 endif()
 
-### config
+add_executable(dope-skeleton-program dope_skeleton.cpp)
+target_link_libraries(dope-skeleton-program PRIVATE channel-map)
+
+# Generate the package configuration here; no source template is required.
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/ChannelMapConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
-configure_file(ChannelMapConfig.cmake.in ChannelMapConfig.cmake @ONLY)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/ChannelMapConfig.cmake" [=[
+include("${CMAKE_CURRENT_LIST_DIR}/ChannelMapTargets.cmake")
+if (NOT TARGET ChannelMap::ChannelMap)
+    add_library(ChannelMap::ChannelMap INTERFACE IMPORTED)
+    set_target_properties(ChannelMap::ChannelMap PROPERTIES
+        INTERFACE_LINK_LIBRARIES ChannelMap::channel-map
+    )
+endif()
+get_target_property(ChannelMap_INCLUDE_DIRS ChannelMap::channel-map INTERFACE_INCLUDE_DIRECTORIES)
+set(ChannelMap_LIBRARIES ChannelMap::ChannelMap)
+]=])
 
-### skeleton
-# add_executable(skeleton-program skeleton.cpp)
-# target_compile_features(skeleton-program PRIVATE cxx_std_17)
-# target_link_libraries(skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
-
-### fat skeleton
-# add_executable(fat-skeleton-program fat_skeleton.cpp)
-# target_compile_features(fat-skeleton-program PRIVATE cxx_std_17)
-# target_link_libraries(fat-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
-
-### speedtest
-# add_executable(speedtest speedtest.cpp)
-# target_compile_features(speedtest PRIVATE cxx_std_17)
-# target_link_libraries(speedtest PRIVATE channel-map ${FILESYSTEM_LIB})
-
-### simple skeleton
-# add_executable(simple-skeleton-program simple_skeleton.cpp)
-# target_compile_features(simple-skeleton-program PRIVATE cxx_std_17)
-# target_link_libraries(simple-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB} ROOT::Core ROOT::Hist ROOT::Tree)
-
-### direct skeleton
-# add_executable(direct-skeleton-program direct_skeleton.cpp)
-# target_compile_features(direct-skeleton-program PRIVATE cxx_std_17)
-# target_link_libraries(direct-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
-
-### dope skeleton
-add_executable(dope-skeleton-program dope_skeleton.cpp)
-target_compile_features(dope-skeleton-program PRIVATE cxx_std_17)
-target_link_libraries(dope-skeleton-program PRIVATE channel-map ${FILESYSTEM_LIB})
-
-# target_link_libraries(simple-skeleton-program ${ROOT_LIBRARIES})
-# target_link_directories(simple-skeleton-program PRIVATE ${ROOT_LIBRARY_DIRS})
-# target_include_directories(simple-skeleton-program PRIVATE ${ROOT_INCLUDE_DIRS})
-
-### install
-install(DIRECTORY include/ DESTINATION include)
-# install(TARGETS skeleton-program DESTINATION bin)
-# install(TARGETS fat-skeleton-program DESTINATION bin)
-# install(TARGETS speedtest DESTINATION bin)
-# install(TARGETS simple-skeleton-program DESTINATION bin)
-# install(TARGETS direct-skeleton-program DESTINATION bin)
-install(TARGETS dope-skeleton-program DESTINATION bin)
-install(TARGETS channel-map EXPORT ChannelMapTargets DESTINATION lib)
-# install(FILES ${HEADERS} DESTINATION include)
-install(FILES ${SCRIPT_SOURCE} DESTINATION bin
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
+install(TARGETS dope-skeleton-program RUNTIME DESTINATION bin)
+install(TARGETS channel-map EXPORT ChannelMapTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+install(DIRECTORY include/chmap DESTINATION include)
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/ChannelMapConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/ChannelMapConfigVersion.cmake"
     DESTINATION lib/cmake/ChannelMap
 )
-
 install(EXPORT ChannelMapTargets
     FILE ChannelMapTargets.cmake
     NAMESPACE ChannelMap::

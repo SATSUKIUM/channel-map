@@ -54,7 +54,10 @@ namespace chmap {
             return std::tie(this->name, this->plane, this->segment, this->channel_number, this->readout_channel) == std::tie(right.name, right.plane, right.segment, right.channel_number, right.readout_channel);
         }
 
-        DETConfItem* detconf = nullptr;
+        const DETConfItem* getConfiguration() const noexcept { return configuration_; }
+        private:
+        friend class ChannelMapDopeness;
+        DETConfItem* configuration_ = nullptr;
     }; // struct DETIdItem
 
     struct ItemPair {

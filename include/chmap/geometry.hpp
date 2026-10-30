@@ -3,6 +3,8 @@
 #ifndef CHMAP_GEOMETRY_HPP_
 #define CHMAP_GEOMETRY_HPP_
 
+#include <cstdint>
+
 namespace chmap {
     class GeomItem{
         public:

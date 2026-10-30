@@ -1,8 +1,5 @@
 #include "chmap/channel_map_dopeness.hpp"
 #include "chmap/item.hpp"
-// #include "chmap/channel_tuple.hpp"
-// #include "chmap/element.hpp"
-
 #include "debugger.h"
 
 #include <fstream>
@@ -11,6 +8,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cctype>
+#include <stdexcept>
 
 #include <variant>
 
@@ -44,12 +42,13 @@ namespace chmap {
         if (std::getline(file_, line)) {}
         // scan mapdata lines for collecting unique strings for dictionary
         while(std::getline(file_, line)){
-            if(line.back() == '\r'){ // for Windwos-style line ending
+            if(!line.empty() && line.back() == '\r'){ // for Windwos-style line ending
                 #if DEBUG_PRINT
                 std::cout << "found Windows-style line ending" << std::endl;
                 #endif
                 line.pop_back();
             }
+            if (line.empty()) continue;
             auto tokens = split_line(line);
             if (tokens.size() != m_header.size()) {
                 std::cerr << "bad file format : " << line << std::endl;
@@ -127,7 +126,7 @@ namespace chmap {
         // dictionary should be built before loading mapdata lines (especially before calling makeDETItem)
         scanNamesForDictionary(file_path);
         ChannelMapDopeness::get_instance().detname_dictionary.sortWords();
-        ChannelMapDopeness::get_instance().detname_dictionary.buildDictionary();
+        ChannelMapDopeness::get_instance().detname_dictionary.buildDictionary(true);
         ChannelMapDopeness::get_instance().plane_dictionary.sortWords();
         ChannelMapDopeness::get_instance().plane_dictionary.buildDictionary();
         ChannelMapDopeness::get_instance().readout_channel_dictionary.sortWords();
@@ -136,7 +135,7 @@ namespace chmap {
 
         // load mapdata lines
         while (std::getline(file, line)) {
-            if(line.back() == '\r'){ // for Windwos-style line ending
+            if(!line.empty() && line.back() == '\r'){ // for Windwos-style line ending
                 #if DEBUG_PRINT
                 std::cout << "found Windows-style line ending" << std::endl;
                 #endif
@@ -146,6 +145,7 @@ namespace chmap {
             std::cout << "loading line: " << line << std::endl;
             #endif
 
+            if (line.empty()) continue;
             auto tokens = split_line(line);
             if (tokens.size() != m_header.size()) {
                 std::cerr << "bad file format : " << line << std::endl;
@@ -168,6 +168,8 @@ namespace chmap {
                       << ", channel: 0x" << std::hex << std::setw(8) << std::setfill('0') << item.det.channel << std::dec
                       << std::endl;
             #endif
+            if (item.fe.ip3rd == 0 && item.fe.ip4th == 0 && item.fe.ch == 0)
+                throw std::runtime_error("FEE address (0, 0, 0) is reserved for unmapped slots");
             fItems.push_back(item);
         }// while getline(file, line) for loading mapdata
         #if CHECK_INITIALIZATION
