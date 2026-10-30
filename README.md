@@ -8,6 +8,23 @@ are owned by the map.
 See the [Japanese documentation](https://satsukium.github.io/channel-map/) and
 [dope_skeleton.cpp](dope_skeleton.cpp) for complete examples.
 
+## Design for runtime performance
+
+Instead of tree traversal with `std::map` or hash/bucket lookup with
+`std::unordered_map`, integer address and identifier fields are converted
+arithmetically into an array index. After range checking, the result is obtained
+with a single indexed access to the mapping array. This design prioritizes
+lookup performance during DAQ processing.
+
+- Build the channel mapping and allocate its lookup arrays during initialization.
+- Insertion, deletion, and addition of channel mappings after initialization are
+  not supported. Use the mapping as a fixed lookup table during RUN.
+- Register geometry and calibration during setup, before RUN, then access them
+  read-only during processing.
+
+String-based reverse lookup also resolves names through dictionaries. For
+per-hit lookup, use integer identifiers or the item-based overloads.
+
 ## Build and install
 
 Requirements: a C++17 compiler, CMake 3.10 or later, and a build tool such as
