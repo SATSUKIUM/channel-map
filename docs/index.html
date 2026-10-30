@@ -15,7 +15,8 @@ cmake --build build --parallel
 <tr><td>fe.id</td><td>整数で記したIP。例は192.168.2.169。検索では下位16bit（2, 169）のみを使います。</td></tr>
 <tr><td>fe.channel</td><td>FEEチャンネル番号。uint8_t、0〜255。</td></tr>
 <tr><td>fe.data</td><td>予約列。現行の対応付けでは未使用。</td></tr>
-<tr><td>detector.id / detector.plane</td><td>検出器名／面名。文字列として辞書に登録（例：utof、0）。</td></tr>
+<tr><td>detector.id</td><td>検出器名。文字列として辞書に登録（例：utof）。</td></tr>
+<tr><td>detector.plane</td><td>面名。文字列として辞書に登録（例：0）。</td></tr>
 <tr><td>detector.segment</td><td>セグメント番号。uint8_t、0〜255。</td></tr>
 <tr><td>detector.channel</td><td>検出器チャンネル番号。uint16_t、0〜65535。</td></tr>
 <tr><td>detector.readout</td><td>読み出し名。例：left、right。辞書で整数化。</td></tr>
