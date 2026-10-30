@@ -48,7 +48,7 @@ write_basic_package_version_file(
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
-configure_file(ChannelMapConfig.cmake.in ChannelMapConfig.cmake @ONLY)
+configure_file(cmake/ChannelMapConfig.cmake.in ChannelMapConfig.cmake @ONLY)
 
 ### skeleton
 # add_executable(skeleton-program skeleton.cpp)
