@@ -37,11 +37,18 @@ if [ "$?" -ne "0" ]; then
 fi
 prefix=`dirname "$fullpath1"`
 
-this=$(basename $0)
-path=$(dirname $(readlink -f $0))
-cd $path
-version=`git log --format=%cd --date=format-local:%Y.%m.%d -n 1`/
-version=$version`git rev-parse --short HEAD`
+this=$(basename "$0")
+# Read version metadata shipped with source archives and installed packages.
+# Git is only an optional way to obtain the source tree.
+version_file="$prefix/share/channel-map/VERSION"
+if [ ! -f "$version_file" ]; then
+  version_file="$prefix/VERSION"
+fi
+if [ ! -r "$version_file" ]; then
+  echo "$this: version file not found: $version_file" >&2
+  exit 1
+fi
+IFS= read -r version < "$version_file"
 
 bindir=$prefix/bin
 incdir=$prefix/include

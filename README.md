@@ -6,10 +6,17 @@ Development and test environment: AMD RYZEN7 3800X, AlmaLinux9.8, gcc/g++ 11.5.0
 
 ## Install
 
+Requirements: a C++17 compiler and CMake 3.10 or later. ROOT and Git are not
+required to build from an extracted source archive. Git is only needed if you
+choose to clone the repository. Release and Debug build the library and the
+current skeleton; the legacy `debug/search-time.cpp` tool is excluded.
+
+The version is read from the included `VERSION` file.
+
 Build channel-map.
 
 ```sh
-git clone 
+git clone --branch fix/checked-channel-lookup https://github.com/SATSUKIUM/channel-map.git
 cd channel-map/
 cmake -S . -B .build -DCMAKE_INSTALL_PREFIX=$NESTDAQ
 cmake --build .build --parallel=$(nproc) --target install
