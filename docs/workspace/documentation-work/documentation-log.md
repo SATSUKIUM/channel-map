@@ -1,3 +1,20 @@
+# ROOT・Gitの必須条件を撤去（2026-10-30）
+
+現在のコード基準コミット: `e5fcd656a7d854bcbb87f05eadf6f8cd3449376a`
+
+- 以前はDebug指定時に旧APIのdebug/search-time.cppが自動ビルドされていた。旧ツールを自動ビルドから外し、無条件・Debug時のROOT検索を撤去。Debugコンパイル設定は維持。
+- バージョンは同梱のVERSION（2026.10.30）で管理。CMakeとchmap-configともにGitを呼ばない。インストール先にもshare/channel-map/VERSIONを配布。
+- chmap-configは非CMake利用向けの互換用補助として残す。現在のライブラリビルドやfind_packageによる利用には不要。
+- READMEとHTMLからROOTとGitの必須条件を除去。Git cloneは任意のソース取得方法としてのみ記載。
+- 検証: macOS上でRelease・DebugのCMake設定、ビルド、インストールに成功。ROOT検索を無効にして実行（現在は検索自体がないため指定変数は未使用の警告となる）。
+- Debugは.gitを含まないソースコピーと、呼び出すと失敗するGitスタブをPATH先頭に置いて確認。ソース／インストール済みchmap-config --versionは2026.10.30を返す。
+- 両ビルドの現行スケルトンを実CSVで実行して成功。ROOTライブラリをリンクせずビルドできた。
+- CMake利用側Configの.so固定など、既存のmacOSインストール利用の問題は別課題として維持。
+
+以下は過去の更新記録です。
+
+---
+
 # 初期化診断の更新（2026-10-25）
 
 現在のコード基準コミット: `d16eacfdff4844b4890dc5c49f479e563350a973`

@@ -65,3 +65,17 @@ overhead, and does not impose a memory limit. Inverse dimensions are multiplied
 in 64 bits; a count beyond the uint32_t key space is rejected to prevent wrapped
 allocation and out-of-bounds access. Memory threshold tests call the diagnostic
 helper directly and do not allocate gigabytes.
+
+## ROOT/Git-free builds (2026-10-30)
+
+Release and Debug now build the current library and skeleton without ROOT.
+The legacy debug/search-time.cpp target is excluded even in Debug builds.
+Version metadata comes from VERSION, installed under share/channel-map/VERSION;
+chmap-config is retained only as an optional helper for non-CMake consumers.
+
+Validated CMake configure/build/install for both Release and Debug on macOS,
+with ROOT discovery disabled. Debug used a copy without .git and a PATH stub
+that fails any Git invocation. Source and installed chmap-config --version both
+returned 2026.10.30. Both built skeleton executables ran successfully with the
+9-column mapdata_T103_20260404.csv. The CMake consumer Config still hard-codes
+.so and has not been made portable to macOS in this change.
