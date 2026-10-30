@@ -1,3 +1,16 @@
+# GitHub Pagesでの公開（2026-10-30）
+
+- リポジトリのSettings → PagesでDeploy from a branch / main / docsを設定。
+- 公開URL: https://satsukium.github.io/channel-map/
+- Pagesの初回ビルド成功と、ブラウザ上で日本語ドキュメントの表示を確認。
+- READMEのJapanese documentationを公開URLへ変更。
+- docs/_config.ymlでworkspaceをPagesの生成対象から除外し、作業ログへのリンクはGitHubのblob/mainへ変更。
+- ページ本文・コード・目次の表示、公開URLとログリンクの参照先を確認。ライブラリのコード変更はなし。
+
+以下は過去の更新記録です。
+
+---
+
 # 初期化確認をRUN経路から分離（2026-10-30）
 
 現在のコード基準コミット: `d0e88a8f971ad713e6698c90b76efe6697973c27`

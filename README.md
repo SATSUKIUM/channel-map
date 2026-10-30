@@ -5,7 +5,7 @@ A C++17 channel mapping library for realtime detector readout processing.
 optionally supports inverse lookup. Detector geometry and calibration objects
 are owned by the map.
 
-See the [Japanese documentation](docs/index.html) and
+See the [Japanese documentation](https://satsukium.github.io/channel-map/) and
 [dope_skeleton.cpp](dope_skeleton.cpp) for complete examples.
 
 ## Build and install
