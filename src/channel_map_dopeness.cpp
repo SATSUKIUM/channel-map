@@ -1,8 +1,6 @@
 #include "chmap/channel_map_dopeness.hpp"
 #include "chmap/item.hpp"
 #include "chmap/dictionary.hpp"
-#include "chmap/channel_tuple.hpp"
-// #include "chmap/element.hpp"
 
 #include "debugger.h"
 #include "initializationDiagnostics.hpp"
@@ -35,14 +33,6 @@ if(!channel_map_dopeness.getDopeKey_FE(ip3rd, ip4th, ch, doped_index)){
 }else{
     // usual process}
 */
-/*
-関連ソースコード
-    - src/channel_map_simple_item.cpp : decode()の実装
-    - src/channel_map_simple_rules.cpp : 辞書などのルールの定義
-    - src/channel_map_readCSV.cpp : CSVの読み込みとfItemsの初期化
-    - include/channel_map_simple_item.hpp
-    - include/channel_map_dopeness.hpp
-*/
 namespace chmap {    
     ChannelMapDopeness& ChannelMapDopeness::get_instance() {
         static ChannelMapDopeness instance;
@@ -55,7 +45,7 @@ namespace chmap {
     double ChannelMapDopeness::initialize(const std::string& file_path, bool createInvMap) {
         double fill_ratio;
 
-        defineTokenNormalizationRules(); // prepare detname_simplify_map
+        defineTokenNormalizationRules(); // prepare numeric-token normalization
         #if DEBUG_PRINT
         std::cout << "str simplify map32:" << std::endl;
         for(const auto& pair : token_normalization_4char){

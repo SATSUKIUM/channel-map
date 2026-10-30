@@ -1,8 +1,5 @@
 #include "chmap/channel_map_dopeness.hpp"
 #include "chmap/item.hpp"
-// #include "chmap/channel_tuple.hpp"
-// #include "chmap/element.hpp"
-
 #include "debugger.h"
 
 #include <fstream>

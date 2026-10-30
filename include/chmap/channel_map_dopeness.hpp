@@ -112,7 +112,6 @@ namespace chmap {
             
             std::vector<ItemPair> fItems;
             
-            std::unordered_map<std::string, uint32_t> token_normalization_4char; // for normalization of string tokens to 4char uint32_t
             std::unordered_map<std::string, uint16_t> token_normalization_2char; // for normalization of string tokens to 2char uint16_t
 
 
@@ -126,10 +125,8 @@ namespace chmap {
             FEAddrItem buildFEItemFromStringTokens(const std::vector<std::string>& tokens);
             DETIdItem buildDETItemFromStringTokens(const std::vector<std::string>& tokens);
             void defineTokenNormalizationRules();
-            uint32_t four_char_to_uint32(char a, char b, char c, char d);
             uint16_t two_char_to_uint16(char a, char b);
             bool isTokenNumeric(const std::string& token);
-            uint32_t parse_to32(const std::string& token);
             uint16_t parse_to16(const std::string& token);
             uint8_t parse_to8(const std::string& token);
             // for print
