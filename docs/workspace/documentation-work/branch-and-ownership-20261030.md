@@ -47,3 +47,10 @@ fix/checked-channel-lookupとorigin/LogicFilterMore32GPUは固有コミットが
 
 対応するchannel-mapコードコミット: `7b2762346b4d3d41679e17f96e7af6cce7547a1a`
 対応するnestdaq-user-impl移行コミット: `e1e832b3ad93b1715d01eb1336a741221af05e94`
+
+## channel-map側の整理履歴の追補
+
+作業元deve_detconfにはorigin/mainのf840feb（スクリプト退避）が含まれていなかった。
+利用側だけでなくライブラリ側の差分確認も必要だったが見落としていた。
+660ec783e12ca7fa0b74b0023df3d8b5d932abfbでorigin/mainをmergeし、script/への移動を復元。
+ビルドに必要な設定テンプレートはcmake/へ移動して維持した。

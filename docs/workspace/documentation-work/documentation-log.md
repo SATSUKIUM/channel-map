@@ -1,3 +1,19 @@
+# main側のディレクトリ整理を復元（2026-10-30）
+
+現在のコード基準コミット: `660ec783e12ca7fa0b74b0023df3d8b5d932abfb`
+
+- main側のf840feb（整理）では直下の4本のシェルスクリプトがscript/へ移動済みだったが、作業元deve_detconfには未収録だった。
+- 調査不足で古い配置のまま作業ブランチを継続していた。今回はorigin/main（7c44c36）を通常mergeし、整理履歴を取り込んだ。
+- benchmark.sh、benchmark_some_ratio.sh、rep_benchmark.sh、rep_benchmark_fixed_number.shはscript/へ移動。内容は変更していない。
+- main側で削除されていたChannelMapConfig.cmake.inは現在のビルドに必要なため、cmake/配下へ配置しCMakeの参照先を修正。ルートには残さない。
+- main側のREADME概要修正も反映。今回の検索・設定API改善とドキュメント・テストは維持。
+- Release設定・ビルド・インストール・実CSVのスケルトン実行に成功。
+- 未追跡のビルド成果物やローカル作業ファイルは削除していない。
+
+以下は過去の更新記録です。
+
+---
+
 # 設定所有権と用途別API（2026-10-30）
 
 現在のコード基準コミット: `7b2762346b4d3d41679e17f96e7af6cce7547a1a`
