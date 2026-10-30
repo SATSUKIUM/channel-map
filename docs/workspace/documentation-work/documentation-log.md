@@ -1,3 +1,24 @@
+# 初期化確認をRUN経路から分離（2026-10-30）
+
+現在のコード基準コミット: `d0e88a8f971ad713e6698c90b76efe6697973c27`
+
+- findDET/findFEからvector.empty()による準備完了チェックを除去。
+- isInitialized()/hasInverseMap()を追加し、InitTask等で一度だけ確認する契約に変更。
+- 未初期化検索と逆引き未作成時のfindFEは前提条件違反。nullptrが保証されるのは範囲外・未登録入力。
+- 設定登録時は準備完了チェックを維持。初期化前のinitialize_InvMapも拒否。
+- nestdaq-user-implはInitTaskで正引き・逆引き・KLDC存在を検証。ProcessSlice内のKLDC初期化チェックを除去。
+- 対象ブランチの追跡本体は引き続き#if 0。有効なProcessSliceはreturn falseのままであり、今回再有効化していない。
+- 検索の範囲判定、未登録判定、入力データのCH上限判定は維持。既存DCHitのnullptr判定等は変更していない。
+- AppleClang -O3のアセンブリでfindDET冒頭のempty比較・分岐の削除を確認。数値版findDET/findFEに外部関数呼び出しなし。
+- 文字列版findFEは辞書検索と一時文字列を伴う。現在の利用側ではInitTask/設定登録だけで使用。
+- 修正後にRelease/Debug・ヘッダ・検索・所有権・診断・空CSV・掲載例・再配置パッケージの33工程が成功。
+- 実DAQ性能の再測定と利用側全体のビルドは未実施。依存不足による既存制約は継続。
+- 生ログとアセンブリはローカルworkspace/performance-audit/およびworkspace/review-init-only/に保存。
+
+以下は過去の更新記録です。
+
+---
+
 # main統合前の最終確認（2026-10-30）
 
 現在のコード基準コミット: `ae0172d3ac2d7c25d9c4fe45a457caebc70c9f24`
