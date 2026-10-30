@@ -89,5 +89,7 @@ Repeated assignments, missing targets and null inputs return `false`.
 Arguments are consumed even on failure. Accepted objects remain alive until
 the map is destroyed; existing settings are never replaced.
 
+## Compatibility
+
 The older `ChannelMap`, `ChannelMapSimple`, and `ChannelMapDirect` APIs are no
 longer shipped. Rebuild consumers against the matching headers and library.
