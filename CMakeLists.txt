@@ -36,13 +36,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(channel-map PUBLIC stdc++fs)
 endif()
 
-### script
-set(SCRIPT_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/script/chmap-config)
-
 ### Debug compiler settings (legacy debug/search-time.cpp is not built)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
-
 endif()
 
 ### config
@@ -98,11 +94,6 @@ install(DIRECTORY include/ DESTINATION include)
 install(TARGETS dope-skeleton-program DESTINATION bin)
 install(TARGETS channel-map EXPORT ChannelMapTargets DESTINATION lib)
 # install(FILES ${HEADERS} DESTINATION include)
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" DESTINATION share/channel-map)
-install(FILES ${SCRIPT_SOURCE} DESTINATION bin
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-	GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/ChannelMapConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/ChannelMapConfigVersion.cmake"

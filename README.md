@@ -30,14 +30,7 @@ find_package(ChannelMap REQUIRED)
 target_link_libraries(YourProject ChannelMap::ChannelMap)
 ```
 
-<!-- For Makefile, the following.
-
-```make
-chmap_config	= /path/to/channel-map/bin/chmap-config
-CFLAGS			+= $(shell $(chmap_config) --include)
-LDFLAGS			+= $(shell $(chmap_config) --libs)
-```
-
+<!--
 ## Uninstall
 
 ```sh
