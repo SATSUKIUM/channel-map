@@ -1,6 +1,8 @@
 #ifndef CHMAP_CALIBRATION_HPP_
 #define CHMAP_CALIBRATION_HPP_
 
+#include <cstdint>
+
 #include <vector>
 #include <cmath>
 

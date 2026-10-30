@@ -28,8 +28,7 @@ int main(int argc, char** argv) {
     assert(!map.findDET(255, 255, 255));
     uint32_t key;
     assert(map.getDopeKey_FEtoDET(2, 1, 1, key)); // Legacy semantics unchanged.
-    chmap::DETConfItem config;
-    assert(!map.registerDETConfItem(key, &config));
+    assert(!map.setGeometry(chmap::FEAddrItem{2, 1, 1}, std::make_unique<chmap::GeomItemDC>()));
     assert(!map.findFE("a", "X", 0, "left", 1));
     assert(!map.findFE("missing", "X", 0, "left", 0));
     assert(!map.findFE("a", "X", 256, "left", 0));
@@ -42,9 +41,8 @@ int main(int argc, char** argv) {
     assert(map.findDET(*fe) == det);
     auto geom = std::make_unique<chmap::GeomItemDC>();
     geom->SetGlobalPosition(1, 2, 3);
-    assert((map.registerDETConfSubItem<chmap::GeomItem, chmap::GeomItemDC>(
-        *det, std::move(geom), &chmap::DETConfItem::membername_geom)));
-    assert(det->detconf && det->detconf->membername_geom->GetGlobalZ() == 3);
+    assert(map.setGeometry(*det, std::move(geom)));
+    assert(det->getConfiguration() && det->getConfiguration()->getGeometry()->GetGlobalZ() == 3);
     chmap::dictionary::NameIndexDictionary dictionary;
     std::string name;
     dictionary.newWord("a"); dictionary.buildDictionary(true);

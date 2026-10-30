@@ -45,11 +45,10 @@ int main(int argc, char* argv[]) {
         geom->SetRotationAngles(0.0, 0.0, 0.0);
         geom->SetWireGeometry(1.0, 5.0, 0.0);
         geom->CalcWirePosition(det->channel_number);
-        if (!map.registerDETConfSubItem<chmap::GeomItem, chmap::GeomItemDC>(
-                *det, std::move(geom), &chmap::DETConfItem::membername_geom)) return 5;
-        if (det->detconf && det->detconf->membername_geom)
+        if (!map.setGeometry(*det, std::move(geom))) return 5;
+        if (det->getConfiguration() && det->getConfiguration()->getGeometry())
             std::cout << "Registered geometry Z: "
-                      << det->detconf->membername_geom->GetGlobalZ() << '\n';
+                      << det->getConfiguration()->getGeometry()->GetGlobalZ() << '\n';
     } catch (const std::exception& e) {
         std::cerr << "Channel map error: " << e.what() << '\n';
         return 1;

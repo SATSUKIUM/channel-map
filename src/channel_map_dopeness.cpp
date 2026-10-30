@@ -305,56 +305,50 @@ namespace chmap {
         return fItemsDETtoFE_dope[doped_index];
     } // FEAddrItem& ChannelMapDopeness::getFEAddrItem
 
-    bool ChannelMapDopeness::registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view channel_name, int channel_number, DETConfItem* detconf) {
-        if (!detconf) return false;
-        const auto* fe = findFE(det_name, det_plane, segment, channel_name, channel_number);
-        uint32_t fe_key;
-        return fe && getDopeKey_FEtoDET(*fe, fe_key) && registerDETConfItem(fe_key, detconf);
+    bool ChannelMapDopeness::configurationKey(const FEAddrItem& fe, uint32_t& key) const {
+        return findDET(fe) && getDopeKey_FEtoDET(fe, key);
     }
 
-    bool ChannelMapDopeness::registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf) {
-        if (!detconf) return false;
-        const auto* fe = findFE(det_item);
-        uint32_t fe_key;
-        return fe && getDopeKey_FEtoDET(*fe, fe_key) && registerDETConfItem(fe_key, detconf);
+    bool ChannelMapDopeness::configurationKey(const DETIdItem& det, uint32_t& key) const {
+        const auto* fe = findFE(det);
+        return fe && configurationKey(*fe, key) && fItemsFEtoDET_dope[key] == det;
     }
 
-    bool ChannelMapDopeness::registerDETConfItem(uint32_t doped_index, DETConfItem* detconf) {
-        if(detconf == nullptr) {
-            return false;
-        }
-        if(doped_index >= fItemsFEtoDET_dope.size() || fItemsFEtoDET_dope[doped_index].name == 0) {
-            return false;
-        }
-        fItemsFEtoDET_dope[doped_index].detconf = detconf;
-        return true;
-    } // bool ChannelMapDopeness::registerDETConfItem
+    bool ChannelMapDopeness::setGeometry(const DETIdItem& det, std::unique_ptr<GeomItem> part) {
+        uint32_t key;
+        if (!part || !configurationKey(det, key)) return false;
+        return setConfigurationPart(key, std::move(part), &DETConfItem::geometry_);
+    }
 
-    // bool ChannelMapDopeness::registerGeomItemDC(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf) {
-    //     uint32_t doped_index;
-    //     if(detconf == nullptr || geom_item == nullptr) {
-    //         return false;
-    //     }
-    //     if(!getDopeKey_DETtoFE(det_name, det_plane, segment, readout_channel, channel_number, doped_index)) {
-    //         return false;
-    //     }
-    //     return registerGeomItemDC(doped_index, std::move(geom_item), detconf);
-    // } // bool ChannelMapDopeness::registerGeomItemDC
+    bool ChannelMapDopeness::setGeometry(const FEAddrItem& fe, std::unique_ptr<GeomItem> part) {
+        uint32_t key;
+        if (!part || !configurationKey(fe, key)) return false;
+        return setConfigurationPart(key, std::move(part), &DETConfItem::geometry_);
+    }
 
-    // bool ChannelMapDopeness::registerGeomItemDC(const DETIdItem& det_item, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf) {
-    //     uint32_t doped_index;
-    //     if(detconf == nullptr || geom_item == nullptr) {
-    //         return false;
-    //     }
-    //     if(!getDopeKey_DETtoFE(det_item, doped_index)) {
-    //         return false;
-    //     }
-    //     return registerGeomItemDC(doped_index, std::move(geom_item), detconf);
-    // } // bool ChannelMapDopeness::registerGeomItemDC
+    bool ChannelMapDopeness::setTdcCalibration(const DETIdItem& det, std::unique_ptr<CalibrationItem_DCTdcCalib> part) {
+        uint32_t key;
+        if (!part || !configurationKey(det, key)) return false;
+        return setConfigurationPart(key, std::move(part), &DETConfItem::tdcCalibration_);
+    }
 
-    // bool ChannelMapDopeness::registerGeomItemDC(uint32_t doped_index, std::unique_ptr<GeomItemDC> geom_item, DETConfItem* detconf) {
-    //     return registerDETConfSubItem(doped_index, std::move(geom_item), &DETConfItem::geom, detconf);
-    // } // bool ChannelMapDopeness::registerGeomItemDC
+    bool ChannelMapDopeness::setTdcCalibration(const FEAddrItem& fe, std::unique_ptr<CalibrationItem_DCTdcCalib> part) {
+        uint32_t key;
+        if (!part || !configurationKey(fe, key)) return false;
+        return setConfigurationPart(key, std::move(part), &DETConfItem::tdcCalibration_);
+    }
+
+    bool ChannelMapDopeness::setDriftCalibration(const DETIdItem& det, std::unique_ptr<CalibrationItem_DCDriftLength> part) {
+        uint32_t key;
+        if (!part || !configurationKey(det, key)) return false;
+        return setConfigurationPart(key, std::move(part), &DETConfItem::driftCalibration_);
+    }
+
+    bool ChannelMapDopeness::setDriftCalibration(const FEAddrItem& fe, std::unique_ptr<CalibrationItem_DCDriftLength> part) {
+        uint32_t key;
+        if (!part || !configurationKey(fe, key)) return false;
+        return setConfigurationPart(key, std::move(part), &DETConfItem::driftCalibration_);
+    }
 
     void ChannelMapDopeness::printAllItemsFE() {
         std::cout << "items count: " << fItems.size() << std::endl;
@@ -382,12 +376,12 @@ namespace chmap {
     }// void ChannelMapDopeness::printAllItemsDET
 
     DETConfItem* ChannelMapDopeness::getOrCreateDETConfItem(uint32_t dopeKey_FEtoDET) {
-        DETConfItem* detconfitem = fItemsFEtoDET_dope[dopeKey_FEtoDET].detconf;
+        DETConfItem* detconfitem = fItemsFEtoDET_dope[dopeKey_FEtoDET].configuration_;
         if(detconfitem == nullptr) {
             auto newp = std::make_unique<DETConfItem>();
             fDetConfItems.push_back(std::move(newp)); // 所有権をfDetConfItemsに移すため
-            fItemsFEtoDET_dope[dopeKey_FEtoDET].detconf = fDetConfItems.back().get();
-            detconfitem = fItemsFEtoDET_dope[dopeKey_FEtoDET].detconf;
+            fItemsFEtoDET_dope[dopeKey_FEtoDET].configuration_ = fDetConfItems.back().get();
+            detconfitem = fItemsFEtoDET_dope[dopeKey_FEtoDET].configuration_;
         }
         return detconfitem;
     } // DETConfItem* ChannelMapDopeness::getOrCreateDETConfItem

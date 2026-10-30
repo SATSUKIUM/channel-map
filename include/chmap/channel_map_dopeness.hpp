@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -65,36 +66,15 @@ namespace chmap {
             const FEAddrItem& getFEAddrItem(uint32_t doped_index) const;
             FEAddrItem& getFEAddrItem(uint32_t doped_index);
 
-            // register DETConfItem
-            bool registerDETConfItem(std::string_view det_name, std::string_view det_plane, int segment, std::string_view readout_channel, int channel_number, DETConfItem* detconf);
-            bool registerDETConfItem(const DETIdItem& det_item, DETConfItem* detconf);
-            bool registerDETConfItem(uint32_t doped_index, DETConfItem* detconf);
-
-            // register subitem of DETConfItem
-            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(uint32_t dopeKey_FEtoDET, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* nameOfMember) {
-                if (dopeKey_FEtoDET >= fItemsFEtoDET_dope.size() ||
-                    fItemsFEtoDET_dope[dopeKey_FEtoDET].name == 0 || !subitem) return false;
-                DETConfItem* detconfitem = getOrCreateDETConfItem(dopeKey_FEtoDET);
-                detconfitem->*nameOfMember = std::move(subitem);
-                return true;
-            };
-            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(std::string_view detName, std::string_view plane, uint8_t segment, std::string_view channelName, uint16_t channelNumber, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* nameOfMember){
-                uint32_t doped_index;
-                const auto* fe = findFE(detName, plane, segment, channelName, channelNumber);
-                if(!fe || !getDopeKey_FEtoDET(*fe, doped_index)) {
-                    return false;
-                }
-                return registerDETConfSubItem<BaseT, DerivedT>(doped_index, std::move(subitem), nameOfMember);
-            };
-            template<typename BaseT, typename DerivedT> bool registerDETConfSubItem(const DETIdItem& det_item, std::unique_ptr<DerivedT> subitem, std::unique_ptr<BaseT> DETConfItem::* nameOfMember){
-                uint32_t doped_index;
-                const auto* fe = findFE(det_item);
-                if(!fe || !getDopeKey_FEtoDET(*fe, doped_index)) {
-                    return false;
-                }
-                return registerDETConfSubItem<BaseT, DerivedT>(doped_index, std::move(subitem), nameOfMember);
-            };
-            
+            // Ownership is transferred on every call (including failure).
+            // Existing slots are never replaced; registered objects live with the map.
+            // DET identifiers (including copies) require the inverse map; FE addresses do not.
+            bool setGeometry(const DETIdItem& det, std::unique_ptr<GeomItem> geometry);
+            bool setGeometry(const FEAddrItem& fe, std::unique_ptr<GeomItem> geometry);
+            bool setTdcCalibration(const DETIdItem& det, std::unique_ptr<CalibrationItem_DCTdcCalib> calibration);
+            bool setTdcCalibration(const FEAddrItem& fe, std::unique_ptr<CalibrationItem_DCTdcCalib> calibration);
+            bool setDriftCalibration(const DETIdItem& det, std::unique_ptr<CalibrationItem_DCDriftLength> calibration);
+            bool setDriftCalibration(const FEAddrItem& fe, std::unique_ptr<CalibrationItem_DCDriftLength> calibration);
 
             void printAllItemsFE();
             void printAllItemsDET();
@@ -159,8 +139,21 @@ namespace chmap {
             std::vector<DETIdItem> fItemsFEtoDET_dope; // dope vectorの実体
             std::vector<FEAddrItem> fItemsDETtoFE_dope; // 逆引き用のdope vectorの実体
 
-            std::vector< std::unique_ptr< DETConfItem > > fDetConfItems; // 登録されるDETConfItemの寿命を延ばす人
-            DETConfItem* getOrCreateDETConfItem(uint32_t dopeKey_FEtoDET); // dopeKey_FEtoDETに対応するDETConfItemを返す。なければ作る。
+            std::vector<std::unique_ptr<DETConfItem>> fDetConfItems; // Sole owner of channel configurations.
+            DETConfItem* getOrCreateDETConfItem(uint32_t feKey);
+            bool configurationKey(const DETIdItem& det, uint32_t& key) const;
+            bool configurationKey(const FEAddrItem& fe, uint32_t& key) const;
+
+            template<typename T>
+            bool setConfigurationPart(uint32_t key, std::unique_ptr<T> part,
+                                      std::unique_ptr<T> DETConfItem::* member) {
+                if (!part) return false;
+                auto* config = getOrCreateDETConfItem(key);
+                if (config->*member) return false;
+                config->*member = std::move(part);
+                return true;
+            }
+
 
             ChannelMapDopeness() = default; // private default constructor
     };// class ChannelMapDopeness

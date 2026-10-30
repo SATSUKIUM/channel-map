@@ -84,3 +84,32 @@ execution passed. The install manifest contains neither chmap-config nor a
 standalone VERSION file; ChannelMapConfigVersion.cmake retains version 2026.10.30.
 Existing installs may still contain the obsolete script; CMake install does not
 remove files installed by earlier versions.
+
+## Map-owned detector configuration
+
+```sh
+c++ -std=c++17 -O2 -Iinclude tests/configuration_ownership.cpp src/*.cpp -o /tmp/channel-map-ownership
+/tmp/channel-map-ownership /tmp/channel-map-ownership.csv
+/tmp/channel-map-ownership /tmp/channel-map-ownership.csv forward
+```
+
+Use setGeometry, setTdcCalibration and setDriftCalibration, passing a unique_ptr
+and either a DETIdItem or FEAddrItem. DET-based registration resolves the
+identifier (copies are accepted) through the inverse map and verifies the
+forward mapping; FE-based registration works without an inverse map. Each
+successful slot is assigned once. nullptr, missing/mismatched channels, and
+repeat assignments return false. Arguments are consumed even on failure.
+
+The map exclusively owns each configuration and its parts. Borrow using
+DETIdItem::getConfiguration(), then getGeometry(), getTdcCalibration(), or
+getDriftCalibration(). These getters return const pointers; do not delete them.
+Registered objects are not replaced and remain alive until map destruction.
+Reinitializing the map and concurrent registration/lookup remain unsupported.
+A copied DETIdItem is an identifier snapshot, not a live configuration view;
+read the canonical item returned by findDET after registration.
+
+The old raw-pointer registration and public member-pointer template API have
+been removed. This is a source/API change: rebuild the library and consumers
+together. Ownership tests check scope exit, rejection without replacement,
+failed-argument destruction, stable references across storage growth, typed
+const access and destruction at singleton shutdown.
