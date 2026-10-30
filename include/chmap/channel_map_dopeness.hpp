@@ -28,7 +28,12 @@ namespace chmap {
             double initialize(const std::string& file_path, bool createInvMap = false); // 返り値はFEキーの充填率
             void initialize_InvMap();
 
-            // Checked lookup: nullptr before initialization, outside the range, or at a hole.
+            // Call readiness checks once during setup, not for each event/hit.
+            bool isInitialized() const noexcept { return !fItemsFEtoDET_dope.empty(); }
+            bool hasInverseMap() const noexcept { return !fItemsDETtoFE_dope.empty(); }
+
+            // Preconditions: successful initialization; findFE also requires an inverse map.
+            // No readiness checks in the lookup path. Out-of-range/hole -> nullptr.
             // Returned pointers remain valid until map storage is rebuilt or destroyed.
             const DETIdItem* findDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const;
             const DETIdItem* findDET(const FEAddrItem& fe) const {

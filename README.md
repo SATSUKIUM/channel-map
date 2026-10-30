@@ -75,7 +75,11 @@ void example() {
 ```
 
 Initialize once per process. `true` creates the inverse map; it defaults to
-`false`. Checked lookups return `nullptr` for unmapped inputs. The retained
+`false`. Call lookups only after successful initialization, and call `findFE`
+only when the inverse map exists. Check `isInitialized()` and `hasInverseMap()`
+once during setup (for example, in `InitTask()`), not per hit. Lookup functions
+intentionally do not repeat readiness checks; they return `nullptr` for unmapped
+inputs. The retained
 `getDopeKey_*` methods only check ranges and do not establish existence.
 
 ## Geometry and calibration

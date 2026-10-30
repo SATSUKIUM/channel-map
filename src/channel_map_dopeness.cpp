@@ -129,6 +129,7 @@ namespace chmap {
     }// void ChannelMapDopeness::initialize
 
     void ChannelMapDopeness::initialize_InvMap() {
+        if (!isInitialized()) throw std::logic_error("Initialize the forward map before the inverse map");
         // fItemsDETtoFEのために、どこからどこまで空間を作るかスキャン
         min_name_idx = 0xFF;
         min_plane_idx = 0xFF;
@@ -195,7 +196,6 @@ namespace chmap {
     } // void ChannelMapDopeness::initialize_InvMap()
 
     const DETIdItem* ChannelMapDopeness::findDET(uint8_t ip3rd, uint8_t ip4th, uint8_t ch) const {
-        if (fItemsFEtoDET_dope.empty()) return nullptr;
         uint32_t key;
         if (!getDopeKey_FEtoDET(ip3rd, ip4th, ch, key)) return nullptr;
         const auto& item = fItemsFEtoDET_dope[key];
@@ -204,7 +204,6 @@ namespace chmap {
 
     const FEAddrItem* ChannelMapDopeness::findFE(uint8_t name, uint8_t plane, uint8_t segment,
                                                uint8_t readout, uint16_t channel) const {
-        if (fItemsDETtoFE_dope.empty()) return nullptr;
         uint32_t key;
         if (!getDopeKey_DETtoFE(name, plane, segment, readout, channel, key)) return nullptr;
         const auto& item = fItemsDETtoFE_dope[key];
@@ -213,7 +212,6 @@ namespace chmap {
 
     const FEAddrItem* ChannelMapDopeness::findFE(std::string_view name, std::string_view plane,
                                                int segment, std::string_view readout, int channel) const {
-        if (fItemsDETtoFE_dope.empty()) return nullptr;
         uint32_t key;
         if (!getDopeKey_DETtoFE(name, plane, segment, readout, channel, key)) return nullptr;
         const auto& item = fItemsDETtoFE_dope[key];
@@ -297,10 +295,12 @@ namespace chmap {
     } // FEAddrItem& ChannelMapDopeness::getFEAddrItem
 
     bool ChannelMapDopeness::configurationKey(const FEAddrItem& fe, uint32_t& key) const {
+        if (!isInitialized()) return false;
         return findDET(fe) && getDopeKey_FEtoDET(fe, key);
     }
 
     bool ChannelMapDopeness::configurationKey(const DETIdItem& det, uint32_t& key) const {
+        if (!hasInverseMap()) return false;
         const auto* fe = findFE(det);
         return fe && configurationKey(*fe, key) && fItemsFEtoDET_dope[key] == det;
     }
