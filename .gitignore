@@ -1,0 +1,54 @@
+# Local drafts and scratch work (published docs/ stays tracked).
+/workspace/
+
+# Build trees and local installation outputs.
+/build/
+/build-*/
+/.build/
+/.build-*/
+/cmake-build-*/
+/bin/
+/lib/
+/install/
+
+# In-source CMake outputs.
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/install_manifest.txt
+/compile_commands.json
+/Makefile
+/ChannelMapConfig.cmake
+/ChannelMapConfigVersion.cmake
+/ChannelMapTargets*.cmake
+/Testing/
+
+# Compiled objects, libraries and executables.
+*.o
+*.obj
+*.a
+*.d
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.dSYM/
+
+# Measurement output and crash dumps.
+*.root
+/core
+/core.[0-9]*
+
+# Local editor and operating-system files.
+/.vscode/
+/.idea/
+.DS_Store
+*~
+\#*
+.\#*
+*.swp
+*.swo
+
+# docs/workspace/documentation-work/ is intentionally tracked.
