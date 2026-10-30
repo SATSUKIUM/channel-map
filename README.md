@@ -20,7 +20,7 @@ From the source directory:
 cmake -S . -B .build -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX="$HOME/.local/channel-map"
 cmake --build .build --parallel
-cmake --install .build
+cmake --build .build --target install
 ```
 
 Use `-DCMAKE_BUILD_TYPE=Debug` for a debug build. The version is read from

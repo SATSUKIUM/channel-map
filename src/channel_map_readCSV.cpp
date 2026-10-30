@@ -42,12 +42,13 @@ namespace chmap {
         if (std::getline(file_, line)) {}
         // scan mapdata lines for collecting unique strings for dictionary
         while(std::getline(file_, line)){
-            if(line.back() == '\r'){ // for Windwos-style line ending
+            if(!line.empty() && line.back() == '\r'){ // for Windwos-style line ending
                 #if DEBUG_PRINT
                 std::cout << "found Windows-style line ending" << std::endl;
                 #endif
                 line.pop_back();
             }
+            if (line.empty()) continue;
             auto tokens = split_line(line);
             if (tokens.size() != m_header.size()) {
                 std::cerr << "bad file format : " << line << std::endl;
@@ -134,7 +135,7 @@ namespace chmap {
 
         // load mapdata lines
         while (std::getline(file, line)) {
-            if(line.back() == '\r'){ // for Windwos-style line ending
+            if(!line.empty() && line.back() == '\r'){ // for Windwos-style line ending
                 #if DEBUG_PRINT
                 std::cout << "found Windows-style line ending" << std::endl;
                 #endif
@@ -144,6 +145,7 @@ namespace chmap {
             std::cout << "loading line: " << line << std::endl;
             #endif
 
+            if (line.empty()) continue;
             auto tokens = split_line(line);
             if (tokens.size() != m_header.size()) {
                 std::cerr << "bad file format : " << line << std::endl;

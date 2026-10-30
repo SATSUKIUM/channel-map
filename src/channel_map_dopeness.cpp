@@ -58,6 +58,7 @@ namespace chmap {
         #endif
 
         readCSV(file_path); // fill fItems
+        if (fItems.empty()) throw std::runtime_error("Channel map contains no valid data rows");
         detail::warnDuplicateMappings(fItems);
         #if CHECK_INITIALIZATION
         std::cout << "[ChannelMapDopeness::initialize] readCSV finished, number of items: " << fItems.size() << std::endl;
