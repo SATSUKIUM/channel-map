@@ -70,12 +70,17 @@ helper directly and do not allocate gigabytes.
 
 Release and Debug now build the current library and skeleton without ROOT.
 The legacy debug/search-time.cpp target is excluded even in Debug builds.
-Version metadata comes from VERSION, installed under share/channel-map/VERSION;
-chmap-config is retained only as an optional helper for non-CMake consumers.
+Version metadata comes from the source VERSION file and is embedded in the
+installed CMake package metadata. The chmap-config helper has been removed.
 
 Validated CMake configure/build/install for both Release and Debug on macOS,
 with ROOT discovery disabled. Debug used a copy without .git and a PATH stub
-that fails any Git invocation. Source and installed chmap-config --version both
-returned 2026.10.30. Both built skeleton executables ran successfully with the
+that fails any Git invocation. Both built skeleton executables ran successfully with the
 9-column mapdata_T103_20260404.csv. The CMake consumer Config still hard-codes
 .so and has not been made portable to macOS in this change.
+
+After removing chmap-config, a fresh Release CMake build/install and skeleton
+execution passed. The install manifest contains neither chmap-config nor a
+standalone VERSION file; ChannelMapConfigVersion.cmake retains version 2026.10.30.
+Existing installs may still contain the obsolete script; CMake install does not
+remove files installed by earlier versions.
