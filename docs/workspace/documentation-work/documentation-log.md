@@ -1,3 +1,32 @@
+# 公開ツリーの整理（2026-10-30）
+
+現在のコード基準コミット: `19db57f67d2be154d9e8958ea4ec30b197e067bb`
+
+- 指定されたdummy_maker、direct/fat/simple/旧skeleton、speedtest、test.csvを削除。
+- mapdata.csvとmapdata_T103_20260311.csvはworkspace/archive/mapdata/へローカル退避。最新のmapdata_T103_20260404.csvのみ配布。
+- tests/とscript/はworkspace/archive/配下へローカル退避し、Gitの追跡対象から削除。
+- debug/、cmake/、src/notManagedNow/を削除。CMake設定はCMakeLists.txt内で生成。
+- ChannelMap/ChannelMapSimple/ChannelMapDirectと、tuple・element・stopwatch・debug_printの旧ヘッダを削除。
+- 現行コードの不要な旧ヘッダincludeを削除。使われていない固定辞書queryIndex APIと4文字正規化処理を削除。現行パーサが使う16bit/8bit変換は維持。
+- 現行ChannelMapDopenessと設定関連の6ヘッダ・8実装、内部診断ヘッダを維持。dope_skeleton.cppは残す。
+- CMakeの入力ソースを明示。exportターゲットを使う設定にし、.soとインストール先の絶対パス固定を撤去。公開ターゲット名ChannelMap::ChannelMapを維持。
+- このMacでは/usr/localの旧ヘッダがsystem includeより優先されたため、CMake 3.23以降でexport先を非systemとして扱う設定を追加。CMake 3.10の最低条件は維持（古いCMakeではこの属性は効かない）。
+- READMEは現行APIに統一。HTMLから削除対象へのリンクを除去し、検証コードはローカル退避であることを記載。
+
+## 検証
+
+- Releaseの設定・ビルド・新規インストールと実CSVのスケルトン実行に成功。
+- Debugの設定・ビルドとスケルトン実行に成功。
+- 別CMakeプロジェクトでfind_packageを2回呼び、インストール済みライブラリへリンクして正逆検索・幾何登録を実行。
+- インストール済みパッケージを別のパスへコピーし、再配置先からのfind_package・リンク・実行に成功。
+- ローカル退避したテストを使い、検索3ケース・所有権2ケース・初期化診断2ケースに成功。
+- workspace/archive/が.gitignoreで除外されていることを確認。
+- 既存インストール先に残る旧ヘッダ・旧バイナリ等は自動削除しない。検証は新規インストール先で実施。
+
+以下は過去の更新記録です。
+
+---
+
 # main側のディレクトリ整理を復元（2026-10-30）
 
 現在のコード基準コミット: `660ec783e12ca7fa0b74b0023df3d8b5d932abfb`
