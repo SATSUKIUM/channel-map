@@ -215,9 +215,10 @@ std::cout &lt;&lt; tdc_view-&gt;GetScale() &lt;&lt; &#x27; &#x27;
 <li>列数が異なる行は、エラー表示後に読み飛ばします。</li>
 <li>数値変換例外も発生し得るので、入力を事前検証してください。</li>
 <li>有効なデータ行がない場合は、<code>std::runtime_error</code>で初期化を中止します。</li>
-</ul><h3 id="limits-linking">利用側のリンクに失敗する場合</h3><ul>
-<li>インストール先のlibディレクトリとCMAKE_PREFIX_PATHを確認してください。</li>
-<li>インストール先を移動した場合は、利用側を新しいCMAKE_PREFIX_PATHで再設定してください。</li>
+</ul><h3 id="limits-linking">アプリケーションのビルドでリンクエラーが出る場合</h3><ul>
+<li>アプリケーションのCMake設定で、<code>CMAKE_PREFIX_PATH</code>にchannel-mapのインストール先を指定してください。</li>
+<li><a href="#install-consumer">プロジェクトへの組み込み手順</a>に沿って、<code>find_package(ChannelMap REQUIRED)</code>とリンク先の<code>ChannelMap::ChannelMap</code>を設定してください。</li>
+<li>channel-mapのインストール先を移動した場合やライブラリを更新した場合は、アプリケーションのCMake設定を再生成し、ビルドし直してください。</li>
 </ul>
 </section><section id="files" hidden>
 <h2>08　APIとサンプルの参照先</h2>
